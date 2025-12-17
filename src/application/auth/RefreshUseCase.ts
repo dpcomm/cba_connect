@@ -3,12 +3,12 @@ import { AuthRepository } from '@domain/auth/AuthRepository';
 import { inject, injectable } from 'tsyringe';
 
 @injectable()
-export class LoginUseCase {
+export class RefreshUseCase {
   constructor(
     @inject('AuthRepository') private authRepository: AuthRepository
   ) {}
 
-  async execute(userId: string, password: string, autoLogin: boolean): Promise<Auth> {
-    return this.authRepository.login(userId, password, autoLogin);
+  async execute(refreshToken: string): Promise<Auth> {
+    return this.authRepository.refresh(refreshToken);
   }
 }

@@ -44,6 +44,48 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Pretendard-Black.otf",
+            "./assets/fonts/Pretendard-Bold.otf",
+            "./assets/fonts/Pretendard-ExtraBold.otf",
+            "./assets/fonts/Pretendard-ExtraLight.otf",
+            "./assets/fonts/Pretendard-Light.otf",
+            "./assets/fonts/Pretendard-Medium.otf",
+            "./assets/fonts/Pretendard-Regular.otf",
+            "./assets/fonts/Pretendard-SemiBold.otf",
+            "./assets/fonts/Pretendard-Thin.otf"
+          ],
+          "android": {
+            "fonts": [
+              { "fontFamily": "Pretendard-Black", "fontDefinitions": [{ "path": "./assets/fonts/Pretendard-Black.otf" }] },
+              { "fontFamily": "Pretendard-Bold", "fontDefinitions": [{ "path": "./assets/fonts/Pretendard-Bold.otf" }] },
+              { "fontFamily": "Pretendard-ExtraBold", "fontDefinitions": [{ "path": "./assets/fonts/Pretendard-ExtraBold.otf" }] },
+              { "fontFamily": "Pretendard-ExtraLight", "fontDefinitions": [{ "path": "./assets/fonts/Pretendard-ExtraLight.otf" }] },
+              { "fontFamily": "Pretendard-Light", "fontDefinitions": [{ "path": "./assets/fonts/Pretendard-Light.otf" }] },
+              { "fontFamily": "Pretendard-Medium", "fontDefinitions": [{ "path": "./assets/fonts/Pretendard-Medium.otf" }] },
+              { "fontFamily": "Pretendard-Regular", "fontDefinitions": [{ "path": "./assets/fonts/Pretendard-Regular.otf" }] },
+              { "fontFamily": "Pretendard-SemiBold", "fontDefinitions": [{ "path": "./assets/fonts/Pretendard-SemiBold.otf" }] },
+              { "fontFamily": "Pretendard-Thin", "fontDefinitions": [{ "path": "./assets/fonts/Pretendard-Thin.otf" }] }
+            ]
+          },
+          "ios": {
+            "fonts": [
+              "./assets/fonts/Pretendard-Black.otf",
+              "./assets/fonts/Pretendard-Bold.otf",
+              "./assets/fonts/Pretendard-ExtraBold.otf",
+              "./assets/fonts/Pretendard-ExtraLight.otf",
+              "./assets/fonts/Pretendard-Light.otf",
+              "./assets/fonts/Pretendard-Medium.otf",
+              "./assets/fonts/Pretendard-Regular.otf",
+              "./assets/fonts/Pretendard-SemiBold.otf",
+              "./assets/fonts/Pretendard-Thin.otf"
+            ]
+          }
+        }
       ]
     ],
     "experiments": {

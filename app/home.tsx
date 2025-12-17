@@ -1,5 +1,5 @@
-import HomeScreen from '@presentation/home/HomeScreen';
+import MainScreen from '@features/home/screens/main/MainScreen';
 
 export default function HomeRoute() {
-  return <HomeScreen />;
+  return <MainScreen />;
 }

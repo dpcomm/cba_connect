@@ -3,13 +3,17 @@ export class Auth {
     public readonly accessToken: string,
     public readonly refreshToken: string,
     public readonly user: {
-      id: string;
+      id: number;
+      rank: string;
       userId: string;
       name: string;
       group: string;
       phone: string;
       birth: string;
       gender: string;
+      isDeleted: boolean;
+      createdAt: string;
+      updatedAt: string;
     }
   ) {}
 }

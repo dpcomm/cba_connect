@@ -1,11 +1,17 @@
 import { Auth } from '@domain/auth/Auth';
-import { AuthRepository } from '@domain/auth/AuthRepository';
-import { apiClient } from '@infrastructure/api/client';
-import type { AxiosError } from 'axios';
+import { AuthRepository, RegisterData } from '@domain/auth/AuthRepository';
+import { apiClient } from '@shared/api/client';
+import { ApiErrorResponse, ApiResponse } from '@shared/api/types';
+import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { injectable } from 'tsyringe';
 
-import { ApiResponse, LoginRequestDto, LoginResponseDto } from './dto';
+import {
+  AuthResponseDto,
+  LoginRequestDto,
+  RefreshRequestDto,
+  RegisterRequestDto
+} from './dto';
 
 @injectable()
 export class ApiAuthRepository implements AuthRepository {
@@ -17,9 +23,9 @@ export class ApiAuthRepository implements AuthRepository {
         autoLogin,
       };
 
-      const response = await apiClient.post<ApiResponse<LoginResponseDto>>('/api/user/login', requestBody);
-      const payload = this.resolvePayload(response.data);
-      const auth = this.mapToAuth(payload);
+      const response = await apiClient.post<ApiResponse<AuthResponseDto>>('/api/auth/login', requestBody);
+      const { data } = response.data;
+      const auth = this.mapToAuth(data);
 
       await this.persistTokens(auth, autoLogin);
 
@@ -29,40 +35,60 @@ export class ApiAuthRepository implements AuthRepository {
     }
   }
 
+  async register(data: RegisterData): Promise<Auth> {
+    try {
+      const requestBody: RegisterRequestDto = {
+        ...data
+      };
+
+      const response = await apiClient.post<ApiResponse<AuthResponseDto>>('/api/auth/register', requestBody);
+      const responseData = response.data.data;
+      const auth = this.mapToAuth(responseData);
+
+      // 회원가입 후 자동 로그인 처리 (토큰 저장)
+      await this.persistTokens(auth, false);
+
+      return auth;
+    } catch (error: any) {
+      throw this.normalizeError(error);
+    }
+  }
+
   async logout(): Promise<void> {
-    await SecureStore.deleteItemAsync('access_token');
-    await SecureStore.deleteItemAsync('refresh_token');
+    try {
+      await apiClient.post<ApiResponse<void>>('/api/auth/logout');
+    } catch (error) {
+      // 로그아웃 API 실패해도 로컬 토큰은 삭제해야 함
+      console.warn('Logout API failed:', error);
+    } finally {
+      await SecureStore.deleteItemAsync('access_token');
+      await SecureStore.deleteItemAsync('refresh_token');
+    }
   }
 
   async refresh(refreshToken: string): Promise<Auth> {
-    throw new Error('Not implemented');
+    try {
+      const requestBody: RefreshRequestDto = {
+        refreshToken
+      };
+
+      const response = await apiClient.post<ApiResponse<AuthResponseDto>>('/api/auth/refresh', requestBody);
+      const { data } = response.data;
+      const auth = this.mapToAuth(data);
+
+      await this.persistTokens(auth, true);
+
+      return auth;
+    } catch (error: any) {
+      throw this.normalizeError(error);
+    }
   }
 
-  private resolvePayload(apiResponse: ApiResponse<LoginResponseDto> | LoginResponseDto): LoginResponseDto {
-    if ('data' in apiResponse && apiResponse.data) {
-      return apiResponse.data;
-    }
-
-    if ('accessToken' in apiResponse) {
-      return apiResponse;
-    }
-
-    throw new Error('서버 응답에 로그인 데이터가 없습니다.');
-  }
-
-  private mapToAuth(data: LoginResponseDto): Auth {
+  private mapToAuth(data: AuthResponseDto): Auth {
     return new Auth(
-      data.accessToken,
-      data.refreshToken || '',
-      {
-        id: data.user.id,
-        userId: data.user.userId,
-        name: data.user.name,
-        group: data.user.group,
-        phone: data.user.phone,
-        birth: data.user.birth,
-        gender: data.user.gender,
-      }
+      data.access_token,
+      data.refresh_token,
+      data.user
     );
   }
 
@@ -78,21 +104,27 @@ export class ApiAuthRepository implements AuthRepository {
   }
 
   private normalizeError(error: unknown): Error {
-    if (this.isAxiosError(error)) {
-      const message =
-        error.response?.data?.message || error.message || '로그인 요청 중 오류가 발생했습니다.';
+    if (axios.isAxiosError<ApiErrorResponse>(error)) {
+      const responseData = error.response?.data;
+      const message = responseData?.message || error.message || '요청 중 오류가 발생했습니다.';
+      
+      const statusCode = error.response?.status;
+      
+      if (statusCode === 400) {
+        if (message.includes('exists')) return new Error('이미 존재하는 사용자입니다.');
+        return new Error(message || '잘못된 요청입니다.');
+      }
+      if (statusCode === 401) {
+        return new Error('인증에 실패했습니다.');
+      }
+      if (statusCode === 404) {
+        return new Error('존재하지 않는 사용자입니다.');
+      }
+      
       return new Error(message);
     }
 
     return error instanceof Error ? error : new Error('알 수 없는 오류가 발생했습니다.');
   }
-
-  private isAxiosError(error: unknown): error is AxiosError<{ message?: string }> {
-    return (
-      typeof error === 'object' &&
-      error !== null &&
-      'isAxiosError' in error &&
-      Boolean((error as { isAxiosError?: boolean }).isAxiosError)
-    );
-  }
 }
+
