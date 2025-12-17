@@ -7,7 +7,7 @@ import {
 } from './interceptors';
 
 const PRODUCT_URI = process.env.EXPO_PUBLIC_PRODUCT_URI || 'https://recba.me';
-const LOCAL_URI = process.env.EXPO_PUBLIC_LOCAL_URI || 'http://localhost:3000';
+const LOCAL_URI = process.env.EXPO_PUBLIC_LOCAL_URI || 'http://192.168.0.217:4001';
 const BASE_URL = PRODUCT_URI || LOCAL_URI;
 const REQUEST_TIMEOUT_MS = 5000;
 
