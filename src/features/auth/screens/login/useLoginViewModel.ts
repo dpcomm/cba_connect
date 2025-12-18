@@ -8,10 +8,8 @@ export function useLoginViewModel() {
   const loginUseCase = container.resolve(LoginUseCase);
   const router = useRouter();
   
-  // Zustand store
   const { setUser, setLoading, setError, isLoading } = useAuthStore();
   
-  // Local UI state
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const [autoLogin, setAutoLogin] = useState(false);
@@ -20,7 +18,7 @@ export function useLoginViewModel() {
     try {
       setLoading(true);
       const auth = await loginUseCase.execute(userId, password, autoLogin);
-      setUser(auth);
+      setUser(auth.user);
       alert('로그인에 성공하였습니다.');
       router.replace('/home');
     } catch (error: any) {

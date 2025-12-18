@@ -1,13 +1,13 @@
-import { Auth } from '@domain/auth/Auth';
+import { User } from '@domain/user/User';
 import { create } from 'zustand';
 
 interface AuthState {
-  user: Auth | null;
+  user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
 
-  setUser: (user: Auth) => void;
+  setUser: (user: User) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   logout: () => void;

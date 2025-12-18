@@ -1,7 +1,8 @@
+import { UserResponseDto } from '../user/dto';
+
 export interface LoginRequestDto {
   userId: string;
   password: string;
-  autoLogin: boolean;
 }
 
 export interface RegisterRequestDto {
@@ -15,31 +16,16 @@ export interface RegisterRequestDto {
   rank: string;
 }
 
-export interface RefreshRequestDto {
-  refreshToken: string;
-}
-
 export interface AuthResponseDto {
   access_token: string;
   refresh_token: string;
-  user: {
-    id: number;
-    rank: string;
-    userId: string;
-    name: string;
-    group: string;
-    phone: string;
-    birth: string;
-    gender: string;
-    isDeleted: boolean;
-    createdAt: string;
-    updatedAt: string;
-  };
+  user: UserResponseDto;
 }
 
-// Alias for backward compatibility if needed, or clear intent
-export type LoginResponseDto = AuthResponseDto;
-export type RegisterResponseDto = AuthResponseDto;
-export type RefreshResponseDto = AuthResponseDto;
+
+export interface RefreshResponseDto {
+  access_token: string;
+}
+
 
 
