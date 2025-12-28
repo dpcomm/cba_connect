@@ -1,3 +1,4 @@
+import { initializeNotifications } from '@shared/bootstrap/InitializeNotification';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -24,6 +25,7 @@ export default function RootLayout() {
     if (fontsLoaded) {
       SplashScreen.hideAsync();
     }
+    initializeNotifications();
   }, [fontsLoaded]);
 
   if (!fontsLoaded) {
