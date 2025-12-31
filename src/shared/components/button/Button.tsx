@@ -2,22 +2,24 @@ import React from 'react';
 import { Pressable, Text, ViewStyle } from 'react-native';
 import { styles } from './styles';
 
+import { Font } from '@shared/constants/font';
+
 export interface ButtonProps {
   onPress?: () => void;
   title: string;
-  variant?: 'primary' | 'secondary' | 'tertiary';
   size?: 'small' | 'medium' | 'large';
   disabled?: boolean;
   style?: ViewStyle;
+  textVariant?: keyof typeof Font;
 }
 
 export function Button({
   onPress,
   title,
-  variant = 'primary',
   size = 'medium',
   disabled = false,
   style,
+  textVariant = 'heading3',
 }: ButtonProps) {
   return (
     <Pressable
@@ -26,22 +28,15 @@ export function Button({
       style={({ pressed }) => [
         styles.base,
         styles[size],
-        styles[variant],
         disabled && styles.disabled,
-        pressed && !disabled && styles[`${variant}Pressed`],
+        pressed && !disabled && styles.basePressed,
         style,
       ]}
     >
-      <Text
-        style={[
-          styles.text,
-          styles[`text${size}`],
-          styles[`text${variant}`],
-          disabled && styles.textDisabled,
-        ]}
-      >
+      <Text style={[styles.baseText, Font[textVariant]]}>
         {title}
       </Text>
     </Pressable>
   );
 }
+

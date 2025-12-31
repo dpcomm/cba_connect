@@ -1,9 +1,9 @@
 export const Layout = {
   spacing: {
     xs: 4,
-    s: 8,
-    m: 16,
-    l: 24,
+    s: 12,
+    m: 18,
+    l: 26,
     xl: 32,
     xxl: 48,
   },

@@ -1,7 +1,7 @@
 export const Color = {
   primary: {
-    main: '#7B519E',
-    hover: '#B896D7',
+    main: '#6618A5',
+    hover: '#C4ABDA',
     pressed: '#4E2372',
   },
   secondary: {
