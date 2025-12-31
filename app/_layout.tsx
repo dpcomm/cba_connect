@@ -59,6 +59,13 @@ export default function RootLayout() {
     if (fontsLoaded) {
       checkAutoLogin();
     }
+
+    // 현재 Expo Go 환경에서 Expo Notification을 테스트하지 못하는 상황입니다.
+    // 원인으로는 다음과 같습니다.
+    // 1. project id의 부재
+    // 2. 현재 Expo SDK 버전의 Expo Go에서는 Android 푸시가 제거됨
+    // 그런 이유로, Expo Go 상에서 다른 기능을 테스트하고 싶으시면 하단의 initializeNotificaitons()함수를 주석처리해주시고 동작하시면 됩니다.
+    // initializeNotifications();
   }, [fontsLoaded]);
 
   useEffect(() => {
