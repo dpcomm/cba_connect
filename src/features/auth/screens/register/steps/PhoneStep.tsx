@@ -1,9 +1,9 @@
+import { TextInputLined } from '@shared/components/text-input-lined/TextInputLined';
 import { ThemedText } from '@shared/components/themed-text/ThemedText';
 import { Color } from '@shared/constants/color';
-import { Font } from '@shared/constants/font';
 import { Layout } from '@shared/constants/layout';
 import React from 'react';
-import { TextInput as RNTextInput, View } from 'react-native';
+import { View } from 'react-native';
 
 interface Props {
   phoneNumber: string;
@@ -29,29 +29,14 @@ export function PhoneStep({ phoneNumber, setPhoneNumber, onNext, readOnly }: Pro
   };
 
   return (
-    <View style={{ width: '100%' }}>
-      <ThemedText variant="text3" color={Color.text.sub} style={{ marginBottom: Layout.spacing.xs }}>전화번호</ThemedText>
-      <View style={{ 
-        borderBottomWidth: 2, 
-        borderBottomColor: Color.primary.main,
-        paddingBottom: Layout.spacing.s,
-      }}>
-        <RNTextInput
-          placeholder="01011111111"
-          placeholderTextColor={Color.text.disabled}
-          value={phoneNumber}
-          onChangeText={setPhoneNumber}
-          onSubmitEditing={handleSubmit}
-          returnKeyType="next"
-          keyboardType="phone-pad"
-          style={{
-            ...Font.heading3,
-            color: Color.text.main,
-            padding: 0,
-            width: '100%',
-          }}
-        />
-      </View>
-    </View>
+    <TextInputLined
+      label="전화번호"
+      placeholder="01011111111"
+      value={phoneNumber}
+      onChangeText={setPhoneNumber}
+      onSubmitEditing={handleSubmit}
+      returnKeyType="next"
+      keyboardType="phone-pad"
+    />
   );
 }

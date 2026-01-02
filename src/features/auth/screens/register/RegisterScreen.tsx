@@ -5,6 +5,7 @@ import { useNavigation, useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
 import { ScrollView, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import BackIcon from '../../../../../assets/svgs/back.svg';
 import RecbaLogo from '../../../../../assets/svgs/recba_logo.svg';
 import { AffiliationStep } from './steps/AffiliationStep';
 import { ConfirmationStep } from './steps/ConfirmationStep';
@@ -19,13 +20,12 @@ import { styles } from './styles';
 import { REGISTER_STEPS, RegisterStep, useRegisterViewModel } from './useRegisterViewModel';
 
 export default function RegisterScreen() {
-  const { currentStep, next, prev, hasPrev, registerData, updateData, stepIndex } = useRegisterViewModel();
+  const { currentStep, next, prev, hasPrev, registerData, updateData, stepIndex, register } = useRegisterViewModel();
   const router = useRouter();
   const navigation = useNavigation();
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', (e: any) => {
-      // Don't intercept back on Welcome screen
       if (currentStep === 'Welcome') {
         return;
       }
@@ -39,7 +39,6 @@ export default function RegisterScreen() {
   }, [navigation, hasPrev, prev, currentStep]);
 
   const handleNextAction = () => {
-    // Validation logic per step
     if (currentStep === 'Name' && !registerData.name.trim()) {
       return;
     }
@@ -58,15 +57,13 @@ export default function RegisterScreen() {
   };
 
   const handleConfirmRegistration = () => {
-    // TODO: Call registration API here
-    next(); // Move to Welcome step
+    register();
   };
 
   const handleGoToLogin = () => {
     router.replace('/' as any);
   };
 
-  // Get steps that should show in history (exclude Terms, Confirmation, Welcome)
   const getCompletedSteps = () => {
     const historySteps = REGISTER_STEPS.filter(s => s !== 'Terms' && s !== 'Confirmation' && s !== 'Welcome');
     return historySteps.slice(0, stepIndex - 1).filter(s => s !== currentStep);
@@ -145,12 +142,11 @@ export default function RegisterScreen() {
         onPress={handleBack} 
         style={{ padding: 8 }}
       >
-        <ThemedText variant="heading3">←</ThemedText>
+        <BackIcon width={24} height={24} />
       </TouchableOpacity>
     </View>
   );
 
-  // Welcome Step - Full screen without header history
   if (currentStep === 'Welcome') {
     return (
       <SafeAreaView style={[styles.container, { paddingTop: 0 }]} edges={['top']}>
@@ -160,7 +156,6 @@ export default function RegisterScreen() {
     );
   }
 
-  // Confirmation Step
   if (currentStep === 'Confirmation') {
     return (
       <SafeAreaView style={[styles.container, { paddingTop: 0 }]} edges={['top']}>
@@ -178,7 +173,6 @@ export default function RegisterScreen() {
     );
   }
 
-  // Terms Step
   if (currentStep === 'Terms') {
     return (
       <SafeAreaView style={[styles.container, { paddingTop: 0 }]} edges={['top']}>
@@ -197,7 +191,6 @@ export default function RegisterScreen() {
     );
   }
 
-  // Standard Input Steps
   return (
     <SafeAreaView style={[styles.container, { paddingTop: 0 }]} edges={['top']}>
       <CustomHeader />

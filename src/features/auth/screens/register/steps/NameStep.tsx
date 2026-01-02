@@ -1,9 +1,9 @@
+import { TextInputLined } from '@shared/components/text-input-lined/TextInputLined';
 import { ThemedText } from '@shared/components/themed-text/ThemedText';
 import { Color } from '@shared/constants/color';
-import { Font } from '@shared/constants/font';
 import { Layout } from '@shared/constants/layout';
 import React from 'react';
-import { TextInput as RNTextInput, View } from 'react-native';
+import { View } from 'react-native';
 
 interface Props {
   name: string;
@@ -29,28 +29,13 @@ export function NameStep({ name, setName, onNext, readOnly }: Props) {
   };
 
   return (
-    <View style={{ width: '100%' }}>
-      <ThemedText variant="text3" color={Color.text.sub} style={{ marginBottom: Layout.spacing.xs }}>이름</ThemedText>
-      <View style={{ 
-        borderBottomWidth: 2, 
-        borderBottomColor: Color.primary.main,
-        paddingBottom: Layout.spacing.s,
-      }}>
-        <RNTextInput
-          placeholder="김땡땡"
-          placeholderTextColor={Color.text.disabled}
-          value={name}
-          onChangeText={setName}
-          onSubmitEditing={handleSubmit}
-          returnKeyType="next"
-          style={{
-            ...Font.heading3,
-            color: Color.text.main,
-            padding: 0,
-            width: '100%',
-          }}
-        />
-      </View>
-    </View>
+    <TextInputLined
+      label="이름"
+      placeholder="김땡땡"
+      value={name}
+      onChangeText={setName}
+      onSubmitEditing={handleSubmit}
+      returnKeyType="next"
+    />
   );
 }

@@ -11,6 +11,8 @@ export interface RegisterRequestDto {
   name: string;
   group: string;
   phone: string;
+  email: string;
+  verificationToken: string;
   birth: string;
   gender: string;
   rank: string;
