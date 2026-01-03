@@ -15,9 +15,9 @@ interface Props {
 export function PhoneStep({ phoneNumber, setPhoneNumber, onNext, readOnly }: Props) {
   if (readOnly) {
     return (
-      <View style={{ marginBottom: Layout.spacing.l }}>
-        <ThemedText variant="text3" color={Color.text.sub}>전화번호</ThemedText>
-        <ThemedText variant="heading3" style={{ marginTop: Layout.spacing.xs }}>{phoneNumber}</ThemedText>
+      <View style={{ marginBottom: Layout.spacing.l, gap: 10 }}>
+        <ThemedText variant="text1" color={Color.text.sub}>전화번호</ThemedText>
+        <ThemedText variant="heading3">{phoneNumber}</ThemedText>
       </View>
     );
   }

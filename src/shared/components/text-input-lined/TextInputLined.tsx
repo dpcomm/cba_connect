@@ -1,24 +1,25 @@
 import { Color } from '@shared/constants/color';
 import { Font } from '@shared/constants/font';
-import { Layout } from '@shared/constants/layout';
 import React, { useState } from 'react';
 import {
-    TextInput as RNTextInput,
-    TextInputProps as RNTextInputProps,
-    View,
-    ViewStyle,
+  TextInput as RNTextInput,
+  TextInputProps as RNTextInputProps,
+  View,
+  ViewStyle,
 } from 'react-native';
 import { ThemedText } from '../themed-text/ThemedText';
 
 export interface TextInputLinedProps extends Omit<RNTextInputProps, 'style'> {
   label?: string;
   containerStyle?: ViewStyle;
+  rightIcon?: React.ReactNode;
 }
 
 export function TextInputLined({
   label,
   containerStyle,
   placeholderTextColor = Color.text.disabled,
+  rightIcon,
   ...props
 }: TextInputLinedProps) {
   const [isFocused, setIsFocused] = useState(false);
@@ -26,14 +27,16 @@ export function TextInputLined({
   return (
     <View style={[{ width: '100%' }, containerStyle]}>
       {label && (
-        <ThemedText variant="text3" color={Color.text.sub} style={{ marginBottom: Layout.spacing.xs }}>
+        <ThemedText variant="text1" color={Color.text.sub} style={{ marginBottom: 10 }}>
           {label}
         </ThemedText>
       )}
       <View style={{ 
+        flexDirection: 'row',
+        alignItems: 'center',
         borderBottomWidth: 2, 
         borderBottomColor: isFocused ? Color.primary.main : Color.tertiary.main,
-        paddingBottom: Layout.spacing.s,
+        paddingBottom: 4,
       }}>
         <RNTextInput
           placeholderTextColor={placeholderTextColor}
@@ -48,11 +51,15 @@ export function TextInputLined({
           style={{
             ...Font.heading3,
             color: Color.text.main,
-            padding: 0,
-            width: '100%',
+            flex: 1,
+            height: 40,
+            textAlignVertical: 'center',
+            includeFontPadding: false,
+            paddingVertical: 0,
           }}
           {...props}
         />
+        {rightIcon}
       </View>
     </View>
   );

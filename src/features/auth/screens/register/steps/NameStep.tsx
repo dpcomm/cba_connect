@@ -15,9 +15,9 @@ interface Props {
 export function NameStep({ name, setName, onNext, readOnly }: Props) {
   if (readOnly) {
     return (
-      <View style={{ marginBottom: Layout.spacing.l }}>
-        <ThemedText variant="text3" color={Color.text.sub}>이름</ThemedText>
-        <ThemedText variant="heading3" style={{ marginTop: Layout.spacing.xs }}>{name}</ThemedText>
+      <View style={{ marginBottom: Layout.spacing.l, gap: 10 }}>
+        <ThemedText variant="text1" color={Color.text.sub}>이름</ThemedText>
+        <ThemedText variant="heading3">{name}</ThemedText>
       </View>
     );
   }
@@ -28,14 +28,21 @@ export function NameStep({ name, setName, onNext, readOnly }: Props) {
     }
   };
 
+  const handleChangeText = (text: string) => {
+    const koreaOnly = text.replace(/[^ㄱ-ㅎㅏ-ㅣ가-힣]/g, '');
+    const limited = koreaOnly.slice(0, 4);
+    setName?.(limited);
+  };
+
   return (
     <TextInputLined
       label="이름"
       placeholder="김땡땡"
       value={name}
-      onChangeText={setName}
+      onChangeText={handleChangeText}
       onSubmitEditing={handleSubmit}
       returnKeyType="next"
+      maxLength={4}
     />
   );
 }

@@ -30,9 +30,9 @@ export function ConfirmationStep({ data, onConfirm }: Props) {
   };
 
   const InfoRow = ({ label, value }: { label: string; value: string }) => (
-    <View style={{ marginBottom: Layout.spacing.m }}>
-      <ThemedText variant="text3" color={Color.text.sub}>{label}</ThemedText>
-      <ThemedText variant="heading3" style={{ marginTop: Layout.spacing.xs }}>{value}</ThemedText>
+    <View style={{ marginBottom: Layout.spacing.m, gap: 10 }}>
+      <ThemedText variant="text1" color={Color.text.sub}>{label}</ThemedText>
+      <ThemedText variant="heading3">{value}</ThemedText>
     </View>
   );
 
@@ -41,7 +41,7 @@ export function ConfirmationStep({ data, onConfirm }: Props) {
       <InfoRow label="아이디" value={data.userId} />
       <InfoRow label="비밀번호" value={'•'.repeat(data.password.length)} />
       <InfoRow label="이름" value={data.name} />
-      {data.birthdate && <InfoRow label="생년월일" value={data.birthdate} />}
+      {/* {data.birthdate && <InfoRow label="생년월일" value={data.birthdate} />} */}
       <InfoRow label="성별" value={getGenderText(data.gender)} />
       <InfoRow label="전화번호" value={data.phoneNumber} />
       <InfoRow label="중그룹" value={data.affiliation} />

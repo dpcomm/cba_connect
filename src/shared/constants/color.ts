@@ -22,5 +22,8 @@ export const Color = {
   },
   default: {
     background: '#F8F8F8',
+  },
+  accents: {
+    pink: '#FF2D55',
   }
 };

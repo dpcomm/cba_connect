@@ -4,7 +4,7 @@ export const Layout = {
     s: 12,
     m: 18,
     l: 26,
-    xl: 32,
+    xl: 36,
     xxl: 48,
   },
   radius: {

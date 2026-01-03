@@ -1,4 +1,3 @@
-import { Button } from '@shared/components/button/Button';
 import { CheckBox } from '@shared/components/check-box/CheckBox';
 import { ThemedText } from '@shared/components/themed-text/ThemedText';
 import { Color } from '@shared/constants/color';
@@ -9,33 +8,23 @@ import { ScrollView, View } from 'react-native';
 interface Props {
   agreed: boolean;
   setAgreed: (agreed: boolean) => void;
-  onNext: () => void;
 }
 
-export function TermsStep({ agreed, setAgreed, onNext }: Props) {
-  const handleNext = () => {
-    if (agreed) {
-      onNext();
-    } else {
-      alert('약관에 동의해주세요.');
-    }
-  };
-
+export function TermsStep({ agreed, setAgreed }: Props) {
   return (
-    <View style={{ flex: 1, padding: Layout.spacing.l }}>
-      <View style={{ marginTop: Layout.spacing.xl, marginBottom: Layout.spacing.l }}>
+    <View style={{ flex: 1 }}>
+      <View style={{ marginBottom: Layout.spacing.l }}>
         <ThemedText variant="heading3" style={{ textAlign: 'center' }}>
           [필수] 개인정보 수집 이용 동의
         </ThemedText>
       </View>
 
       <View style={{
-        flex: 1,
+        height: 220,
         borderWidth: 1,
         borderColor: Color.secondary.pressed,
         borderRadius: Layout.radius.m,
         padding: Layout.spacing.m,
-        marginBottom: Layout.spacing.xl,
         backgroundColor: Color.secondary.main,
       }}>
         <ScrollView>
@@ -55,7 +44,7 @@ export function TermsStep({ agreed, setAgreed, onNext }: Props) {
         flexDirection: 'row', 
         justifyContent: 'center', 
         alignItems: 'center',
-        marginBottom: Layout.spacing.xxl 
+        marginTop: Layout.spacing.l,
       }}>
         <CheckBox 
           checked={agreed} 
@@ -69,13 +58,6 @@ export function TermsStep({ agreed, setAgreed, onNext }: Props) {
           동의합니다.
         </ThemedText>
       </View>
-
-      <Button 
-        title="다음" 
-        onPress={handleNext} 
-        size="large"
-        disabled={!agreed}
-      />
     </View>
   );
 }

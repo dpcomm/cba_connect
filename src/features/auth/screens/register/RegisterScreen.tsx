@@ -1,3 +1,4 @@
+import { Button } from '@shared/components/button/Button';
 import { ThemedText } from '@shared/components/themed-text/ThemedText';
 import { Color } from '@shared/constants/color';
 import { Layout } from '@shared/constants/layout';
@@ -164,7 +165,7 @@ export default function RegisterScreen() {
           <View style={{ alignItems: 'center', marginBottom: Layout.spacing.xl }}>
             <RecbaLogo width={210} height={49} />
           </View>
-          <View style={{ marginBottom: Layout.spacing.xl, alignItems: 'flex-start' }}>
+          <View style={{ marginBottom: 22, alignItems: 'flex-start' }}>
             <ThemedText variant="heading2">{getStepPrompt(currentStep)}</ThemedText>
           </View>
           <ConfirmationStep data={registerData} onConfirm={handleConfirmRegistration} />
@@ -174,19 +175,34 @@ export default function RegisterScreen() {
   }
 
   if (currentStep === 'Terms') {
+    const handleTermsNext = () => {
+      if (registerData.agreedToTerms) {
+        next();
+      } else {
+        alert('약관에 동의해주세요.');
+      }
+    };
+
     return (
       <SafeAreaView style={[styles.container, { paddingTop: 0 }]} edges={['top']}>
         <CustomHeader />
-        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: Layout.spacing.l }}>
+        <View style={{ flex: 1, padding: Layout.spacing.l }}>
           <View style={{ alignItems: 'center', marginBottom: Layout.spacing.xl }}>
             <RecbaLogo width={210} height={49} />
           </View>
           <TermsStep 
             agreed={registerData.agreedToTerms}
             setAgreed={(v) => updateData({ agreedToTerms: v })}
-            onNext={next} 
           />
-        </ScrollView>
+        </View>
+        <View style={{ padding: Layout.spacing.l }}>
+          <Button 
+            title="다음" 
+            onPress={handleTermsNext} 
+            size="large"
+            disabled={!registerData.agreedToTerms}
+          />
+        </View>
       </SafeAreaView>
     );
   }
