@@ -1,10 +1,12 @@
 import { Button } from '@shared/components/button/Button';
-import { ThemedText } from '@shared/components/themed-text/ThemedText';
 import { Color } from '@shared/constants/color';
 import { Font } from '@shared/constants/font';
 import { Layout } from '@shared/constants/layout';
 import React, { useState } from 'react';
 import { TextInput as RNTextInput, View } from 'react-native';
+import { ReadOnlyStepValue } from '../../../components/ReadOnlyStepValue';
+import { StepLabel } from '../../../components/StepLabel';
+import { ValidationMessage } from '../../../components/ValidationMessage';
 
 interface Props {
   userId: string;
@@ -17,12 +19,7 @@ export function IdStep({ userId, setUserId, onNext, readOnly }: Props) {
   const [checkStatus, setCheckStatus] = useState<'idle' | 'checking' | 'available' | 'duplicate'>('idle');
 
   if (readOnly) {
-    return (
-      <View style={{ marginBottom: Layout.spacing.l, gap: 10 }}>
-        <ThemedText variant="text1" color={Color.text.sub}>아이디</ThemedText>
-        <ThemedText variant="heading3">{userId}</ThemedText>
-      </View>
-    );
+    return <ReadOnlyStepValue label="아이디" value={userId} />;
   }
 
   const handleDuplicateCheck = async () => {
@@ -57,9 +54,7 @@ export function IdStep({ userId, setUserId, onNext, readOnly }: Props) {
 
   return (
     <View style={{ width: '100%' }}>
-      <View style={{ marginBottom: 10 }}>
-        <ThemedText variant="text1" color={Color.text.sub}>아이디</ThemedText>
-      </View>
+      <StepLabel label="아이디" />
       <View style={{ 
         flexDirection: 'row',
         alignItems: 'center',
@@ -69,7 +64,7 @@ export function IdStep({ userId, setUserId, onNext, readOnly }: Props) {
           flex: 1,
           borderBottomWidth: 2, 
           borderBottomColor: Color.primary.main,
-          paddingBottom: Layout.spacing.xs,
+          paddingBottom: 4,
         }}>
           <RNTextInput
             placeholder="아이디를 입력해주세요"
@@ -103,14 +98,10 @@ export function IdStep({ userId, setUserId, onNext, readOnly }: Props) {
       </View>
       {/* Status Message */}
       {checkStatus === 'available' && (
-        <ThemedText variant="text4" color={Color.primary.main} style={{ marginTop: Layout.spacing.xs }}>
-          • 사용가능한 아이디입니다.
-        </ThemedText>
+        <ValidationMessage message="• 사용가능한 아이디입니다." type="success" />
       )}
       {checkStatus === 'duplicate' && (
-        <ThemedText variant="text4" color={Color.accents.pink} style={{ marginTop: Layout.spacing.xs }}>
-          중복된 아이디입니다.
-        </ThemedText>
+        <ValidationMessage message="중복된 아이디입니다." type="error" />
       )}
     </View>
   );

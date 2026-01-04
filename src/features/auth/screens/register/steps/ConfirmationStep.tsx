@@ -1,9 +1,8 @@
 import { Button } from '@shared/components/button/Button';
-import { ThemedText } from '@shared/components/themed-text/ThemedText';
-import { Color } from '@shared/constants/color';
 import { Layout } from '@shared/constants/layout';
 import React from 'react';
 import { View } from 'react-native';
+import { ReadOnlyStepValue } from '../../../components/ReadOnlyStepValue';
 
 interface RegisterData {
   name: string;
@@ -29,22 +28,15 @@ export function ConfirmationStep({ data, onConfirm }: Props) {
     }
   };
 
-  const InfoRow = ({ label, value }: { label: string; value: string }) => (
-    <View style={{ marginBottom: Layout.spacing.m, gap: 10 }}>
-      <ThemedText variant="text1" color={Color.text.sub}>{label}</ThemedText>
-      <ThemedText variant="heading3">{value}</ThemedText>
-    </View>
-  );
-
   return (
     <View style={{ flex: 1 }}>
-      <InfoRow label="아이디" value={data.userId} />
-      <InfoRow label="비밀번호" value={'•'.repeat(data.password.length)} />
-      <InfoRow label="이름" value={data.name} />
-      {/* {data.birthdate && <InfoRow label="생년월일" value={data.birthdate} />} */}
-      <InfoRow label="성별" value={getGenderText(data.gender)} />
-      <InfoRow label="전화번호" value={data.phoneNumber} />
-      <InfoRow label="중그룹" value={data.affiliation} />
+      <ReadOnlyStepValue label="아이디" value={data.userId} />
+      <ReadOnlyStepValue label="비밀번호" value={'•'.repeat(data.password.length)} />
+      <ReadOnlyStepValue label="이름" value={data.name} />
+      {data.birthdate && <ReadOnlyStepValue label="생년월일" value={data.birthdate} />}
+      <ReadOnlyStepValue label="성별" value={getGenderText(data.gender)} />
+      <ReadOnlyStepValue label="전화번호" value={data.phoneNumber} />
+      <ReadOnlyStepValue label="중그룹" value={data.affiliation} />
 
       <View style={{ marginTop: Layout.spacing.xl }}>
         <Button 

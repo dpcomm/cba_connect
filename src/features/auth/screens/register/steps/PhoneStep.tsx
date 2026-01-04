@@ -1,9 +1,8 @@
 import { TextInputLined } from '@shared/components/text-input-lined/TextInputLined';
-import { ThemedText } from '@shared/components/themed-text/ThemedText';
-import { Color } from '@shared/constants/color';
-import { Layout } from '@shared/constants/layout';
 import React from 'react';
 import { View } from 'react-native';
+import { ReadOnlyStepValue } from '../../../components/ReadOnlyStepValue';
+import { StepLabel } from '../../../components/StepLabel';
 
 interface Props {
   phoneNumber: string;
@@ -14,12 +13,7 @@ interface Props {
 
 export function PhoneStep({ phoneNumber, setPhoneNumber, onNext, readOnly }: Props) {
   if (readOnly) {
-    return (
-      <View style={{ marginBottom: Layout.spacing.l, gap: 10 }}>
-        <ThemedText variant="text1" color={Color.text.sub}>전화번호</ThemedText>
-        <ThemedText variant="heading3">{phoneNumber}</ThemedText>
-      </View>
-    );
+    return <ReadOnlyStepValue label="전화번호" value={phoneNumber} />;
   }
 
   const handleSubmit = () => {
@@ -29,14 +23,16 @@ export function PhoneStep({ phoneNumber, setPhoneNumber, onNext, readOnly }: Pro
   };
 
   return (
-    <TextInputLined
-      label="전화번호"
-      placeholder="01011111111"
-      value={phoneNumber}
-      onChangeText={setPhoneNumber}
-      onSubmitEditing={handleSubmit}
-      returnKeyType="next"
-      keyboardType="phone-pad"
-    />
+    <View style={{ width: '100%' }}>
+      <StepLabel label="전화번호" />
+      <TextInputLined
+        placeholder="01011111111"
+        value={phoneNumber}
+        onChangeText={setPhoneNumber}
+        onSubmitEditing={handleSubmit}
+        returnKeyType="next"
+        keyboardType="phone-pad"
+      />
+    </View>
   );
 }

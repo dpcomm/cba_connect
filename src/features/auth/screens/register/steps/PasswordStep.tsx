@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { TextInputLined } from '@shared/components/text-input-lined/TextInputLined';
-import { ThemedText } from '@shared/components/themed-text/ThemedText';
 import { Color } from '@shared/constants/color';
 import { Layout } from '@shared/constants/layout';
 import React, { useRef, useState } from 'react';
 import { TextInput as RNTextInput, TouchableOpacity, View } from 'react-native';
+import { ReadOnlyStepValue } from '../../../components/ReadOnlyStepValue';
+import { ValidationMessage } from '../../../components/ValidationMessage';
 
 interface Props {
   password: string;
@@ -20,12 +21,7 @@ export function PasswordStep({ password, setPassword, onNext, readOnly }: Props)
   const confirmInputRef = useRef<RNTextInput>(null);
 
   if (readOnly) {
-    return (
-      <View style={{ marginBottom: Layout.spacing.l, gap: 10 }}>
-        <ThemedText variant="text1" color={Color.text.sub}>비밀번호</ThemedText>
-        <ThemedText variant="heading3">{'•'.repeat(password.length)}</ThemedText>
-      </View>
-    );
+    return <ReadOnlyStepValue label="비밀번호" value={'•'.repeat(password.length)} />;
   }
 
   const handlePasswordSubmit = () => {
@@ -68,15 +64,11 @@ export function PasswordStep({ password, setPassword, onNext, readOnly }: Props)
 
       {/* Password Hints */}
       <View style={{ marginTop: Layout.spacing.xs, marginBottom: Layout.spacing.l }}>
-        <ThemedText variant="text4" color={Color.text.sub} style={{ marginBottom: 2 }}>
-          • 8자리 이상 입력(영문/숫자)
-        </ThemedText>
-        <ThemedText 
-          variant="text4" 
-          color={isPasswordValid ? Color.primary.main : Color.accents.pink}
-        >
-          • {isPasswordValid ? '사용가능한 비밀번호입니다.' : '사용 불가능한 비밀번호입니다.'}
-        </ThemedText>
+        <ValidationMessage message="• 8자리 이상 입력(영문/숫자)" type="info" />
+        <ValidationMessage 
+          message={`• ${isPasswordValid ? '사용가능한 비밀번호입니다.' : '사용 불가능한 비밀번호입니다.'}`}
+          type={isPasswordValid ? 'success' : 'error'}
+        />
       </View>
 
       <TextInputLined
@@ -100,13 +92,10 @@ export function PasswordStep({ password, setPassword, onNext, readOnly }: Props)
 
       {/* Confirm Match Status */}
       {confirmPassword.length > 0 && (
-        <ThemedText 
-          variant="text4" 
-          color={isConfirmMatch ? Color.primary.main : Color.accents.pink}
-          style={{ marginTop: Layout.spacing.xs }}
-        >
-          • {isConfirmMatch ? '비밀번호가 일치합니다.' : '비밀번호가 일치하지 않습니다.'}
-        </ThemedText>
+        <ValidationMessage 
+          message={`• ${isConfirmMatch ? '비밀번호가 일치합니다.' : '비밀번호가 일치하지 않습니다.'}`}
+          type={isConfirmMatch ? 'success' : 'error'}
+        />
       )}
     </View>
   );

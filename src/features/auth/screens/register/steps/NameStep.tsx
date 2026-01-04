@@ -1,9 +1,8 @@
 import { TextInputLined } from '@shared/components/text-input-lined/TextInputLined';
-import { ThemedText } from '@shared/components/themed-text/ThemedText';
-import { Color } from '@shared/constants/color';
-import { Layout } from '@shared/constants/layout';
 import React from 'react';
 import { View } from 'react-native';
+import { ReadOnlyStepValue } from '../../../components/ReadOnlyStepValue';
+import { StepLabel } from '../../../components/StepLabel';
 
 interface Props {
   name: string;
@@ -14,12 +13,7 @@ interface Props {
 
 export function NameStep({ name, setName, onNext, readOnly }: Props) {
   if (readOnly) {
-    return (
-      <View style={{ marginBottom: Layout.spacing.l, gap: 10 }}>
-        <ThemedText variant="text1" color={Color.text.sub}>이름</ThemedText>
-        <ThemedText variant="heading3">{name}</ThemedText>
-      </View>
-    );
+    return <ReadOnlyStepValue label="이름" value={name} />;
   }
 
   const handleSubmit = () => {
@@ -28,21 +22,16 @@ export function NameStep({ name, setName, onNext, readOnly }: Props) {
     }
   };
 
-  const handleChangeText = (text: string) => {
-    const koreaOnly = text.replace(/[^ㄱ-ㅎㅏ-ㅣ가-힣]/g, '');
-    const limited = koreaOnly.slice(0, 4);
-    setName?.(limited);
-  };
-
   return (
-    <TextInputLined
-      label="이름"
-      placeholder="김땡땡"
-      value={name}
-      onChangeText={handleChangeText}
-      onSubmitEditing={handleSubmit}
-      returnKeyType="next"
-      maxLength={4}
-    />
+    <View style={{ width: '100%' }}>
+      <StepLabel label="이름" />
+      <TextInputLined
+        placeholder="이름을 입력해주세요"
+        value={name}
+        onChangeText={setName}
+        onSubmitEditing={handleSubmit}
+        returnKeyType="next"
+      />
+    </View>
   );
 }
