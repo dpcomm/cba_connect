@@ -11,7 +11,7 @@ export const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: Layout.spacing.xxl,
+    marginBottom: 21,
   },
   logoLight: {
     fontWeight: '300',
@@ -24,18 +24,9 @@ export const styles = StyleSheet.create({
   },
   inputContainer: {
     marginBottom: Layout.spacing.l,
+    gap: 11
   },
-  input: {
-    height: 50,
-    borderWidth: 1,
-    borderColor: Color.secondary.hover,
-    borderRadius: Layout.radius.m,
-    paddingHorizontal: Layout.spacing.m,
-    marginBottom: Layout.spacing.m,
-    fontSize: 16,
-    color: Color.text.main,
-    backgroundColor: Color.secondary.main,
-  },
+
   optionContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -46,6 +37,13 @@ export const styles = StyleSheet.create({
   },
   footerContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  divider: {
+    height: 16,
+    width: 0.5,
+    backgroundColor: Color.text.main,
+    marginHorizontal: 10,
   },
 });

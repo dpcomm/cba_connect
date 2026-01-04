@@ -28,7 +28,7 @@ export function useLoginViewModel() {
   };
 
   const navigateToResetPassword = () => {
-    router.push('/auth/reset-password');
+    router.push('/auth/account-search');
   };
 
   const navigateToRegister = () => {
