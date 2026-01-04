@@ -22,6 +22,16 @@ export const Layout = {
       shadowOpacity: 0.15,
       shadowRadius: 5,
       elevation: 2,
+    },
+    drop: {
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 4,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 4,
     }
   }
 };
