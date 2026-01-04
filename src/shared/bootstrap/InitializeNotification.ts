@@ -21,6 +21,7 @@ export async function initializeNotifications(): Promise<{
 
   // 3. Push Token 확보
   const pushToken = await getExpoPushToken();
+  console.log('Expo Push Token (Bootstrap):', pushToken);
 
   // 4. Handler 등록
   registerNotificationHandlers();

@@ -1,5 +1,7 @@
 import 'reflect-metadata';
 
+import { initializeNotifications } from '@shared/bootstrap/InitializeNotification';
+
 import { AutoLoginUseCase } from '@application/auth/AutoLoginUseCase';
 import { container } from '@shared/di/container';
 import { useAuthStore } from '@shared/stores/useAuthStore';
@@ -64,8 +66,11 @@ export default function RootLayout() {
     // 원인으로는 다음과 같습니다.
     // 1. project id의 부재
     // 2. 현재 Expo SDK 버전의 Expo Go에서는 Android 푸시가 제거됨
-    // 그런 이유로, Expo Go 상에서 다른 기능을 테스트하고 싶으시면 하단의 initializeNotificaitons()함수를 주석처리해주시고 동작하시면 됩니다.
-    // initializeNotifications();
+    // Expo Go 환경에서의 제약 사항 등으로 인해 주석 처리되어 있었으나, 
+    // 실제 디바이스 테스트(Development Build)를 위해 활성화합니다.
+    initializeNotifications().then(({ pushToken }) => {
+      console.log('Push Token:', pushToken);
+    });
   }, [fontsLoaded]);
 
   useEffect(() => {
