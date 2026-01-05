@@ -4,21 +4,17 @@ import React from 'react';
 import { View } from 'react-native';
 import { VerificationCodeForm } from '../../../components/VerificationCodeForm';
 
-interface Props {
-  email: string;
+interface CodeVerificationStepProps {
   verificationCode: string;
   setVerificationCode: (value: string) => void;
   onResend: () => void;
-  onVerify: () => void;
 }
 
-export function VerificationCodeView({ 
-  email, 
+export function CodeVerificationStep({ 
   verificationCode, 
   setVerificationCode, 
-  onResend, 
-  onVerify 
-}: Props) {
+  onResend 
+}: CodeVerificationStepProps) {
   return (
     <View style={{ flex: 1, padding: Layout.spacing.l, backgroundColor: Color.default.background }}>
       <VerificationCodeForm
@@ -29,4 +25,3 @@ export function VerificationCodeView({
     </View>
   );
 }
-

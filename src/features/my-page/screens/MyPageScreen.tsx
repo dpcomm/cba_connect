@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { Header } from '@shared/components/header/Header';
 import { ThemedText } from '@shared/components/themed-text/ThemedText';
 import { Color } from '@shared/constants/color';
 import { Layout } from '@shared/constants/layout';
@@ -6,7 +7,6 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import { ScrollView, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import BackIcon from '../../../../assets/svgs/back.svg';
 import { MenuItem } from '../components/MenuItem';
 import { MenuSection } from '../components/MenuSection';
 import { ProfileCard } from '../components/ProfileCard';
@@ -21,24 +21,15 @@ export default function MyPageScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Color.default.background }}>
-      {/* 헤더 */}
-      <View style={{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: Layout.spacing.l,
-        paddingVertical: Layout.spacing.m,
-      }}>
-        <TouchableOpacity onPress={() => router.back()} style={{ padding: 4 }}>
-          <BackIcon width={24} height={24} color={Color.text.main} />
-        </TouchableOpacity>
-        <ThemedText variant="heading2" color={Color.text.main} style={{ fontWeight: 'bold' }}>
-          마이 페이지
-        </ThemedText>
-        <TouchableOpacity style={{ padding: 4 }}>
-          <Ionicons name="notifications-outline" size={24} color={Color.text.main} />
-        </TouchableOpacity>
-      </View>
+      <Header
+        title="마이 페이지"
+        onBack={() => router.back()}
+        rightContent={
+          <TouchableOpacity style={{ padding: 4 }}>
+            <Ionicons name="notifications-outline" size={24} color={Color.text.main} />
+          </TouchableOpacity>
+        }
+      />
 
       <ScrollView 
         contentContainerStyle={{ paddingHorizontal: Layout.spacing.l, paddingBottom: 40 }}
