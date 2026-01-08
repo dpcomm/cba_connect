@@ -1,217 +1,312 @@
+import React, { useMemo, useState } from 'react';
+import { Platform, Pressable, ScrollView, View } from 'react-native';
+
+import { TextInput } from '@shared/components/text-input/TextInput';
 import { ThemedText } from '@shared/components/themed-text/ThemedText';
 import { Color } from '@shared/constants/color';
-import React from 'react';
-import { Pressable, TextInput, View } from 'react-native';
+
+import { AddressSearchModal } from '@shared/components/address/AddressSearchModal';
+import { InlineSelectDropdown, type InlineOption } from '@shared/components/select-inline/InlineSelectDropdown';
+
+import { SelectBox } from '@shared/components/select-box/SelectBox';
+import { Layout } from '@shared/constants/layout';
 import { styles } from './formStyles';
 import { useCarpoolRegisterFormViewModel } from './useCarpoolRegisterFormViewModel';
 
+// 네이티브에서만 로드
+let MapView: any = null;
+let Marker: any = null;
+if (Platform.OS !== 'web') {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const maps = require('react-native-maps');
+  MapView = maps.default;
+  Marker = maps.Marker;
+}
+
+const SEOUL_REGION = {
+  latitude: 37.5665,
+  longitude: 126.978,
+  latitudeDelta: 0.05,
+  longitudeDelta: 0.05,
+};
+
+function FieldBlock({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <View style={styles.fieldBlock}>
+      <ThemedText variant="text3" color={Color.text.main} style={styles.fieldLabel}>
+        {label}
+      </ThemedText>
+      {children}
+    </View>
+  );
+}
+
 export default function CarpoolRegisterFormScreen() {
   const {
-    destination,
-    isHomeDestination,
-    driverName,
-    setDriverName,
-    carInfo,
-    setCarInfo,
-    capacity,
-    decCapacity,
-    incCapacity,
-    dateText,
-    openDatePicker,
-    hour,
-    setHour,
-    minute,
-    setMinute,
-    phone,
-    setPhone,
-    fromPlace,
-    setFromPlace,
-    toPlace,
-    setToPlace,
-    mainPickup,
-    setMainPickup,
-    memo,
-    setMemo,
+    isHome,
+
+    carInfo, setCarInfo,
+    capacity, incCapacity, decCapacity,
+
+    mainPickup, setMainPickup,
+    memo, setMemo,
+
+    date, setDate, hour, setHour, minute, setMinute,
+    DATE_OPTIONS, HOUR_OPTIONS, MINUTE_OPTIONS,
+
+    origin, setOrigin,
+    dest, setDest,
+    originDisabled, destDisabled,
+    editableMarker,
+
     goBack,
     submit,
   } = useCarpoolRegisterFormViewModel();
 
-  return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Pressable onPress={goBack} style={styles.headerSide} hitSlop={10}>
-          <ThemedText variant="heading3" style={{ color: Color.text.main }}>
-            ←
-          </ThemedText>
-        </Pressable>
+  const [openDropdown, setOpenDropdown] = useState<null | 'date' | 'hour' | 'minute'>(null);
+  const [addressModalOpen, setAddressModalOpen] = useState<null | 'origin' | 'dest'>(null);
 
-        <ThemedText variant="heading3" style={styles.headerTitle}>
-          카풀 등록
-        </ThemedText>
+  const dateOptions: InlineOption[] = useMemo(
+    () => DATE_OPTIONS.map((d) => ({ label: d, value: d })),
+    [DATE_OPTIONS],
+  );
+  const hourOptions: InlineOption[] = useMemo(
+    () => HOUR_OPTIONS.map((h) => ({ label: h, value: h })),
+    [HOUR_OPTIONS],
+  );
+  const minuteOptions: InlineOption[] = useMemo(
+    () => MINUTE_OPTIONS.map((m) => ({ label: m, value: m })),
+    [MINUTE_OPTIONS],
+  );
 
-        <View style={styles.headerSide} />
-      </View>
+  const mapRegion = useMemo(() => {
+    if (editableMarker) {
+      return {
+        latitude: editableMarker.lat,
+        longitude: editableMarker.lng,
+        latitudeDelta: 0.03,
+        longitudeDelta: 0.03,
+      };
+    }
+    return SEOUL_REGION;
+  }, [editableMarker]);
 
-      <View style={styles.content}>
-        {/* 운전자명 */}
-        <ThemedText variant="text3" style={styles.label}>운전자명</ThemedText>
-        <TextInput
-          style={styles.input}
-          value={driverName}
-          onChangeText={setDriverName}
-          placeholder="김OO (DB 자동입력/수정 가능)"
-          placeholderTextColor={Color.text.disabled}
-        />
+  const minusDisabled = capacity <= 1;
 
-        {/* 내 차 정보 */}
-        <ThemedText variant="text3" style={styles.label}>내 차 정보(차종/색깔/번호)</ThemedText>
-        <TextInput
-          style={styles.input}
-          value={carInfo}
-          onChangeText={setCarInfo}
-          placeholder="셀토스/흰색/00가0000"
-          placeholderTextColor={Color.text.disabled}
-        />
+  // ✅ 지도는 “활성 필드 아래”로: HOME이면 dest 아래 / RETREAT이면 origin 아래 (5번)
+  const ActivePlaceBlock = () => (
+    Platform.OS !== 'web' && MapView ? (
+      <View style={styles.mapBox}>
+        <MapView style={{ flex: 1 }} initialRegion={SEOUL_REGION} region={mapRegion}>
+          {editableMarker && (
+            <Marker
+              coordinate={{ latitude: editableMarker.lat, longitude: editableMarker.lng }}
+              title={isHome ? '도착지' : '출발지'}
+            />
+          )}
+        </MapView>
 
-        {/* 수용 가능 인원 */}
-        <ThemedText variant="text3" style={styles.label}>수용 가능한 인원</ThemedText>
-        <View style={styles.stepperRow}>
-          <Pressable onPress={decCapacity} style={styles.stepperBtnLeft} hitSlop={10}>
-            <ThemedText variant="heading3" style={styles.stepperBtnText}>-</ThemedText>
-          </Pressable>
-          <View style={styles.stepperValue}>
-            <ThemedText variant="text2" style={styles.stepperValueText}>{capacity}</ThemedText>
+        {!editableMarker && (
+          <View style={styles.mapOverlay}>
+            <ThemedText variant="text2" color={Color.text.sub}>
+              주소를 선택하면 지도에 표시돼요.
+            </ThemedText>
           </View>
-          <Pressable onPress={incCapacity} style={styles.stepperBtnRight} hitSlop={10}>
-            <ThemedText variant="heading3" style={styles.stepperBtnText}>+</ThemedText>
+        )}
+      </View>
+    ) : null
+  );
+
+  return (
+    <ScrollView>
+      <View style={styles.container}>
+        {/* ✅ 드롭다운 외부 클릭 닫기 overlay (2번) */}
+        {openDropdown && (
+          <Pressable
+            style={styles.dropdownDismissOverlay}
+            onPress={() => setOpenDropdown(null)}
+          />
+        )}
+
+        {/* Header */}
+        <View style={styles.header}>
+          <Pressable onPress={goBack} style={styles.headerSide} hitSlop={10}>
+            <ThemedText variant="heading3" color={Color.text.main}>←</ThemedText>
+          </Pressable>
+          <ThemedText variant="heading3" style={styles.headerTitle}>카풀 등록</ThemedText>
+          <View style={styles.headerSide} />
+        </View>
+
+        <View style={styles.content}>
+          <FieldBlock label="내 차 정보">
+            <TextInput value={carInfo} onChangeText={setCarInfo} placeholder="예: 셀토스/흰색/00가0000" />
+          </FieldBlock>
+
+          <FieldBlock label="수용 가능한 인원">
+            <View style={styles.stepperRow}>
+              <Pressable
+                onPress={decCapacity}
+                disabled={minusDisabled}
+                style={[
+                  styles.stepperBtnLeft,
+                  minusDisabled && styles.stepperBtnDisabled,
+                ]}
+                hitSlop={10}
+              >
+                <ThemedText variant="heading3" style={styles.stepperBtnText}>-</ThemedText>
+              </Pressable>
+
+              <View style={styles.stepperValue}>
+                <ThemedText variant="text2" style={styles.stepperValueText}>{capacity}</ThemedText>
+              </View>
+
+              <Pressable onPress={incCapacity} style={styles.stepperBtnRight} hitSlop={10}>
+                <ThemedText variant="heading3" style={styles.stepperBtnText}>+</ThemedText>
+              </Pressable>
+            </View>
+          </FieldBlock>
+
+          {/* ✅ 날짜/시간: 라벨-컨텐츠 간격 통일 (1번), 드롭다운 박스 바로 아래 (이미 top:100%) */}
+          <FieldBlock label="날짜/시간">
+            <View style={styles.dateTimeRow}>
+              {/* 날짜 50% */}
+              <View style={styles.dateCol}>
+                <View style={styles.inlineAnchor}>
+                  <SelectBox
+                    value={date}
+                    onPress={() => setOpenDropdown((v) => (v === 'date' ? null : 'date'))}
+                  />
+                  <InlineSelectDropdown
+                    visible={openDropdown === 'date'}
+                    options={dateOptions}
+                    selectedValue={date}
+                    onSelect={(opt) => {
+                      setDate(opt.value);
+                      setOpenDropdown(null);
+                    }}
+                  />
+                </View>
+              </View>
+
+              {/* 시 25% */}
+              <View style={styles.timeCol}>
+                <View style={styles.inlineAnchor}>
+                  <SelectBox
+                    value={hour}
+                    onPress={() => setOpenDropdown((v) => (v === 'hour' ? null : 'hour'))}
+                  />
+                  <InlineSelectDropdown
+                    visible={openDropdown === 'hour'}
+                    options={hourOptions}
+                    selectedValue={hour}
+                    onSelect={(opt) => {
+                      setHour(opt.value);
+                      setOpenDropdown(null);
+                    }}
+                  />
+                </View>
+              </View>
+
+              {/* 분 25% */}
+              <View style={styles.timeCol}>
+                <View style={styles.inlineAnchor}>
+                  <SelectBox
+                    value={minute}
+                    onPress={() => setOpenDropdown((v) => (v === 'minute' ? null : 'minute'))}
+                  />
+                  <InlineSelectDropdown
+                    visible={openDropdown === 'minute'}
+                    options={minuteOptions}
+                    selectedValue={minute}
+                    onSelect={(opt) => {
+                      setMinute(opt.value);
+                      setOpenDropdown(null);
+                    }}
+                  />
+                </View>
+              </View>
+            </View>
+          </FieldBlock>
+
+          {/* 출발/도착 + 지도 위치 조건부 */}
+          <View style={styles.fieldBlock}>
+            <ThemedText variant="text3" color={Color.text.main} style={styles.fieldLabel}>출발지</ThemedText>
+            <SelectBox
+              value={origin.roadAddress}
+              placeholder={originDisabled ? origin.roadAddress : '도로명 주소 검색'}
+              disabled={originDisabled}
+              right={<ThemedText variant="text2" color={originDisabled ? Color.text.disabled : Color.text.sub}>🔍</ThemedText>}
+              onPress={() => { if (!originDisabled) setAddressModalOpen('origin'); }}
+            />
+            {/* ✅ RETREAT일 때(출발지가 활성) 출발지 아래 지도 */}
+            {!isHome && <ActivePlaceBlock />}
+          </View>
+
+          <View style={styles.fieldBlock}>
+            <ThemedText variant="text3" color={Color.text.main} style={styles.fieldLabel}>도착지</ThemedText>
+            <SelectBox
+              value={dest.roadAddress}
+              placeholder={destDisabled ? dest.roadAddress : '도로명 주소 검색'}
+              disabled={destDisabled}
+              right={<ThemedText variant="text2" color={destDisabled ? Color.text.disabled : Color.text.sub}>🔍</ThemedText>}
+              onPress={() => { if (!destDisabled) setAddressModalOpen('dest'); }}
+            />
+            {/* ✅ HOME일 때(도착지가 활성) 도착지 아래 지도 */}
+            {isHome && <ActivePlaceBlock />}
+          </View>
+
+          <View style={styles.fieldBlock}>
+            <View style={styles.labelRow}>
+              <ThemedText variant="text3" color={Color.text.main}>
+                주요 위치
+              </ThemedText>
+              <ThemedText
+                variant="text4"
+                color={Color.text.sub}
+                style={styles.helperText}
+              >
+                ※카풀 리스트에 표시될 위치를 입력하세요.
+              </ThemedText>
+            </View>
+
+            <TextInput
+              value={mainPickup}
+              onChangeText={setMainPickup}
+              placeholder="예: 신도림역 1번 출구 앞"
+            />
+          </View>
+
+          <FieldBlock label="메모">
+            <TextInput
+              value={memo}
+              onChangeText={setMemo}
+              placeholder="시간 엄수, 커피 사주시면 감사, 도착하면 전화주세요 등"
+              multiline
+              textAlignVertical="top"
+              inputStyle={{ paddingTop: Layout.spacing.s }}
+              containerStyle={styles.memoContainer}
+            />
+          </FieldBlock>
+
+          <Pressable onPress={submit} style={styles.submitBtn} hitSlop={10}>
+            <ThemedText variant="text2" style={styles.submitText}>등록하기</ThemedText>
           </Pressable>
         </View>
 
-        {/* 날짜/시간 */}
-        <View style={styles.row2}>
-  <View style={{ flex: 1 }}>
-    <ThemedText variant="text3" style={styles.label}>날짜</ThemedText>
-
-    {isHomeDestination ? (
-      // ✅ HOME: 고정(읽기 전용)
-      <View style={styles.readonlyBox}>
-        <ThemedText variant="text3" style={styles.readonlyText}>
-          {dateText}
-        </ThemedText>
+        <AddressSearchModal
+          visible={addressModalOpen != null}
+          title={addressModalOpen === 'origin' ? '출발지 검색(도로명)' : '도착지 검색(도로명)'}
+          onClose={() => setAddressModalOpen(null)}
+          onSelect={(r) => {
+            if (addressModalOpen === 'origin') {
+              setOrigin({ roadAddress: r.roadAddress, lat: r.lat, lng: r.lng, detail: origin.detail });
+            } else {
+              setDest({ roadAddress: r.roadAddress, lat: r.lat, lng: r.lng, detail: dest.detail });
+            }
+            setAddressModalOpen(null);
+          }}
+        />
       </View>
-    ) : (
-      // ✅ RETREAT: 선택 가능(Pressable)
-      <Pressable onPress={openDatePicker} style={styles.selectBox} hitSlop={10}>
-        <ThemedText variant="text3" style={styles.selectBoxText}>
-          {dateText}
-        </ThemedText>
-      </Pressable>
-    )}
-  </View>
-
-  <View style={{ width: 10 }} />
-
-  {/* ✅ HOME이 아니면 시간 선택 가능 */}
-  {!isHomeDestination && (
-    <View style={{ width: 110 }}>
-      <ThemedText variant="text3" style={styles.label}>시간</ThemedText>
-      <View style={styles.timeRow}>
-        <TextInput
-          style={styles.timeInput}
-          value={hour}
-          onChangeText={setHour}
-          keyboardType="number-pad"
-          maxLength={2}
-          placeholder="00"
-          placeholderTextColor={Color.text.disabled}
-        />
-        <ThemedText variant="text3" style={styles.timeUnit}>시</ThemedText>
-        <TextInput
-          style={styles.timeInput}
-          value={minute}
-          onChangeText={setMinute}
-          keyboardType="number-pad"
-          maxLength={2}
-          placeholder="00"
-          placeholderTextColor={Color.text.disabled}
-        />
-        <ThemedText variant="text3" style={styles.timeUnit}>분</ThemedText>
-      </View>
-    </View>
-  )}
-</View>
-
-        {/* 연락처 */}
-        <ThemedText variant="text3" style={styles.label}>연락처</ThemedText>
-        <TextInput
-          style={styles.input}
-          value={phone}
-          onChangeText={setPhone}
-          placeholder="010-0000-0000 (DB 자동입력/수정 가능)"
-          placeholderTextColor={Color.text.disabled}
-          keyboardType="phone-pad"
-        />
-
-        {/* 출발지(픽업위치) */}
-        <ThemedText variant="text3" style={styles.label}>출발지 (픽업위치)</ThemedText>
-        <View style={styles.searchBox}>
-          <TextInput
-            style={styles.searchInput}
-            value={fromPlace}
-            placeholder={destination === 'RETREAT' ? '수련회장' : '집으로'}
-            placeholderTextColor={Color.text.disabled}
-          />
-          <ThemedText variant="text3" style={styles.searchIcon}>🔍</ThemedText>
-        </View>
-
-        {/* 도착지 */}
-        <ThemedText variant="text3" style={styles.label}>도착지</ThemedText>
-        <View style={styles.searchBox}>
-          <TextInput
-            style={styles.searchInput}
-            value={toPlace}
-            onChangeText={setToPlace}
-            placeholder="영등포 307"
-            placeholderTextColor={Color.text.disabled}
-          />
-          <ThemedText variant="text3" style={styles.searchIcon}>🔍</ThemedText>
-        </View>
-
-        {/* 지도 (빈칸) */}
-        <View style={styles.mapBox}>
-          <ThemedText variant="text3" style={styles.mapText}>픽업 장소 선택</ThemedText>
-          <ThemedText variant="text3" style={styles.mapSubText}>
-            지도는 추후 연동 예정
-          </ThemedText>
-        </View>
-
-        {/* 주요 위치 */}
-        <ThemedText variant="text3" style={styles.label}>주요 위치</ThemedText>
-        <TextInput
-          style={styles.input}
-          value={mainPickup}
-          onChangeText={setMainPickup}
-          placeholder="신도림역 1번 출구 앞"
-          placeholderTextColor={Color.text.disabled}
-        />
-
-        {/* 메모 */}
-        <ThemedText variant="text3" style={styles.label}>메모</ThemedText>
-        <TextInput
-          style={[styles.input, styles.memoInput]}
-          value={memo}
-          onChangeText={setMemo}
-          placeholder="시간 엄수, 커피 사주시면 감사, 도착하면 전화주세요 등"
-          placeholderTextColor={Color.text.disabled}
-          multiline
-        />
-
-        {/* 등록하기 버튼 */}
-        <Pressable onPress={submit} style={styles.submitBtn} hitSlop={10}>
-          <ThemedText variant="text2" style={styles.submitText}>등록하기</ThemedText>
-        </Pressable>
-      </View>
-    </View>
+    </ScrollView>
   );
 }
