@@ -18,10 +18,10 @@ export class ApiExpoPushTokenRepository implements ExpoPushTokenRepository {
                         
             const requestBody: RegisterRequestDto = {
                 userId: userId,
-                expoPushToken: token,
+                token: token,
             };
 
-            const response = await apiClient.post<ApiResponse<ExpoTokenResponseDto>>('/api/notification/register_expo', requestBody);
+            const response = await apiClient.post<ApiResponse<ExpoTokenResponseDto>>('/api/expoPushToken/regist', requestBody);
             const responseData = response.data.data;
             const expoToken = this.mapToExpoToken(responseData);
 
