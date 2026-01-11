@@ -18,6 +18,7 @@ export const styles = StyleSheet.create({
     borderTopRightRadius: Layout.radius.l,
     paddingBottom: Layout.spacing.l,
     ...Layout.shadow.drop,
+    height: 520,
   },
 
   header: {
@@ -64,6 +65,7 @@ export const styles = StyleSheet.create({
     paddingTop: Layout.spacing.m,
     paddingBottom: Layout.spacing.l,
     gap: Layout.spacing.s,
+    flexGrow: 1,
   },
 
   item: {

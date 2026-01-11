@@ -21,6 +21,9 @@ export interface UpdateCarpoolData extends CreateCarpoolData {
 }
 
 export interface ICarpoolRepository {
+  getAvailableCarpools(userId?: number): Promise<Carpool[]>;
+  getParticipatingCarpools(userId: number): Promise<Carpool[]>;
+
   getAllCarpools(): Promise<Carpool[]>;
   createCarpool(data: CreateCarpoolData): Promise<Carpool>;
 

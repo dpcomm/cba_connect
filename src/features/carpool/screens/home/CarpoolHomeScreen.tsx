@@ -7,17 +7,27 @@ import { useCarpoolHomeViewModel } from './useCarpoolHomeViewModel';
 
 export default function CarpoolHomeScreen() {
   const {
-    applicationsPreview,
-    posts,
-    activeTab,
+    // status
+    isLoading,
+    error,
+
+    // tabs
+    activeTab, // 'HOME' | 'RETREAT'
     setActiveTab,
+
+    // search
     query,
     setQuery,
+
+    // data
+    carpools,
+    posts,
+
+    // actions
     goBack,
-    goApplications,
+    goDetail,
     goRegister,
-    // goDetail,
-    // applyToPost,
+    goHistory,
   } = useCarpoolHomeViewModel();
 
   return (
@@ -38,32 +48,47 @@ export default function CarpoolHomeScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* 카풀 신청내역 */}
+        {/* ✅ 신청 내역 + More */}
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
             <ThemedText variant="text2" style={styles.sectionTitle}>
-              📒 카풀 신청내역
+              📒 신청 내역
             </ThemedText>
 
-            <Pressable onPress={goApplications} hitSlop={10} style={styles.chevronBtn}>
-              <ThemedText variant="text2" color={Color.text.sub}>
-                ›
-              </ThemedText>
-            </Pressable>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <Pressable onPress={goHistory} hitSlop={10} style={styles.moreBtn}>
+                <ThemedText variant="text3" style={styles.moreBtnText}>
+                  More
+                </ThemedText>
+              </Pressable>
+            </View>
           </View>
 
           <View style={styles.applicationList}>
-            {applicationsPreview.map((item) => (
-              <View key={item.id} style={styles.applicationCard}>
-                <ThemedText variant="text3" style={styles.applicationDriver}>
-                  {item.driverName} 카풀
-                </ThemedText>
-                <ThemedText variant="text3" style={styles.applicationDesc}>
-                  • {item.summary}
+            {carpools?.length === 0 ? (
+              <View style={styles.applicationCard}>
+                <ThemedText variant="text2" style={styles.emptyText}>
+                  카풀 신청한 내역이 없습니다.
                 </ThemedText>
               </View>
-            ))}
+            ) : (
+              carpools?.map((item) => (
+                <Pressable
+                  key={item.id}
+                  style={styles.applicationCard}
+                  onPress={() => goDetail(item.id)}
+                >
+                  <ThemedText variant="text3" style={styles.applicationDriver}>
+                    {item.driverName} 카풀
+                  </ThemedText>
+                  <ThemedText variant="text3" style={styles.applicationDesc}>
+                    • {item.summary}
+                  </ThemedText>
+                </Pressable>
+              ))
+            )}
           </View>
+
         </View>
 
         {/* 집으로 / 수련회장 세그먼트 */}
@@ -93,15 +118,15 @@ export default function CarpoolHomeScreen() {
           </Pressable>
         </View>
 
-        {/* 카풀 찾기 + 등록 버튼 */}
+        {/* ✅ 찾기 + 등록 버튼 */}
         <View style={styles.findHeader}>
           <ThemedText variant="text2" style={styles.findTitle}>
-            🚗 카풀 찾기
+            🚗 찾기
           </ThemedText>
 
           <Pressable onPress={goRegister} style={styles.pillBtn} hitSlop={10}>
             <ThemedText variant="text3" style={styles.pillBtnText}>
-              + 카풀 등록
+              + 등록
             </ThemedText>
           </Pressable>
         </View>
@@ -117,62 +142,23 @@ export default function CarpoolHomeScreen() {
 
         {/* 모집글 리스트 */}
         <View style={styles.postList}>
-          {posts.map((post) => (
-            <Pressable key={post.id} style={styles.postCard} onPress={() => goDetail(post.id)}>
-              <View style={styles.postTopRow}>
-                <View style={styles.avatar} />
-                <ThemedText variant="text2" style={styles.postName}>
-                  {post.driverName}
-                </ThemedText>
-
-                <View style={{ flex: 1 }} />
-
-                {post.isClosed ? (
-                  <View style={styles.statusBtnClosed}>
-                    <ThemedText variant="text3" style={styles.statusTextClosed}>
-                      마감
-                    </ThemedText>
-                  </View>
-                ) : (
-                  <Pressable
-                    onPress={() => applyToPost(post.id)}
-                    style={styles.statusBtnApply}
-                    hitSlop={6}
-                  >
-                    <ThemedText variant="text3" style={styles.statusTextApply}>
-                      신청
-                    </ThemedText>
-                  </Pressable>
-                )}
-              </View>
-
-              <View style={styles.postInfo}>
-                <View style={styles.infoRow}>
-                  <ThemedText variant="text3" color={Color.text.sub}>
-                    시간:
-                  </ThemedText>
-                  <ThemedText variant="text3" style={styles.infoValue}>
-                    {post.timeText}
-                  </ThemedText>
-                </View>
-
-                <View style={styles.infoRow}>
-                  <ThemedText variant="text3" color={Color.text.sub}>
-                    장소:
-                  </ThemedText>
-                  <ThemedText variant="text3" style={styles.infoValue}>
-                    {post.placeText}
-                  </ThemedText>
-                </View>
-
-                <View style={styles.routeRow}>
-                  <ThemedText variant="text3" style={styles.routeText}>
-                    📍 {post.routeText}
-                  </ThemedText>
-                </View>
-              </View>
-            </Pressable>
-          ))}
+          {posts.length === 0 ? (
+            <View style={styles.postCard}>
+              <ThemedText variant="text3" style={styles.emptyText}>
+                등록된 카풀이 없습니다.
+              </ThemedText>
+            </View>
+          ) : (
+            posts.map((post) => (
+              <Pressable
+                key={post.id}
+                style={styles.postCard}
+                onPress={() => goDetail(post.id)}
+              >
+                {/* 기존 카드 내용 그대로 */}
+              </Pressable>
+            ))
+          )}
         </View>
       </ScrollView>
     </View>

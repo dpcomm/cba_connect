@@ -1,99 +1,190 @@
+import { GetAvailableCarpoolsUseCase } from '@application/carpool/GetAvailableCarpoolsUseCase';
+import { GetParticipatingCarpoolsUseCase } from '@application/carpool/GetParticipatingCarpoolsUseCase';
+import { container } from '@shared/di/container';
+import { useAuthStore } from '@shared/stores/useAuthStore';
 import { useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
-type Tab = 'HOME' | 'RETREAT';
+const RETREAT_PLACE = '딱따구리 수련원';
+export type DestinationTab = 'HOME' | 'RETREAT';
 
-type ApplicationPreview = {
-  id: string;
-  driverName: string;
-  summary: string;
-};
+function matchTab(destination?: string | null, tab?: DestinationTab): boolean {
+  const isRetreat = destination === RETREAT_PLACE;
+  return tab === 'RETREAT' ? isRetreat : !isRetreat;
+}
 
-type CarpoolPostItem = {
-  id: string;
-  driverName: string;
-  timeText: string;
-  placeText: string;
-  routeText: string;
-  isClosed: boolean;
-};
+function normalize(v: unknown): string {
+  return String(v ?? '').trim().toLowerCase();
+}
+
+/** execute() 타입이 never로 굳는 경우 방어 */
+function toArray<T = any>(res: unknown): T[] {
+  if (Array.isArray(res)) return res as T[];
+  if (res && typeof res === 'object') {
+    const r = res as Record<string, unknown>;
+    if (Array.isArray(r.items)) return r.items as T[];
+  }
+  return [];
+}
+
+function formatKoreanDateTime(iso?: string | null): string {
+  if (!iso) return '-';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '-';
+
+  const m = d.getMonth() + 1;
+  const day = d.getDate();
+  const weekday = ['일', '월', '화', '수', '목', '금', '토'][d.getDay()];
+
+  const hour = d.getHours();
+  const isPM = hour >= 12;
+  const hour12 = ((hour + 11) % 12) + 1;
+  const ampm = isPM ? '오후' : '오전';
+
+  return `${m}/${day}(${weekday}) ${ampm} ${hour12}시`;
+}
+
+function deriveIsClosed(p: any): boolean {
+  if (typeof p?.isClosed === 'boolean') return p.isClosed;
+
+  const current =
+    Number(p?.currentCount ?? p?.currentMemberCount ?? p?.passengerCount ?? p?.appliedCount ?? 0) || 0;
+  const max = Number(p?.maxCount ?? p?.capacity ?? p?.maxMemberCount ?? p?.limitCount ?? 0) || 0;
+
+  if (max <= 0) return false;
+  return current >= max;
+}
+
+function buildSummary(p: any): string {
+  const time = formatKoreanDateTime(p?.departureTime);
+  const pickup = p?.pickupPlace ?? p?.origin ?? p?.startPlace ?? '';
+  const dest = p?.destination ?? '';
+  if (pickup && dest) return `${time} | ${pickup} → ${dest}`;
+  if (dest) return `${time} | ${dest}`;
+  return `${time}`;
+}
 
 export function useCarpoolHomeViewModel() {
+  const getAvailableCarpools = container.resolve(GetAvailableCarpoolsUseCase);
+  const getParticipatingCarpools = container.resolve(GetParticipatingCarpoolsUseCase);
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<Tab>('HOME');
+  const { user } = useAuthStore();
+
+  const [isLoading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const [allPosts, setAllPosts] = useState<any[]>([]);
+  const [myCarpools, setMyCarpools] = useState<any[]>([]);
+
+  const [activeTab, setActiveTab] = useState<DestinationTab>('RETREAT');
   const [query, setQuery] = useState('');
 
-  // TODO: API 연결 전 임시 데이터
-  const applicationsPreview: ApplicationPreview[] = useMemo(
-    () => [
-      { id: 'a1', driverName: '김호준', summary: '1/30(금) 저녁 8시 | 신도림역 → 수련회' },
-      { id: 'a2', driverName: '김호준', summary: '2/1(주일) 저녁 8시 | 수련회 → 신도림역' },
-    ],
-    []
-  );
+  const preload = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  // 탭/검색에 따라 필터하는 척만(실제는 API)
-  const posts: CarpoolPostItem[] = useMemo(() => {
-    const all: CarpoolPostItem[] = [
-      {
-        id: '101',
-        driverName: '박OO',
-        timeText: '1/30(금) 저녁 8시',
-        placeText: '신도림역 2번 출구 앞',
-        routeText: '신도림역 | 👥 2/4 | 🚙 카니발(검은색)',
-        isClosed: false,
-      },
-      {
-        id: '102',
-        driverName: '김OO',
-        timeText: '1/31(토) 저녁 1시',
-        placeText: '구로역 도착 시 전화',
-        routeText: '구로역 | 👥 3/3 | 🚙 모닝(흰색)',
-        isClosed: true,
-      },
-      {
-        id: '103',
-        driverName: '구OO',
-        timeText: '1/30(금) 저녁 7시',
-        placeText: '교회 도착 시 전화',
-        routeText: '교회 | 👥 2/3 | 🚙 소나타(흰색)',
-        isClosed: false,
-      },
-    ];
+      const rawUserId = user?.id;
+      const userId = Number(rawUserId);
 
-    // query로 간단 필터
-    const q = query.trim().toLowerCase();
-    const filtered = q
-      ? all.filter((p) => (p.driverName + p.placeText + p.routeText).toLowerCase().includes(q))
-      : all;
+      if (rawUserId == null || Number.isNaN(userId)) {
+        throw new Error(`userId가 올바르지 않습니다. raw=${String(rawUserId)}`);
+      }
 
-    // activeTab은 나중에 서버 파라미터로 쓰면 됨
-    return filtered;
-  }, [query, activeTab]);
+      const [
+        // allRes, 
+        myRes] = await Promise.all([
+          // getAvailableCarpools.execute(userId),
+          getParticipatingCarpools.execute(userId),
+        ]);
 
-  const goBack = () => router.back();
-  const goApplications = () => router.push('/carpool/applications');
+      // setAllPosts(toArray(allRes));
+      setMyCarpools(toArray(myRes));
+    } catch (e: any) {
+      const msg = e?.message || '카풀 목록 조회에 실패하였습니다.';
+      setError(msg);
+      alert(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!user?.id) return;
+    preload();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  /** ✅ 상단 신청내역: 내 신청 중 isArrived=false (탭 영향 없음) */
+  const carpools = useMemo(() => {
+    return myCarpools
+      .filter((p) => p?.isArrived === false)
+      .map((p) => ({
+        ...p,
+        summary: p?.summary ?? buildSummary(p),
+      }));
+  }, [myCarpools]);
+
+  /** ✅ 하단 전체: isArrived=false → 탭(destination) → 검색(목적지/운전자/픽업) */
+  const posts = useMemo(() => {
+    const base = allPosts.filter((p) => p?.isArrived === false).filter((p) => matchTab(p?.destination, activeTab));
+
+    const q = normalize(query);
+    const filtered = !q
+      ? base
+      : base.filter((p) => {
+        const hay = [
+          p?.destination,
+          p?.driverName,
+          p?.pickupPlace,
+          p?.origin,
+          p?.startPlace,
+        ]
+          .map(normalize)
+          .join(' ');
+        return hay.includes(q);
+      });
+
+    return filtered.map((p) => {
+      const timeText = p?.timeText ?? formatKoreanDateTime(p?.departureTime);
+      const placeText = p?.placeText ?? (p?.pickupPlace ?? p?.origin ?? p?.startPlace ?? '-');
+      const routeText =
+        p?.routeText ??
+        `${p?.destination ?? '-'} | ${p?.currentCount ?? p?.passengerCount ?? '-'} / ${p?.maxCount ?? p?.capacity ?? '-'}`;
+
+      return {
+        ...p,
+        isClosed: deriveIsClosed(p),
+        timeText,
+        placeText,
+        routeText,
+      };
+    });
+  }, [allPosts, activeTab, query]);
+
+  const goDetail = (id: number) => router.push(`/carpool/detail/${id}`);
   const goRegister = () => router.push('/carpool/register');
-//   const goDetail = (id: string) => router.push(`/carpool/${id}`);
-
-//   const applyToPost = (id: string) => {
-//     // TODO: 신청 API 호출
-//     // 지금은 상세로 보내도 되고(확인 화면), 바로 신청 처리해도 됨
-//     router.push(`/carpool/${id}`);
-//   };
+  const goHistory = () => router.push('/carpool/history');
+  const goBack = () => router.back();
 
   return {
-    applicationsPreview,
-    posts,
+    isLoading,
+    error,
+
     activeTab,
     setActiveTab,
+
     query,
     setQuery,
-    goBack,
-    goApplications,
+
+    carpools,
+    myCarpools,
+    posts,
+
+    goDetail,
     goRegister,
-    // goDetail,
-    // applyToPost,
+    goHistory,
+    goBack,
   };
 }

@@ -76,6 +76,11 @@ export const styles = StyleSheet.create({
     color: Color.primary.main,
     fontWeight: '700',
   },
+  emptyText: {
+    color: Color.text.sub,
+    textAlign: 'center',
+    fontWeight: '700',
+  },
 
   /* ---------- 집으로 / 수련회장 ---------- */
   segmentWrap: {
@@ -217,6 +222,21 @@ export const styles = StyleSheet.create({
     marginTop: Layout.spacing.s,
   },
   routeText: {
+    color: Color.text.main,
+    fontWeight: '700',
+  },
+
+  moreBtn: {
+    paddingHorizontal: 14,
+    height: 28,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: Color.secondary.hover,
+    backgroundColor: Color.secondary.main,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  moreBtnText: {
     color: Color.text.main,
     fontWeight: '700',
   },

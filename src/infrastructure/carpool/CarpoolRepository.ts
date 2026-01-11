@@ -8,19 +8,55 @@ import { CarpoolStatus } from '@domain/carpool/CarpoolStatus';
 import { CreateCarpoolData, ICarpoolRepository, UpdateCarpoolData } from '@domain/carpool/ICarpoolRepository';
 
 import {
-    CarpoolResponseDto,
-    CreateCarpoolRequestDto,
-    ParticipationCarpoolRequestDto,
-    UpdateCarpoolStatusRequestDto,
+  CarpoolResponseDto,
+  CreateCarpoolRequestDto,
+  ParticipationCarpoolRequestDto,
+  UpdateCarpoolStatusRequestDto,
 } from './dto';
 
 @injectable()
 export class CarpoolRepository implements ICarpoolRepository {
+  async getAvailableCarpools(userId?: number): Promise<Carpool[]> {
+    try {
+      const uid = userId == null ? undefined : Number(userId);
+      const hasUid = uid != null && !Number.isNaN(uid);
+
+      const res = await apiClient.request<ApiResponse<CarpoolResponseDto[]>>({
+        method: 'GET',
+        url: '/api/carpool/available',
+        params: hasUid ? { userId: uid } : undefined,
+        data: hasUid ? { userId: uid } : {},
+      });
+
+
+      return res.data.data.map(this.mapToCarpool);
+    } catch (e) {
+      if (isAxiosError<ApiErrorResponse>(e) && e.response?.status === 404) return [];
+      throw this.normalizeError(e);
+    }
+  }
+
+  async getParticipatingCarpools(userId: number): Promise<Carpool[]> {
+    const id = Number(userId);
+    if (!id || Number.isNaN(id)) return [];
+
+    try {
+      const res = await apiClient.get<ApiResponse<CarpoolResponseDto[]>>(
+        `/api/carpool/participating/${id}`
+      );
+      return res.data.data.map(this.mapToCarpool);
+    } catch (e) {
+      if (isAxiosError<ApiErrorResponse>(e) && e.response?.status === 404) return [];
+      throw this.normalizeError(e);
+    }
+  }
+
   async getAllCarpools(): Promise<Carpool[]> {
     try {
       const res = await apiClient.get<ApiResponse<CarpoolResponseDto[]>>('/api/carpool');
       return res.data.data.map(this.mapToCarpool);
     } catch (e) {
+      if (isAxiosError<ApiErrorResponse>(e) && e.response?.status === 404) return [];
       throw this.normalizeError(e);
     }
   }
@@ -46,7 +82,9 @@ export class CarpoolRepository implements ICarpoolRepository {
       const res = await apiClient.post<ApiResponse<CarpoolResponseDto>>('/api/carpool', body);
       return this.mapToCarpool(res.data.data);
     } catch (e) {
-      throw this.normalizeError(e);
+      console.log('--------------------');
+      console.log(e);
+      throw e;
     }
   }
 
@@ -73,6 +111,7 @@ export class CarpoolRepository implements ICarpoolRepository {
       const res = await apiClient.get<ApiResponse<CarpoolResponseDto[]>>(`/api/carpool/my/${userId}`);
       return res.data.data.map(this.mapToCarpool);
     } catch (e) {
+      if (isAxiosError<ApiErrorResponse>(e) && e.response?.status === 404) return [];
       throw this.normalizeError(e);
     }
   }

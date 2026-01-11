@@ -21,10 +21,23 @@ export const styles = StyleSheet.create({
     paddingHorizontal: Layout.spacing.l,
     paddingTop: Layout.spacing.m,
     paddingBottom: Layout.spacing.xl,
-    gap: Layout.spacing.m, // ✅ 필드 블록 간격 일정
+    gap: Layout.spacing.m,
+    zIndex: 1,
   },
 
-  // ✅ 라벨-입력 간격 통일 (1번)
+  contentOnDropdown: {
+    zIndex: 50,
+    elevation: 50,
+  },
+
+  betweenActiveBlocks: {
+    height: Layout.spacing.s,
+  },
+  activeBlockWrap: {
+    marginTop: Layout.spacing.xs,
+    gap: Layout.spacing.s,
+  },
+
   fieldBlock: {
     width: '100%',
     gap: Layout.spacing.xs,
@@ -33,10 +46,10 @@ export const styles = StyleSheet.create({
     marginTop: 0,
   },
 
-  // ✅ 드롭다운 외부 클릭 닫기 overlay (2번)
   dropdownDismissOverlay: {
     ...StyleSheet.absoluteFillObject,
-    zIndex: 40,
+    zIndex: 10,
+    elevation: 1,
   },
 
   stepperRow: {
@@ -82,9 +95,10 @@ export const styles = StyleSheet.create({
   inlineAnchor: {
     position: 'relative',
     zIndex: 60, // dropdown이 위로 올라오도록
+    elevation: 50,
   },
 
-  // ✅ 지도 박스(활성 필드 아래로 이동했으므로 marginTop은 최소화)
+  // ✅ 지도 박스
   mapBox: {
     height: 180,
     borderRadius: Layout.radius.m,

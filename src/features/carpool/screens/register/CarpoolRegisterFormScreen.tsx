@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Platform, Pressable, ScrollView, View } from 'react-native';
 
 import { TextInput } from '@shared/components/text-input/TextInput';
@@ -6,9 +6,9 @@ import { ThemedText } from '@shared/components/themed-text/ThemedText';
 import { Color } from '@shared/constants/color';
 
 import { AddressSearchModal } from '@shared/components/address/AddressSearchModal';
-import { InlineSelectDropdown, type InlineOption } from '@shared/components/select-inline/InlineSelectDropdown';
 
 import { SelectBox } from '@shared/components/select-box/SelectBox';
+import { InlineOption, InlineSelectModal } from '@shared/components/select-inline/InlineSelectModal';
 import { Layout } from '@shared/constants/layout';
 import { styles } from './formStyles';
 import { useCarpoolRegisterFormViewModel } from './useCarpoolRegisterFormViewModel';
@@ -45,9 +45,11 @@ export default function CarpoolRegisterFormScreen() {
   const {
     isHome,
 
+    driverName, setDriverName,
     carInfo, setCarInfo,
     capacity, incCapacity, decCapacity,
 
+    phone, setPhone,
     mainPickup, setMainPickup,
     memo, setMemo,
 
@@ -62,6 +64,8 @@ export default function CarpoolRegisterFormScreen() {
     goBack,
     submit,
   } = useCarpoolRegisterFormViewModel();
+
+  const mapRef = useRef<any>(null);
 
   const [openDropdown, setOpenDropdown] = useState<null | 'date' | 'hour' | 'minute'>(null);
   const [addressModalOpen, setAddressModalOpen] = useState<null | 'origin' | 'dest'>(null);
@@ -79,6 +83,20 @@ export default function CarpoolRegisterFormScreen() {
     [MINUTE_OPTIONS],
   );
 
+  useEffect(() => {
+    if (!editableMarker || Platform.OS === 'web' || !mapRef.current) return;
+
+    mapRef.current.animateToRegion(
+      {
+        latitude: editableMarker.lat,
+        longitude: editableMarker.lng,
+        latitudeDelta: 0.03,
+        longitudeDelta: 0.03,
+      },
+      250
+    );
+  }, [editableMarker]);
+
   const mapRegion = useMemo(() => {
     if (editableMarker) {
       return {
@@ -94,15 +112,18 @@ export default function CarpoolRegisterFormScreen() {
   const minusDisabled = capacity <= 1;
 
   // ✅ 지도는 “활성 필드 아래”로: HOME이면 dest 아래 / RETREAT이면 origin 아래 (5번)
-  const ActivePlaceBlock = () => (
-    Platform.OS !== 'web' && MapView ? (
+  const mapSection = useMemo(() => {
+    if (Platform.OS === 'web' || !MapView) return null;
+
+    return (
       <View style={styles.mapBox}>
-        <MapView style={{ flex: 1 }} initialRegion={SEOUL_REGION} region={mapRegion}>
+        <MapView
+          ref={mapRef}
+          style={{ flex: 1 }}
+          initialRegion={SEOUL_REGION}
+        >
           {editableMarker && (
-            <Marker
-              coordinate={{ latitude: editableMarker.lat, longitude: editableMarker.lng }}
-              title={isHome ? '도착지' : '출발지'}
-            />
+            <Marker coordinate={{ latitude: editableMarker.lat, longitude: editableMarker.lng }} />
           )}
         </MapView>
 
@@ -114,11 +135,32 @@ export default function CarpoolRegisterFormScreen() {
           </View>
         )}
       </View>
-    ) : null
-  );
+    );
+  }, [editableMarker]);
+
+  const mainPickupSection = useMemo(() => {
+    return (
+      <View style={styles.fieldBlock}>
+        <View style={styles.labelRow}>
+          <ThemedText variant="text3" color={Color.text.main}>
+            주요 위치
+          </ThemedText>
+          <ThemedText variant="text4" color={Color.text.sub} style={styles.helperText}>
+            ※카풀 리스트에 표시될 위치를 입력하세요.
+          </ThemedText>
+        </View>
+
+        <TextInput
+          value={mainPickup}
+          onChangeText={setMainPickup}
+          placeholder="예: 신도림역 1번 출구 앞"
+        />
+      </View>
+    );
+  }, [mainPickup, setMainPickup]);
 
   return (
-    <ScrollView>
+    <ScrollView nestedScrollEnabled keyboardShouldPersistTaps="handled" scrollEnabled={!openDropdown} >
       <View style={styles.container}>
         {/* ✅ 드롭다운 외부 클릭 닫기 overlay (2번) */}
         {openDropdown && (
@@ -137,7 +179,15 @@ export default function CarpoolRegisterFormScreen() {
           <View style={styles.headerSide} />
         </View>
 
-        <View style={styles.content}>
+        <View style={[styles.content, openDropdown && styles.contentOnDropdown]}>
+          <FieldBlock label="운전자명">
+            <TextInput value={driverName} disabled placeholder="운전자명" />
+          </FieldBlock>
+
+          <FieldBlock label="연락처">
+            <TextInput value={phone} disabled placeholder="010-0000-0000" keyboardType="phone-pad" />
+          </FieldBlock>
+
           <FieldBlock label="내 차 정보">
             <TextInput value={carInfo} onChangeText={setCarInfo} placeholder="예: 셀토스/흰색/00가0000" />
           </FieldBlock>
@@ -149,7 +199,7 @@ export default function CarpoolRegisterFormScreen() {
                 disabled={minusDisabled}
                 style={[
                   styles.stepperBtnLeft,
-                  minusDisabled && styles.stepperBtnDisabled,
+                  minusDisabled && styles.stepperBtnDisabled, // ✅ (4번)
                 ]}
                 hitSlop={10}
               >
@@ -176,15 +226,6 @@ export default function CarpoolRegisterFormScreen() {
                     value={date}
                     onPress={() => setOpenDropdown((v) => (v === 'date' ? null : 'date'))}
                   />
-                  <InlineSelectDropdown
-                    visible={openDropdown === 'date'}
-                    options={dateOptions}
-                    selectedValue={date}
-                    onSelect={(opt) => {
-                      setDate(opt.value);
-                      setOpenDropdown(null);
-                    }}
-                  />
                 </View>
               </View>
 
@@ -194,15 +235,6 @@ export default function CarpoolRegisterFormScreen() {
                   <SelectBox
                     value={hour}
                     onPress={() => setOpenDropdown((v) => (v === 'hour' ? null : 'hour'))}
-                  />
-                  <InlineSelectDropdown
-                    visible={openDropdown === 'hour'}
-                    options={hourOptions}
-                    selectedValue={hour}
-                    onSelect={(opt) => {
-                      setHour(opt.value);
-                      setOpenDropdown(null);
-                    }}
                   />
                 </View>
               </View>
@@ -214,66 +246,47 @@ export default function CarpoolRegisterFormScreen() {
                     value={minute}
                     onPress={() => setOpenDropdown((v) => (v === 'minute' ? null : 'minute'))}
                   />
-                  <InlineSelectDropdown
-                    visible={openDropdown === 'minute'}
-                    options={minuteOptions}
-                    selectedValue={minute}
-                    onSelect={(opt) => {
-                      setMinute(opt.value);
-                      setOpenDropdown(null);
-                    }}
-                  />
                 </View>
               </View>
             </View>
           </FieldBlock>
 
           {/* 출발/도착 + 지도 위치 조건부 */}
+          {/* ✅ RETREAT일 때 출발지 */}
+
           <View style={styles.fieldBlock}>
             <ThemedText variant="text3" color={Color.text.main} style={styles.fieldLabel}>출발지</ThemedText>
             <SelectBox
               value={origin.roadAddress}
               placeholder={originDisabled ? origin.roadAddress : '도로명 주소 검색'}
               disabled={originDisabled}
-              right={<ThemedText variant="text2" color={originDisabled ? Color.text.disabled : Color.text.sub}>🔍</ThemedText>}
+              right={<ThemedText variant="text2">🔍</ThemedText>}
               onPress={() => { if (!originDisabled) setAddressModalOpen('origin'); }}
             />
-            {/* ✅ RETREAT일 때(출발지가 활성) 출발지 아래 지도 */}
-            {!isHome && <ActivePlaceBlock />}
+            {!isHome && (
+              <>
+                {mapSection}
+                {mainPickupSection}
+              </>
+            )}
           </View>
 
+          {/* ✅ HOME일 때 도착지 활성 */}
           <View style={styles.fieldBlock}>
             <ThemedText variant="text3" color={Color.text.main} style={styles.fieldLabel}>도착지</ThemedText>
             <SelectBox
               value={dest.roadAddress}
               placeholder={destDisabled ? dest.roadAddress : '도로명 주소 검색'}
               disabled={destDisabled}
-              right={<ThemedText variant="text2" color={destDisabled ? Color.text.disabled : Color.text.sub}>🔍</ThemedText>}
+              right={<ThemedText variant="text2">🔍</ThemedText>}
               onPress={() => { if (!destDisabled) setAddressModalOpen('dest'); }}
             />
-            {/* ✅ HOME일 때(도착지가 활성) 도착지 아래 지도 */}
-            {isHome && <ActivePlaceBlock />}
-          </View>
-
-          <View style={styles.fieldBlock}>
-            <View style={styles.labelRow}>
-              <ThemedText variant="text3" color={Color.text.main}>
-                주요 위치
-              </ThemedText>
-              <ThemedText
-                variant="text4"
-                color={Color.text.sub}
-                style={styles.helperText}
-              >
-                ※카풀 리스트에 표시될 위치를 입력하세요.
-              </ThemedText>
-            </View>
-
-            <TextInput
-              value={mainPickup}
-              onChangeText={setMainPickup}
-              placeholder="예: 신도림역 1번 출구 앞"
-            />
+            {isHome && (
+              <>
+                {mapSection}
+                {mainPickupSection}
+              </>
+            )}
           </View>
 
           <FieldBlock label="메모">
@@ -292,6 +305,33 @@ export default function CarpoolRegisterFormScreen() {
             <ThemedText variant="text2" style={styles.submitText}>등록하기</ThemedText>
           </Pressable>
         </View>
+
+        <InlineSelectModal
+          visible={openDropdown === 'date'}
+          title="날짜 선택"
+          options={dateOptions}
+          selectedValue={date}
+          onClose={() => setOpenDropdown(null)}
+          onSelect={(opt) => setDate(opt.value)}
+        />
+
+        <InlineSelectModal
+          visible={openDropdown === 'hour'}
+          title="시간 선택"
+          options={hourOptions}
+          selectedValue={hour}
+          onClose={() => setOpenDropdown(null)}
+          onSelect={(opt) => setHour(opt.value)}
+        />
+
+        <InlineSelectModal
+          visible={openDropdown === 'minute'}
+          title="분 선택"
+          options={minuteOptions}
+          selectedValue={minute}
+          onClose={() => setOpenDropdown(null)}
+          onSelect={(opt) => setMinute(opt.value)}
+        />
 
         <AddressSearchModal
           visible={addressModalOpen != null}

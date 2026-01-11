@@ -1,6 +1,7 @@
 import { TextInput } from '@shared/components/text-input/TextInput';
 import { ThemedText } from '@shared/components/themed-text/ThemedText';
 import { Color } from '@shared/constants/color';
+import Constants from 'expo-constants';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Modal, Pressable, ScrollView, View } from 'react-native';
 import { styles } from './styles';
@@ -19,7 +20,9 @@ export interface AddressSearchModalProps {
   onSelect: (result: AddressResult) => void;
 }
 
-const KAKAO_REST_API_KEY = process.env.EXPO_PUBLIC_KAKAO_REST_API_KEY;
+const KAKAO_REST_API_KEY =
+  (Constants.expoConfig?.extra?.KAKAO_REST_API_KEY as string | undefined) ??
+  (Constants.manifest2?.extra?.KAKAO_REST_API_KEY as string | undefined);
 
 function normalizeKakaoDoc(doc: any): AddressResult | null {
   const road = doc?.road_address?.address_name as string | undefined;
@@ -33,9 +36,14 @@ function normalizeKakaoDoc(doc: any): AddressResult | null {
   const lng = Number(doc?.x);
   if (Number.isNaN(lat) || Number.isNaN(lng)) return null;
 
+  console.log(lat, lng);
+
+  const jibunAddress =
+    jibun && jibun !== roadAddress ? jibun : undefined;
+
   return {
     roadAddress,
-    jibunAddress: jibun,
+    jibunAddress,
     lat,
     lng,
   };
@@ -43,7 +51,7 @@ function normalizeKakaoDoc(doc: any): AddressResult | null {
 
 async function kakaoSearchAddress(query: string, signal?: AbortSignal): Promise<AddressResult[]> {
   if (!KAKAO_REST_API_KEY) {
-    throw new Error('Missing EXPO_PUBLIC_KAKAO_REST_API_KEY');
+    throw new Error('Missing KAKAO_REST_API_KEY');
   }
 
   const url = `https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(query)}`;
@@ -162,16 +170,12 @@ export function AddressSearchModal({
               onChangeText={setQuery}
               placeholder="도로명 / 지번 주소를 입력하세요 (2글자 이상)"
               returnKeyType="search"
-              // 엔터를 눌러도 검색되게(자동검색이지만 UX 보완)
-              onSubmitEditing={() => {
-                // 디바운스 기다리지 않고 즉시 실행하고 싶으면 query를 살짝 트릭할 수도 있는데,
-                // 현재는 자동검색이라 별도 동작 없이 둬도 충분.
-              }}
+              onSubmitEditing={() => {}}
             />
           </View>
         </View>
 
-        <ScrollView contentContainerStyle={styles.list} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={styles.list} keyboardShouldPersistTaps="always">
           {loading && (
             <View style={styles.empty}>
               <ThemedText variant="text2" color={Color.text.sub}>

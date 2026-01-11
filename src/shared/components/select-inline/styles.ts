@@ -3,26 +3,62 @@ import { Layout } from '@shared/constants/layout';
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
-  dropdown: {
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+  },
+
+  sheet: {
     position: 'absolute',
-    top: '100%',
     left: 0,
-    right: 0,               // ✅ 앵커 너비와 동일 (3번)
-    marginTop: 0,           // ✅ 박스 바로 아래 딱 붙게 (1번)
+    right: 0,
+    bottom: 0,
     backgroundColor: Color.secondary.main,
-    borderRadius: Layout.radius.m,
-    borderWidth: 1,
-    borderColor: Color.secondary.hover,
-    overflow: 'hidden',
-    zIndex: 60,
+    borderTopLeftRadius: Layout.radius.l,
+    borderTopRightRadius: Layout.radius.l,
+    paddingBottom: Layout.spacing.l,
     ...Layout.shadow.drop,
   },
 
-  item: {
+  header: {
+    paddingHorizontal: Layout.spacing.l,
+    paddingTop: Layout.spacing.l,
+    paddingBottom: Layout.spacing.s,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+
+  headerSide: {
+    width: 40,
     height: 40,
-    paddingHorizontal: Layout.spacing.s,
+    alignItems: 'center',
     justifyContent: 'center',
   },
-  itemPressed: { backgroundColor: Color.secondary.hover },
-  itemActive: { backgroundColor: Color.primary.hover },
+
+  list: {
+    maxHeight: 320,
+  },
+
+  listContent: {
+    paddingVertical: Layout.spacing.m,
+    alignItems: 'center',
+  },
+
+ item: {
+  width: '100%',
+  height: 44,
+  justifyContent: 'center',
+  alignItems: 'center',
+  paddingHorizontal: Layout.spacing.l,
+},
+
+itemActive: {
+  backgroundColor: Color.primary.hover,
+},
+
+itemPressed: {
+  backgroundColor: Color.secondary.hover,
+},
+
 });

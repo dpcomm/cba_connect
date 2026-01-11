@@ -1,5 +1,6 @@
 import { Color } from '@shared/constants/color';
 import { Layout } from '@shared/constants/layout';
+import { router } from 'expo-router';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { HomeHeader } from '../components/HomeHeader';
@@ -19,7 +20,7 @@ export default function HomeScreen() {
 
   const handleCarpoolPress = () => {
     // TODO: 카풀 서비스 화면으로 이동
-    console.log('Carpool pressed');
+    router.push('/carpool');
   };
 
   const handleGuidebookPress = () => {
