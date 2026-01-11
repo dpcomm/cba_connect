@@ -5,6 +5,7 @@ import { useState } from 'react';
 
 export const REGISTER_STEPS = [
   'Terms',
+  'Email',
   'Name',
   'Gender',
   'Phone',

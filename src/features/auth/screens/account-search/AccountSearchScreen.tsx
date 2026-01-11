@@ -1,13 +1,12 @@
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { Button } from '@shared/components/button/Button';
-import { ThemedText } from '@shared/components/themed-text/ThemedText';
+import { Header } from '@shared/components/header/Header';
 import { Color } from '@shared/constants/color';
 import { Layout } from '@shared/constants/layout';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { TouchableOpacity, View } from 'react-native';
+import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import BackIcon from '../../../../../assets/svgs/back.svg';
 import { FindIdResultView } from './tabs/FindIdResultView';
 import { FindIdTab } from './tabs/FindIdTab';
 import { FindPasswordTab } from './tabs/FindPasswordTab';
@@ -83,22 +82,7 @@ export default function AccountSearchScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Color.default.background }} edges={['top']}>
-      <View style={{
-        height: 50,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: Layout.spacing.m,
-        backgroundColor: Color.default.background,
-      }}>
-        <TouchableOpacity
-          onPress={handleBack}
-          style={{ position: 'absolute', left: Layout.spacing.m, padding: 8 }}
-        >
-          <BackIcon width={24} height={24} />
-        </TouchableOpacity>
-        <ThemedText variant="heading3">ID/PW 찾기</ThemedText>
-      </View>
+      <Header title="ID/PW 찾기" onBack={handleBack} />
       <View style={{ flex: 1 }}>
         <Tab.Navigator
           screenOptions={{

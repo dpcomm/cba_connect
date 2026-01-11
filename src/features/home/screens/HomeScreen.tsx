@@ -1,6 +1,6 @@
 import { Color } from '@shared/constants/color';
 import { Layout } from '@shared/constants/layout';
-import { router } from 'expo-router';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { HomeHeader } from '../components/HomeHeader';
@@ -8,9 +8,10 @@ import { HomeMenuGrid } from '../components/HomeMenuGrid';
 import { MainBanner } from '../components/MainBanner';
 
 export default function HomeScreen() {
+  const router = useRouter();
+
   const handleMenuPress = () => {
-    // TODO: 메뉴 드로어 열기
-    console.log('Menu pressed');
+    router.push('/my-page');
   };
 
   const handleRetreatPress = () => {
@@ -40,7 +41,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView 
-      style={{ flex: 1, backgroundColor: Color.default.background, paddingHorizontal: Layout.spacing.l, gap: 25 }}
+      style={{ flex: 1, alignItems: 'center', backgroundColor: Color.default.background, paddingHorizontal: Layout.spacing.l, gap: 25 }}
     >
       <HomeHeader 
         dDay={0} 

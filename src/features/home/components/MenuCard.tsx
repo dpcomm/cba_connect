@@ -68,7 +68,7 @@ export function MenuCard({
         {
           backgroundColor: Color.secondary.main,
           borderRadius: Layout.radius.l,
-          paddingHorizontal: 28,
+          paddingHorizontal: 8, // 패딩을 28 -> 8로 대폭 축소
           paddingTop: 16,
           paddingBottom: 4,
           justifyContent: 'center',
@@ -81,6 +81,7 @@ export function MenuCard({
       <ThemedText 
         variant="text3" 
         color={Color.text.main}
+        style={{ textAlign: 'center' }} // 텍스트 중앙 정렬 추가
       >
         {title}
       </ThemedText>

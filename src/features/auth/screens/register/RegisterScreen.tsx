@@ -1,12 +1,12 @@
 import { Button } from '@shared/components/button/Button';
+import { Header } from '@shared/components/header/Header';
 import { ThemedText } from '@shared/components/themed-text/ThemedText';
 import { Color } from '@shared/constants/color';
 import { Layout } from '@shared/constants/layout';
 import { useNavigation, useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
-import { ScrollView, TouchableOpacity, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import BackIcon from '../../../../../assets/svgs/back.svg';
 import RecbaLogo from '../../../../../assets/svgs/recba_logo.svg';
 import { AffiliationStep } from './steps/AffiliationStep';
 import { ConfirmationStep } from './steps/ConfirmationStep';
@@ -131,27 +131,10 @@ export default function RegisterScreen() {
     }
   };
 
-  const CustomHeader = () => (
-    <View style={{ 
-      height: 50, 
-      flexDirection: 'row', 
-      alignItems: 'center', 
-      paddingHorizontal: Layout.spacing.m,
-      backgroundColor: Color.default.background,
-    }}>
-      <TouchableOpacity 
-        onPress={handleBack} 
-        style={{ padding: 8 }}
-      >
-        <BackIcon width={24} height={24} />
-      </TouchableOpacity>
-    </View>
-  );
-
   if (currentStep === 'Welcome') {
     return (
       <SafeAreaView style={[styles.container, { paddingTop: 0 }]} edges={['top']}>
-        <CustomHeader />
+        <Header onBack={handleBack} />
         <WelcomeStep name={registerData.name} onGoToLogin={handleGoToLogin} />
       </SafeAreaView>
     );
@@ -160,7 +143,7 @@ export default function RegisterScreen() {
   if (currentStep === 'Confirmation') {
     return (
       <SafeAreaView style={[styles.container, { paddingTop: 0 }]} edges={['top']}>
-        <CustomHeader />
+        <Header onBack={handleBack} />
         <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: Layout.spacing.l }}>
           <View style={{ alignItems: 'center', marginBottom: Layout.spacing.xl }}>
             <RecbaLogo width={210} height={49} />
@@ -185,7 +168,7 @@ export default function RegisterScreen() {
 
     return (
       <SafeAreaView style={[styles.container, { paddingTop: 0 }]} edges={['top']}>
-        <CustomHeader />
+        <Header onBack={handleBack} />
         <View style={{ flex: 1, padding: Layout.spacing.l }}>
           <View style={{ alignItems: 'center', marginBottom: Layout.spacing.xl }}>
             <RecbaLogo width={210} height={49} />
@@ -207,9 +190,49 @@ export default function RegisterScreen() {
     );
   }
 
+  if (currentStep === 'Email') {
+    const handleEmailVerification = () => {
+      router.push('/auth/email-verification?source=register' as any);
+    };
+
+    // 이메일 인증 완료 후 돌아오면 다음 단계로 진행
+    // TODO: 실제로는 이메일 인증 완료 시 콜백으로 처리하거나 상태 확인 필요
+    // 현재는 간단하게 버튼으로 이동하도록 구현
+    return (
+      <SafeAreaView style={[styles.container, { paddingTop: 0 }]} edges={['top']}>
+        <Header onBack={handleBack} />
+        <View style={{ flex: 1, padding: Layout.spacing.l }}>
+          <View style={{ alignItems: 'center', marginBottom: Layout.spacing.xl }}>
+            <RecbaLogo width={210} height={49} />
+          </View>
+          <View style={{ marginBottom: Layout.spacing.xl, alignItems: 'flex-start' }}>
+            <ThemedText variant="heading2">이메일 인증이 필요합니다.</ThemedText>
+            <ThemedText variant="text2" color={Color.text.sub} style={{ marginTop: Layout.spacing.s }}>
+              회원가입을 위해 이메일 인증을 진행해주세요.
+            </ThemedText>
+          </View>
+        </View>
+        <View style={{ padding: Layout.spacing.l, gap: Layout.spacing.m }}>
+          <Button 
+            title="이메일 인증하기" 
+            onPress={handleEmailVerification} 
+            size="large"
+          />
+          {/* 개발용: 인증 스킵 버튼 (추후 제거) */}
+          <Button 
+            title="인증 완료 (다음으로)" 
+            onPress={() => next()} 
+            size="large"
+            disabled={false}
+          />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={[styles.container, { paddingTop: 0 }]} edges={['top']}>
-      <CustomHeader />
+      <Header onBack={handleBack} />
       <ScrollView 
         style={{ flex: 1 }} 
         contentContainerStyle={{ padding: Layout.spacing.l }}
