@@ -8,6 +8,8 @@ import {
 
 const PRODUCT_URI = process.env.EXPO_PUBLIC_PRODUCT_URI || 'https://recba.me';
 const LOCAL_URI = process.env.EXPO_PUBLIC_LOCAL_URI || 'https://dev.recba.me';
+// const LOCAL_URI = 'http://localhost:3000';
+
 
 // 개발 모드면 LOCAL_URI, 배포 모드면 PRODUCT_URI 사용
 const BASE_URL = __DEV__ ? LOCAL_URI : PRODUCT_URI;

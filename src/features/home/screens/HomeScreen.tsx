@@ -21,7 +21,7 @@ export default function HomeScreen() {
 
   const handleCarpoolPress = () => {
     // TODO: 카풀 서비스 화면으로 이동
-    console.log('Carpool pressed');
+    router.push('/carpool');
   };
 
   const handleGuidebookPress = () => {

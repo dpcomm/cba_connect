@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import {
   TextInput as RNTextInput,
   TextInputProps as RNTextInputProps,
+  TextStyle,
   View,
   ViewStyle,
 } from 'react-native';
@@ -13,6 +14,7 @@ export interface TextInputProps extends Omit<RNTextInputProps, 'style'> {
   disabled?: boolean;
   leftIcon?: React.ReactNode;
   containerStyle?: ViewStyle;
+  inputStyle?: TextStyle; 
 }
 
 export function TextInput({
@@ -21,6 +23,7 @@ export function TextInput({
   leftIcon,
   containerStyle,
   placeholderTextColor = Color.text.disabled,
+  inputStyle,
   ...props
 }: TextInputProps) {
   const [isFocused, setIsFocused] = useState(false);
@@ -37,7 +40,7 @@ export function TextInput({
     >
       {leftIcon && <View style={styles.leftIcon}>{leftIcon}</View>}
       <RNTextInput
-        style={styles.input}
+        style={[styles.input, inputStyle]}
         placeholderTextColor={placeholderTextColor}
         editable={!disabled}
         onFocus={(e) => {
