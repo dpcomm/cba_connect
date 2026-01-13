@@ -32,6 +32,24 @@ export class ApiExpoPushTokenRepository implements ExpoPushTokenRepository {
         }
     }
 
+    async delete(): Promise<void> {
+        try {
+            const token = await getExpoPushToken();
+
+            if(!token) {
+                throw new Error('Expo push token not available');
+            }
+
+            const requestBody = {
+                token: token,
+            };
+
+            const response = await apiClient.post<ApiResponse<null>>('/api/expoPushToken/delete', requestBody);
+        } catch (error: any) {
+            throw error;
+        }
+    }
+
     private mapToExpoToken(data: ExpoTokenResponseDto): ExpoPushToken {
         return new ExpoPushToken(
             data.userId,
