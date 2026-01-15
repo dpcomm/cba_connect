@@ -9,11 +9,8 @@ export class GetAvailableCarpoolsUseCase {
     private readonly carpoolRepository: ICarpoolRepository
   ) {}
 
-  /**
-   * userId가 있으면: 해당 사용자가 참여중인 카풀 제외 + 살아있는 카풀만
-   * userId가 없으면: 필터 없이 살아있는 카풀만
-   */
-  async execute(userId?: number): Promise<Carpool[]> {
+  /** swagger 기준: userId required */
+  async execute(userId: number): Promise<Carpool[]> {
     return this.carpoolRepository.getAvailableCarpools(userId);
   }
 }

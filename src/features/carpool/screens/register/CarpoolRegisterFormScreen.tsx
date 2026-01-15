@@ -71,7 +71,7 @@ export default function CarpoolRegisterFormScreen() {
   const [addressModalOpen, setAddressModalOpen] = useState<null | 'origin' | 'dest'>(null);
 
   const dateOptions: InlineOption[] = useMemo(
-    () => DATE_OPTIONS.map((d) => ({ label: d, value: d })),
+    () => DATE_OPTIONS.map((o) => ({ label: o.label, value: o.value })),
     [DATE_OPTIONS],
   );
   const hourOptions: InlineOption[] = useMemo(
@@ -82,6 +82,10 @@ export default function CarpoolRegisterFormScreen() {
     () => MINUTE_OPTIONS.map((m) => ({ label: m, value: m })),
     [MINUTE_OPTIONS],
   );
+
+  const dateLabel = useMemo(() => {
+    return DATE_OPTIONS.find((o) => o.value === date)?.label ?? date;
+  }, [DATE_OPTIONS, date]);
 
   useEffect(() => {
     if (!editableMarker || Platform.OS === 'web' || !mapRef.current) return;
@@ -97,18 +101,7 @@ export default function CarpoolRegisterFormScreen() {
     );
   }, [editableMarker]);
 
-  const mapRegion = useMemo(() => {
-    if (editableMarker) {
-      return {
-        latitude: editableMarker.lat,
-        longitude: editableMarker.lng,
-        latitudeDelta: 0.03,
-        longitudeDelta: 0.03,
-      };
-    }
-    return SEOUL_REGION;
-  }, [editableMarker]);
-
+  // 한 명 이상 등록 가능
   const minusDisabled = capacity <= 1;
 
   // ✅ 지도는 “활성 필드 아래”로: HOME이면 dest 아래 / RETREAT이면 origin 아래 (5번)
@@ -146,7 +139,7 @@ export default function CarpoolRegisterFormScreen() {
             주요 위치
           </ThemedText>
           <ThemedText variant="text4" color={Color.text.sub} style={styles.helperText}>
-            ※카풀 리스트에 표시될 위치를 입력하세요.
+            ※ 카풀 리스트에 표시될 위치를 입력하세요.
           </ThemedText>
         </View>
 
@@ -216,20 +209,17 @@ export default function CarpoolRegisterFormScreen() {
             </View>
           </FieldBlock>
 
-          {/* ✅ 날짜/시간: 라벨-컨텐츠 간격 통일 (1번), 드롭다운 박스 바로 아래 (이미 top:100%) */}
+          {/* ✅ 날짜/시간 */}
           <FieldBlock label="날짜/시간">
             <View style={styles.dateTimeRow}>
-              {/* 날짜 50% */}
               <View style={styles.dateCol}>
                 <View style={styles.inlineAnchor}>
                   <SelectBox
-                    value={date}
+                    value={dateLabel}
                     onPress={() => setOpenDropdown((v) => (v === 'date' ? null : 'date'))}
                   />
                 </View>
               </View>
-
-              {/* 시 25% */}
               <View style={styles.timeCol}>
                 <View style={styles.inlineAnchor}>
                   <SelectBox
@@ -238,8 +228,6 @@ export default function CarpoolRegisterFormScreen() {
                   />
                 </View>
               </View>
-
-              {/* 분 25% */}
               <View style={styles.timeCol}>
                 <View style={styles.inlineAnchor}>
                   <SelectBox
@@ -251,13 +239,12 @@ export default function CarpoolRegisterFormScreen() {
             </View>
           </FieldBlock>
 
-          {/* 출발/도착 + 지도 위치 조건부 */}
+          {/* 출발지/도착지}
           {/* ✅ RETREAT일 때 출발지 */}
-
           <View style={styles.fieldBlock}>
             <ThemedText variant="text3" color={Color.text.main} style={styles.fieldLabel}>출발지</ThemedText>
             <SelectBox
-              value={origin.roadAddress}
+              value={originDisabled ? (origin.detail ?? '') : origin.roadAddress}
               placeholder={originDisabled ? origin.roadAddress : '도로명 주소 검색'}
               disabled={originDisabled}
               right={<ThemedText variant="text2">🔍</ThemedText>}
@@ -275,7 +262,7 @@ export default function CarpoolRegisterFormScreen() {
           <View style={styles.fieldBlock}>
             <ThemedText variant="text3" color={Color.text.main} style={styles.fieldLabel}>도착지</ThemedText>
             <SelectBox
-              value={dest.roadAddress}
+              value={destDisabled ? (dest.detail ?? '') : dest.roadAddress}
               placeholder={destDisabled ? dest.roadAddress : '도로명 주소 검색'}
               disabled={destDisabled}
               right={<ThemedText variant="text2">🔍</ThemedText>}
@@ -288,7 +275,8 @@ export default function CarpoolRegisterFormScreen() {
               </>
             )}
           </View>
-
+          
+          {/* 메모 */}
           <FieldBlock label="메모">
             <TextInput
               value={memo}
@@ -301,11 +289,13 @@ export default function CarpoolRegisterFormScreen() {
             />
           </FieldBlock>
 
+          {/* 버튼 */}
           <Pressable onPress={submit} style={styles.submitBtn} hitSlop={10}>
             <ThemedText variant="text2" style={styles.submitText}>등록하기</ThemedText>
           </Pressable>
         </View>
 
+        {/* 사용 모달 */}
         <InlineSelectModal
           visible={openDropdown === 'date'}
           title="날짜 선택"

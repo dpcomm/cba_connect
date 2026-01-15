@@ -29,7 +29,6 @@ export const styles = StyleSheet.create({
   },
   headerTitle: {
     color: Color.text.main,
-    fontWeight: '800',
   },
 
   content: {
@@ -48,38 +47,56 @@ export const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: Color.text.main,
-    fontWeight: '800',
-  },
-  chevronBtn: {
-    width: 28,
-    height: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 
   applicationList: {
     marginTop: Layout.spacing.s,
     gap: Layout.spacing.s,
   },
+
   applicationCard: {
     backgroundColor: Color.secondary.main,
-    borderRadius: Layout.radius.m,
-    padding: Layout.spacing.m,
-    ...Layout.shadow.default,
+    borderRadius: Layout.radius.l,
+    borderWidth: 1,
+    borderColor: Color.secondary.hover,
+    paddingHorizontal: Layout.spacing.m,
+    paddingVertical: Layout.spacing.s,
   },
+
   applicationDriver: {
     color: Color.text.main,
-    fontWeight: '800',
+    marginBottom: 4,
   },
-  applicationDesc: {
-    marginTop: Layout.spacing.xs,
+
+  /* 시간 줄 */
+  applicationDescRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  applicationBullet: {
+    marginRight: Layout.spacing.s,
+    color: Color.text.main,
+  },
+  applicationDateAccent: {
     color: Color.primary.main,
-    fontWeight: '700',
+    lineHeight: 18,
+    flexShrink: 1,
   },
+
+  /* 경로 줄 */
+  applicationRouteRow: {
+    marginLeft: 14, // 불릿 정렬
+  },
+  applicationRouteText: {
+    color: Color.text.main,
+    lineHeight: 18,
+    flexWrap: 'wrap',
+  },
+
   emptyText: {
     color: Color.text.sub,
     textAlign: 'center',
-    fontWeight: '700',
   },
 
   /* ---------- 집으로 / 수련회장 ---------- */
@@ -104,7 +121,6 @@ export const styles = StyleSheet.create({
   },
   segmentText: {
     color: Color.text.sub,
-    fontWeight: '800',
   },
   segmentTextActive: {
     color: Color.text.main,
@@ -119,7 +135,6 @@ export const styles = StyleSheet.create({
   },
   findTitle: {
     color: Color.text.main,
-    fontWeight: '900',
   },
 
   pillBtn: {
@@ -134,7 +149,6 @@ export const styles = StyleSheet.create({
   },
   pillBtnText: {
     color: Color.text.main,
-    fontWeight: '800',
   },
 
   searchInput: {
@@ -161,11 +175,26 @@ export const styles = StyleSheet.create({
     padding: Layout.spacing.m,
     ...Layout.shadow.default,
   },
-
   postTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: Layout.spacing.xs,
   },
+  postTimeText: {
+    color: Color.text.main,
+  },
+  postSeatText: {
+    color: Color.primary.main,
+  },
+  postPlaceText: {
+    color: Color.text.sub,
+    marginBottom: 2,
+  },
+  postRouteText: {
+    color: Color.text.main,
+  },
+
   avatar: {
     width: 28,
     height: 28,
@@ -175,7 +204,6 @@ export const styles = StyleSheet.create({
   },
   postName: {
     color: Color.text.main,
-    fontWeight: '800',
   },
 
   statusBtnApply: {
@@ -188,7 +216,6 @@ export const styles = StyleSheet.create({
   },
   statusTextApply: {
     color: Color.text.white,
-    fontWeight: '800',
   },
 
   statusBtnClosed: {
@@ -201,9 +228,7 @@ export const styles = StyleSheet.create({
   },
   statusTextClosed: {
     color: Color.text.sub,
-    fontWeight: '800',
   },
-
   postInfo: {
     marginTop: Layout.spacing.s,
     gap: Layout.spacing.xs,
@@ -215,15 +240,12 @@ export const styles = StyleSheet.create({
   },
   infoValue: {
     color: Color.text.main,
-    fontWeight: '700',
   },
-
   routeRow: {
     marginTop: Layout.spacing.s,
   },
   routeText: {
     color: Color.text.main,
-    fontWeight: '700',
   },
 
   moreBtn: {
@@ -238,6 +260,5 @@ export const styles = StyleSheet.create({
   },
   moreBtnText: {
     color: Color.text.main,
-    fontWeight: '700',
   },
 });

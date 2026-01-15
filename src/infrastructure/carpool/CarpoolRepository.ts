@@ -7,7 +7,9 @@ import { Carpool } from '@domain/carpool/Carpool';
 import { CarpoolStatus } from '@domain/carpool/CarpoolStatus';
 import { CreateCarpoolData, ICarpoolRepository, UpdateCarpoolData } from '@domain/carpool/ICarpoolRepository';
 
+import { CarpoolDetail } from '@domain/carpool/CarpoolDetail';
 import {
+  CarpoolDetailResponseDto,
   CarpoolResponseDto,
   CreateCarpoolRequestDto,
   ParticipationCarpoolRequestDto,
@@ -16,25 +18,34 @@ import {
 
 @injectable()
 export class CarpoolRepository implements ICarpoolRepository {
-  async getAvailableCarpools(userId?: number): Promise<Carpool[]> {
+  async getAvailableCarpools(userId: number): Promise<Carpool[]> {
+    const uid = Number(userId);
+    if (Number.isNaN(uid) || uid <= 0) return [];
+
     try {
-      const uid = userId == null ? undefined : Number(userId);
-      const hasUid = uid != null && !Number.isNaN(uid);
-
-      const res = await apiClient.request<ApiResponse<CarpoolResponseDto[]>>({
-        method: 'GET',
-        url: '/api/carpool/available',
-        params: hasUid ? { userId: uid } : undefined,
-        data: hasUid ? { userId: uid } : {},
-      });
-
-
+      const res = await apiClient.post<ApiResponse<CarpoolResponseDto[]>>(
+        '/api/carpool/available',
+        { userId: uid }
+      );
       return res.data.data.map(this.mapToCarpool);
     } catch (e) {
+      if (isAxiosError<ApiErrorResponse>(e)) {
+        console.log('[available axios]', {
+          status: e.response?.status,
+          data: e.response?.data,
+          message: e.message,
+        });
+      } else {
+        console.log('[available non-axios]', e);
+      }
+
       if (isAxiosError<ApiErrorResponse>(e) && e.response?.status === 404) return [];
       throw this.normalizeError(e);
     }
   }
+
+
+
 
   async getParticipatingCarpools(userId: number): Promise<Carpool[]> {
     const id = Number(userId);
@@ -82,7 +93,6 @@ export class CarpoolRepository implements ICarpoolRepository {
       const res = await apiClient.post<ApiResponse<CarpoolResponseDto>>('/api/carpool', body);
       return this.mapToCarpool(res.data.data);
     } catch (e) {
-      console.log('--------------------');
       console.log(e);
       throw e;
     }
@@ -97,14 +107,16 @@ export class CarpoolRepository implements ICarpoolRepository {
     }
   }
 
-  async getCarpoolDetail(id: number): Promise<Carpool> {
+  async getCarpoolDetail(id: number): Promise<CarpoolDetail> {
     try {
-      const res = await apiClient.get<ApiResponse<CarpoolResponseDto>>(`/api/carpool/detail/${id}`);
-      return this.mapToCarpool(res.data.data);
+      const res = await apiClient.get<ApiResponse<CarpoolDetailResponseDto>>(`/api/carpool/detail/${id}`);
+      console.log('[detail raw]', res.data.data); // ✅ 이거
+      return this.mapToCarpoolDetail(res.data.data);
     } catch (e) {
       throw this.normalizeError(e);
     }
   }
+
 
   async findMyCarpools(userId: number): Promise<Carpool[]> {
     try {
@@ -181,8 +193,14 @@ export class CarpoolRepository implements ICarpoolRepository {
     }
   }
 
+  private toNumberOrNull(v: unknown): number | null {
+    if (v === null || v === undefined) return null;
+    const n = typeof v === 'number' ? v : Number(v);
+    return Number.isFinite(n) ? n : null;
+  }
+
   /** DTO -> Domain (README 원칙) */
-  private mapToCarpool(dto: CarpoolResponseDto): Carpool {
+  private mapToCarpool = (dto: CarpoolResponseDto): Carpool => {
     return new Carpool(
       dto.id,
       dto.driverId,
@@ -195,14 +213,43 @@ export class CarpoolRepository implements ICarpoolRepository {
       dto.seatsTotal,
       dto.seatsLeft,
       dto.note,
-      dto.originLat ?? null,
-      dto.originLng ?? null,
-      dto.destLat ?? null,
-      dto.destLng ?? null,
+      this.toNumberOrNull(dto.originLat),
+      this.toNumberOrNull(dto.originLng),
+      this.toNumberOrNull(dto.destLat),
+      this.toNumberOrNull(dto.destLng),
       dto.status as CarpoolStatus,
       dto.isArrived,
       dto.createdAt,
       dto.updatedAt
+    );
+  }
+
+  private mapToCarpoolDetail = (dto: CarpoolDetailResponseDto): CarpoolDetail => {
+    const driver = dto.driver ?? { id: dto.driverId, name: '', phone: '' };
+    const members = Array.isArray(dto.members) ? dto.members : [];
+
+    return new CarpoolDetail(
+      dto.id,
+      dto.driverId,
+      dto.carInfo ?? null,
+      dto.departureTime,
+      dto.origin,
+      dto.originDetailed ?? null,
+      dto.destination,
+      dto.destinationDetailed ?? null,
+      dto.seatsTotal,
+      dto.seatsLeft,
+      dto.note,
+      this.toNumberOrNull(dto.originLat),
+      this.toNumberOrNull(dto.originLng),
+      this.toNumberOrNull(dto.destLat),
+      this.toNumberOrNull(dto.destLng),
+      dto.status as CarpoolStatus,
+      dto.isArrived,
+      dto.createdAt,
+      dto.updatedAt,
+      driver,
+      members
     );
   }
 

@@ -73,7 +73,6 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  // ✅ (-) disabled 스타일 (4번)
   stepperBtnDisabled: {
     backgroundColor: Color.primary.hover,
     opacity: 0.6,
@@ -94,7 +93,7 @@ export const styles = StyleSheet.create({
   // ✅ 드롭다운이 박스 바로 아래 붙도록
   inlineAnchor: {
     position: 'relative',
-    zIndex: 60, // dropdown이 위로 올라오도록
+    zIndex: 60,
     elevation: 50,
   },
 
@@ -115,12 +114,11 @@ export const styles = StyleSheet.create({
 
   labelRow: {
     flexDirection: 'row',
-    alignItems: 'flex-end', // 텍스트 기준선 맞추기
+    alignItems: 'flex-end',
     gap: Layout.spacing.xs,
   },
 
   helperText: {
-    // 라벨보다 살짝 아래로 내려가게(스크린샷 느낌)
     marginBottom: 1,
   },
 

@@ -38,7 +38,7 @@ export default function CarpoolRegisterScreen() {
         >
           <ThemedText variant="heading1">⛪</ThemedText>
           <ThemedText
-            variant="text2"
+            variant="text3"
             style={[
               styles.cardText,
               selected === 'RETREAT' && styles.cardTextActive,
@@ -58,7 +58,7 @@ export default function CarpoolRegisterScreen() {
         >
           <ThemedText variant="heading1">🏠</ThemedText>
           <ThemedText
-            variant="text2"
+            variant="text3"
             style={[
               styles.cardText,
               selected === 'HOME' && styles.cardTextActive,

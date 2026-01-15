@@ -20,10 +20,20 @@ function normalize(v: unknown): string {
 /** execute() 타입이 never로 굳는 경우 방어 */
 function toArray<T = any>(res: unknown): T[] {
   if (Array.isArray(res)) return res as T[];
+
   if (res && typeof res === 'object') {
-    const r = res as Record<string, unknown>;
+    const r = res as Record<string, any>;
     if (Array.isArray(r.items)) return r.items as T[];
+    if (Array.isArray(r.data)) return r.data as T[];
+
+    if (r.data && typeof r.data === 'object') {
+      if (Array.isArray(r.data.items)) return r.data.items as T[];
+      if (Array.isArray(r.data.data)) return r.data.data as T[];
+    }
+
+    if (Array.isArray(r.result)) return r.result as T[];
   }
+
   return [];
 }
 
@@ -34,34 +44,60 @@ function formatKoreanDateTime(iso?: string | null): string {
 
   const m = d.getMonth() + 1;
   const day = d.getDate();
-  const weekday = ['일', '월', '화', '수', '목', '금', '토'][d.getDay()];
+
+  const weekdayMap = ['주일', '월', '화', '수', '목', '금', '토'];
+  const weekday = weekdayMap[d.getDay()];
 
   const hour = d.getHours();
-  const isPM = hour >= 12;
   const hour12 = ((hour + 11) % 12) + 1;
-  const ampm = isPM ? '오후' : '오전';
+
+  const ampm = hour < 12 ? '오전' : '저녁';
 
   return `${m}/${day}(${weekday}) ${ampm} ${hour12}시`;
 }
 
+/**
+ * swagger 기준:
+ * - seatsTotal: 전체 좌석
+ * - seatsLeft: 남은 좌석
+ */
 function deriveIsClosed(p: any): boolean {
+  // 백에서 isClosed를 내려주면 그대로 사용
   if (typeof p?.isClosed === 'boolean') return p.isClosed;
 
-  const current =
-    Number(p?.currentCount ?? p?.currentMemberCount ?? p?.passengerCount ?? p?.appliedCount ?? 0) || 0;
-  const max = Number(p?.maxCount ?? p?.capacity ?? p?.maxMemberCount ?? p?.limitCount ?? 0) || 0;
+  const seatsTotal = Number(p?.seatsTotal ?? p?.maxCount ?? p?.capacity ?? 0) || 0;
+  const seatsLeft = Number(p?.seatsLeft ?? 0) || 0;
 
-  if (max <= 0) return false;
-  return current >= max;
+  if (seatsTotal <= 0) return false;
+
+  // 남은 좌석이 0 이하면 마감
+  return seatsLeft <= 0;
 }
 
 function buildSummary(p: any): string {
   const time = formatKoreanDateTime(p?.departureTime);
-  const pickup = p?.pickupPlace ?? p?.origin ?? p?.startPlace ?? '';
-  const dest = p?.destination ?? '';
-  if (pickup && dest) return `${time} | ${pickup} → ${dest}`;
+
+  const origin = (p?.originDetailed ?? p?.origin ?? '').toString().trim();
+  const dest = (p?.destinationDetailed ?? p?.destination ?? '').toString().trim();
+
+  if (origin && dest) return `${time} | ${origin} → ${dest}`;
   if (dest) return `${time} | ${dest}`;
   return `${time}`;
+}
+
+function buildRouteText(p: any): string {
+  // swagger 기준
+  const total = Number(p?.seatsTotal ?? 0) || 0;
+  const left = Number(p?.seatsLeft ?? 0) || 0;
+
+  if (total > 0) return `${p?.destination ?? '-'} | ${left} / ${total}`;
+
+  // 혹시 예전 필드가 섞여 들어오면 fallback
+  const current = Number(p?.currentCount ?? p?.currentMemberCount ?? p?.passengerCount ?? p?.appliedCount ?? 0) || 0;
+  const max = Number(p?.maxCount ?? p?.capacity ?? p?.maxMemberCount ?? p?.limitCount ?? 0) || 0;
+  if (max > 0) return `${p?.destination ?? '-'} | ${current} / ${max}`;
+
+  return `${p?.destination ?? '-'}`;
 }
 
 export function useCarpoolHomeViewModel() {
@@ -77,7 +113,7 @@ export function useCarpoolHomeViewModel() {
   const [allPosts, setAllPosts] = useState<any[]>([]);
   const [myCarpools, setMyCarpools] = useState<any[]>([]);
 
-  const [activeTab, setActiveTab] = useState<DestinationTab>('RETREAT');
+  const [activeTab, setActiveTab] = useState<DestinationTab>('HOME');
   const [query, setQuery] = useState('');
 
   const preload = async () => {
@@ -93,13 +129,14 @@ export function useCarpoolHomeViewModel() {
       }
 
       const [
-        // allRes, 
+        allRes,
         myRes] = await Promise.all([
-          // getAvailableCarpools.execute(userId),
+          getAvailableCarpools.execute(userId),
           getParticipatingCarpools.execute(userId),
         ]);
 
-      // setAllPosts(toArray(allRes));
+      console.log(allRes);
+      setAllPosts(toArray(allRes));
       setMyCarpools(toArray(myRes));
     } catch (e: any) {
       const msg = e?.message || '카풀 목록 조회에 실패하였습니다.';
@@ -116,7 +153,7 @@ export function useCarpoolHomeViewModel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
-  /** ✅ 상단 신청내역: 내 신청 중 isArrived=false (탭 영향 없음) */
+  /** 상단 신청내역: 내 신청 중 isArrived=false (탭 영향 없음) */
   const carpools = useMemo(() => {
     return myCarpools
       .filter((p) => p?.isArrived === false)
@@ -126,9 +163,11 @@ export function useCarpoolHomeViewModel() {
       }));
   }, [myCarpools]);
 
-  /** ✅ 하단 전체: isArrived=false → 탭(destination) → 검색(목적지/운전자/픽업) */
+  /** 하단 전체: isArrived=false → 탭(destination) → 검색 */
   const posts = useMemo(() => {
-    const base = allPosts.filter((p) => p?.isArrived === false).filter((p) => matchTab(p?.destination, activeTab));
+    const base = allPosts
+      .filter((p) => p?.isArrived === false)
+      .filter((p) => matchTab(p?.destination, activeTab));
 
     const q = normalize(query);
     const filtered = !q
@@ -136,9 +175,12 @@ export function useCarpoolHomeViewModel() {
       : base.filter((p) => {
         const hay = [
           p?.destination,
+          p?.destinationDetailed,
+          p?.origin,
+          p?.originDetailed,
+          // 과거 필드/서버 확장 대비로 남겨둠(있으면 검색됨)
           p?.driverName,
           p?.pickupPlace,
-          p?.origin,
           p?.startPlace,
         ]
           .map(normalize)
@@ -148,10 +190,13 @@ export function useCarpoolHomeViewModel() {
 
     return filtered.map((p) => {
       const timeText = p?.timeText ?? formatKoreanDateTime(p?.departureTime);
-      const placeText = p?.placeText ?? (p?.pickupPlace ?? p?.origin ?? p?.startPlace ?? '-');
-      const routeText =
-        p?.routeText ??
-        `${p?.destination ?? '-'} | ${p?.currentCount ?? p?.passengerCount ?? '-'} / ${p?.maxCount ?? p?.capacity ?? '-'}`;
+
+      // 장소 표시는 originDetailed 우선, 없으면 origin
+      const placeText =
+        p?.placeText ??
+        (p?.originDetailed ?? p?.origin ?? '-');
+
+      const routeText = p?.routeText ?? buildRouteText(p);
 
       return {
         ...p,
@@ -163,7 +208,7 @@ export function useCarpoolHomeViewModel() {
     });
   }, [allPosts, activeTab, query]);
 
-  const goDetail = (id: number) => router.push(`/carpool/detail/${id}`);
+  const goDetail = (id: number) => router.push(`/carpool/${id}`);
   const goRegister = () => router.push('/carpool/register');
   const goHistory = () => router.push('/carpool/history');
   const goBack = () => router.back();

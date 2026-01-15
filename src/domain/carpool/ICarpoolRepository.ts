@@ -1,4 +1,5 @@
 import { Carpool } from "./Carpool";
+import { CarpoolDetail } from "./CarpoolDetail";
 import { CarpoolStatus } from "./CarpoolStatus";
 
 export interface CreateCarpoolData {
@@ -18,6 +19,18 @@ export interface CreateCarpoolData {
 }
 
 export interface UpdateCarpoolData extends CreateCarpoolData {
+  carInfo: string;
+  departureTime: string;
+  origin: string;
+  originDetailed: string;
+  destination: string;
+  destinationDetailed: string;
+  seatsTotal: number;
+  note?: string;
+  originLat: number;
+  originLng: number;
+  destLat: number;
+  destLng: number;
 }
 
 export interface ICarpoolRepository {
@@ -28,7 +41,7 @@ export interface ICarpoolRepository {
   createCarpool(data: CreateCarpoolData): Promise<Carpool>;
 
   getCarpoolById(id: number): Promise<Carpool>;
-  getCarpoolDetail(id: number): Promise<Carpool>;
+  getCarpoolDetail(id: number): Promise<CarpoolDetail>;
 
   findMyCarpools(userId: number): Promise<Carpool[]>;
 

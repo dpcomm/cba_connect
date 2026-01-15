@@ -25,24 +25,23 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   headerTitle: {
-    fontWeight: '800',
     color: Color.text.main,
   },
 
   /* Content */
   content: {
     paddingHorizontal: Layout.spacing.l,
-    paddingTop: Layout.spacing.l,
+    paddingTop: Layout.spacing.s,
   },
 
   title: {
-    marginBottom: Layout.spacing.l,
-    fontWeight: '800',
+    marginBottom: Layout.spacing.s,
+    textAlign: 'center',
     color: Color.text.main,
   },
 
   card: {
-    height: 140,
+    height: 200,
     borderRadius: Layout.radius.m,
     backgroundColor: Color.secondary.main,
     alignItems: 'center',
@@ -58,7 +57,6 @@ export const styles = StyleSheet.create({
   cardText: {
     marginTop: Layout.spacing.s,
     color: Color.text.main,
-    fontWeight: '700',
   },
 
   cardTextActive: {

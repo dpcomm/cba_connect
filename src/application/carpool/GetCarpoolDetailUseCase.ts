@@ -1,4 +1,4 @@
-import { Carpool } from '@domain/carpool/Carpool';
+import { CarpoolDetail } from '@domain/carpool/CarpoolDetail';
 import { ICarpoolRepository } from '@domain/carpool/ICarpoolRepository';
 import { inject, injectable } from 'tsyringe';
 
@@ -8,7 +8,7 @@ export class GetCarpoolDetailUseCase {
     @inject('CarpoolRepository') private readonly carpoolRepository: ICarpoolRepository
   ) {}
 
-  async execute(id: number): Promise<Carpool> {
+  async execute(id: number): Promise<CarpoolDetail> {
     return this.carpoolRepository.getCarpoolDetail(id);
   }
 }
