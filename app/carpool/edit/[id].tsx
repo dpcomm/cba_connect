@@ -1,5 +1,3 @@
-import CarpoolDetailScreen from '@features/carpool/screens/detail/CarpoolDetailScreen';
+import CarpoolEditScreen from '@features/carpool/screens/edit/CarpoolEditScreen';
 
-export default function RegisterRoute() {
-  return <CarpoolDetailScreen />;
-}
+export default CarpoolEditScreen;
