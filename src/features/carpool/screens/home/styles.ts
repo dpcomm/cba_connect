@@ -3,39 +3,6 @@ import { Layout } from '@shared/constants/layout';
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Color.default.background,
-  },
-
-  /* ---------- Header ---------- */
-  header: {
-    height: 56,
-    paddingHorizontal: Layout.spacing.l,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: Color.secondary.main,
-    ...Layout.shadow.default,
-  },
-  headerSide: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerIcon: {
-    color: Color.text.main,
-  },
-  headerTitle: {
-    color: Color.text.main,
-  },
-
-  content: {
-    paddingHorizontal: Layout.spacing.l,
-    paddingBottom: Layout.spacing.xl,
-  },
-
   /* ---------- 신청내역 ---------- */
   section: {
     marginTop: Layout.spacing.m,
@@ -143,7 +110,7 @@ export const styles = StyleSheet.create({
     borderRadius: Layout.radius.l,
     backgroundColor: Color.secondary.main,
     borderWidth: 1,
-    borderColor: Color.secondary.hover,
+    borderColor: Color.tertiary.hover,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -209,7 +176,7 @@ export const styles = StyleSheet.create({
   statusBtnApply: {
     height: 28,
     paddingHorizontal: Layout.spacing.s,
-    borderRadius: Layout.radius.s,
+    borderRadius: Layout.radius.l,
     backgroundColor: Color.primary.main,
     alignItems: 'center',
     justifyContent: 'center',
@@ -221,7 +188,7 @@ export const styles = StyleSheet.create({
   statusBtnClosed: {
     height: 28,
     paddingHorizontal: Layout.spacing.s,
-    borderRadius: Layout.radius.s,
+    borderRadius: Layout.radius.l,
     backgroundColor: Color.secondary.hover,
     alignItems: 'center',
     justifyContent: 'center',
@@ -230,7 +197,7 @@ export const styles = StyleSheet.create({
     color: Color.text.sub,
   },
   postInfo: {
-    marginTop: Layout.spacing.s,
+    marginTop: Layout.spacing.xs,
     gap: Layout.spacing.xs,
   },
   infoRow: {
@@ -253,12 +220,27 @@ export const styles = StyleSheet.create({
     height: 28,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: Color.secondary.hover,
+    borderColor: Color.tertiary.pressed,
     backgroundColor: Color.secondary.main,
     alignItems: 'center',
     justifyContent: 'center',
   },
   moreBtnText: {
     color: Color.text.main,
+  },
+  kvRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+
+  kvLabel: {
+    width: 44,
+    color: Color.text.main,
+  },
+
+  kvValue: {
+    flex: 1,
+    color: Color.text.sub,
+    flexWrap: 'wrap',
   },
 });

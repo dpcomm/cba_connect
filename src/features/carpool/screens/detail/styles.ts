@@ -3,23 +3,6 @@ import { Layout } from '@shared/constants/layout';
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Color.default.background },
-
-  header: {
-    height: 56,
-    paddingHorizontal: Layout.spacing.l,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: Color.secondary.main,
-  },
-  headerSide: { width: 40, alignItems: 'center' },
-  headerTitle: { flex: 1, textAlign: 'center' },
-
-  content: {
-    padding: Layout.spacing.l,
-  },
-
   card: {
     backgroundColor: Color.secondary.main,
     borderRadius: Layout.radius.l,
@@ -87,4 +70,33 @@ export const styles = StyleSheet.create({
   },
 
   infoTextCol: { flex: 1 },
+
+  bottomBar: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: Layout.spacing.l,
+    paddingTop: Layout.spacing.m,
+    paddingBottom: Layout.spacing.l,
+    backgroundColor: Color.default.background,
+  },
+
+  bottomButton: {
+    width: '100%',
+  },
+
+  bottomButtonRow: {
+    flexDirection: 'row',
+    gap: Layout.spacing.m,
+  },
+
+  bottomButtonHalf: {
+    flex: 1,
+  },
+
+  deleteButtonHalf: {
+    flex: 1,
+    backgroundColor: Color.secondary.pressed,
+  },
 });

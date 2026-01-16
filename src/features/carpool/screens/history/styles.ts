@@ -3,31 +3,22 @@ import { Layout } from '@shared/constants/layout';
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Color.default.background,
-  },
-
-  listContent: {
-    paddingHorizontal: Layout.spacing.l,
-    paddingBottom: Layout.spacing.xl,
-  },
-
   card: {
     backgroundColor: Color.secondary.main,
     borderRadius: Layout.radius.l,
-    paddingHorizontal: Layout.spacing.l,
-    paddingVertical: Layout.spacing.l,
+    margin: Layout.spacing.xs,
+    paddingHorizontal: Layout.spacing.m,
+    paddingVertical: Layout.spacing.m,
     ...Layout.shadow.default,
   },
 
   topRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: Layout.spacing.m,
+    marginBottom: Layout.spacing.xs,
   },
 
-  leftIcon: {
+  roleIconWrap: {
     marginRight: Layout.spacing.s,
   },
 
@@ -36,23 +27,16 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
 
-  roleChip: {
-    paddingHorizontal: Layout.spacing.m,
-    paddingVertical: 6,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: Color.text.main,
-    backgroundColor: Color.secondary.main,
-  },
-
-  roleChipText: {
-    color: Color.text.main,
+  statusChip: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
   },
 
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: Layout.spacing.s,
+    marginTop: Layout.spacing.xs,
   },
 
   label: {
@@ -72,7 +56,7 @@ export const styles = StyleSheet.create({
   },
 
   emptyCard: {
-    backgroundColor: Color.secondary.hover, // 연한 회색 계열
+    backgroundColor: Color.secondary.hover,
     borderRadius: Layout.radius.l,
     paddingVertical: Layout.spacing.xl,
     paddingHorizontal: Layout.spacing.l,
@@ -83,5 +67,4 @@ export const styles = StyleSheet.create({
   emptyText: {
     color: Color.text.main,
   },
-
 });

@@ -1,7 +1,12 @@
+import { Header } from '@shared/components/header/Header';
 import { ThemedText } from '@shared/components/themed-text/ThemedText';
 import { Color } from '@shared/constants/color';
+import { Layout } from '@shared/constants/layout';
+import { router } from 'expo-router';
 import React from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { getDepartureChip } from './getDepartureChip';
 import { styles } from './styles';
 import { useCarpoolHomeViewModel } from './useCarpoolHomeViewModel';
 
@@ -24,48 +29,23 @@ export default function CarpoolHomeScreen() {
     posts,
 
     // actions
-    goBack,
     goDetail,
     goRegister,
     goHistory,
   } = useCarpoolHomeViewModel();
 
-  function formatKoreanDateTime(iso: string): string {
-    const d = new Date(iso);
-    const month = d.getMonth() + 1;
-    const date = d.getDate();
-    const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-    const day = dayNames[d.getDay()];
-
-    let hour = d.getHours();
-    const min = d.getMinutes();
-    const isPM = hour >= 12;
-    const ampm = isPM ? '오후' : '오전';
-    hour = hour % 12;
-    if (hour === 0) hour = 12;
-
-    const minText = min === 0 ? '' : ` ${String(min).padStart(2, '0')}분`;
-    return `${month}/${date}(${day}) ${ampm} ${hour}시${minText}`;
-  }
-
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Pressable onPress={goBack} style={styles.headerSide} hitSlop={10}>
-          <ThemedText variant="heading3" style={styles.headerIcon}>
-            ←
-          </ThemedText>
-        </Pressable>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: Color.default.background }}>
+      <Header
+        title="카풀 서비스"
+        onBack={() => router.back()}
+      />
 
-        <ThemedText variant="heading3" style={styles.headerTitle}>
-          카풀 서비스
-        </ThemedText>
-
-        <View style={styles.headerSide} />
-      </View>
-
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={{ paddingHorizontal: Layout.spacing.l, paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+      >
         {/* ✅ 신청 내역 + More */}
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
@@ -75,7 +55,7 @@ export default function CarpoolHomeScreen() {
 
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
               <Pressable onPress={goHistory} hitSlop={10} style={styles.moreBtn}>
-                <ThemedText variant="text2" style={styles.moreBtnText}>
+                <ThemedText variant="text4" style={styles.moreBtnText}>
                   More
                 </ThemedText>
               </Pressable>
@@ -92,8 +72,9 @@ export default function CarpoolHomeScreen() {
             ) : (
               carpools?.map((item) => {
                 const summary = String(item.summary ?? '');
-                // "1/30(금) 저녁 8시 | 신도림역 → 수련회"
                 const [timePart, routePart] = summary.split(' | ');
+
+                const chip = getDepartureChip(item.status);
 
                 return (
                   <Pressable
@@ -101,35 +82,48 @@ export default function CarpoolHomeScreen() {
                     style={styles.applicationCard}
                     onPress={() => goDetail(item.id)}
                   >
-                    {/* 제목 */}
-                    <ThemedText variant="text3" style={styles.applicationDriver}>
-                      {(item.driverDisplay ?? item.driverName ?? '드라이버')} 카풀
-                    </ThemedText>
-
-                    {/* ⏱ 시간 줄 */}
-                    <View style={styles.applicationDescRow}>
-                      <ThemedText variant="text3" style={styles.applicationBullet}>
-                        ▪
+                    {/* 상태 말머리 + 운전자 */}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <ThemedText variant="text3" style={styles.applicationDriver}>
+                        {item.driver.name} 카풀
                       </ThemedText>
 
-                      <ThemedText variant="text2" style={styles.applicationDateAccent}>
+                      <View
+                        style={{
+                          paddingHorizontal: 10,
+                          paddingVertical: 3,
+                          borderRadius: 6,
+                          backgroundColor: chip.backgroundColor,
+                        }}
+                      >
+                        <ThemedText variant="text4" style={{ color: chip.textColor }}>
+                          {chip.label}
+                        </ThemedText>
+                      </View>
+                    </View>
+                    F
+                    {/* 시간 */}
+                    <View style={styles.kvRow}>
+                      <ThemedText variant="text2" style={styles.kvLabel}>
+                        시간
+                      </ThemedText>
+                      <ThemedText variant="text2" style={styles.kvValue}>
                         {timePart}
                       </ThemedText>
                     </View>
 
-                    {/* 📍 출발지 → 도착지 줄 */}
-                    {routePart && (
-                      <View style={styles.applicationRouteRow}>
-                        <ThemedText variant="text2" style={styles.applicationRouteText}>
-                          {routePart}
-                        </ThemedText>
-                      </View>
-                    )}
+                    {/* 경로 */}
+                    <View style={styles.kvRow}>
+                      <ThemedText variant="text2" style={styles.kvLabel}>
+                        경로
+                      </ThemedText>
+                      <ThemedText variant="text2" style={styles.kvValue}>
+                        {routePart}
+                      </ThemedText>
+                    </View>
                   </Pressable>
-                );
-
+                )
               })
-
             )}
           </View>
         </View>
@@ -168,7 +162,7 @@ export default function CarpoolHomeScreen() {
           </ThemedText>
 
           <Pressable onPress={goRegister} style={styles.pillBtn} hitSlop={10}>
-            <ThemedText variant="text2" style={styles.pillBtnText}>
+            <ThemedText variant="text4" style={styles.pillBtnText}>
               + 등록
             </ThemedText>
           </Pressable>
@@ -194,12 +188,14 @@ export default function CarpoolHomeScreen() {
           ) : (
             posts.map((post) => {
               const isClosed = (post.seatsLeft ?? 0) <= 0;
+              const driverName = (post as any).driver.name ?? '운전자';
+              const isHome = activeTab === 'HOME';
+              const placeLabel = isHome ? '도착지' : '출발지';
+              const detailText = isHome
+                ? (post.destinationDetailed ?? post.destination ?? '')
+                : (post.originDetailed ?? post.origin ?? '');
 
-              // ✅ 백에서 driverName join 예정 → 지금은 임시 표시
-              const driverName = (post as any).driverName ?? '운전자';
-
-              // ✅ 장소 표시 (스샷처럼 originDetailed 우선)
-              const placeText = post.originDetailed || post.origin;
+              const note = post.note ?? '';
 
               return (
                 <Pressable
@@ -219,44 +215,40 @@ export default function CarpoolHomeScreen() {
                       </ThemedText>
                     </View>
 
-                    {/* seatsLeft 조건: 0이면 마감(disabled), 1+면 신청 */}
-                    <Pressable
-                      style={isClosed ? styles.statusBtnClosed : styles.statusBtnApply}
-                      disabled={isClosed} // ✅ 마감 버튼 disable
-                      onPress={() => {
-                        if (isClosed) return;
-                        // TODO: 신청 로직(모달 confirm) 연결
-                        // joinCarpool(post.id)
-                      }}
-                    >
+                    {/* seatsLeft 조건: 0이면 마감(라벨), 1+면 신청가능(라벨) */}
+                    <View style={isClosed ? styles.statusBtnClosed : styles.statusBtnApply}>
                       <ThemedText
-                        variant="text2"
+                        variant="text4"
                         style={isClosed ? styles.statusTextClosed : styles.statusTextApply}
                       >
-                        {isClosed ? '마감' : '신청'}
+                        {isClosed ? '마감' : '신청 가능'}
                       </ThemedText>
-                    </Pressable>
+                    </View>
+
                   </View>
 
                   {/* 시간/장소 */}
                   <View style={styles.postInfo}>
-                    <View style={styles.infoRow}>
-                      <ThemedText variant="text2" style={styles.infoValue}>
-                        시간: {post.timeText}
-                      </ThemedText>
+                    <View style={styles.kvRow}>
+                      <ThemedText variant="text2" style={styles.kvLabel}>시간</ThemedText>
+                      <ThemedText variant="text2" style={styles.kvValue}>{post.timeText}</ThemedText>
                     </View>
 
-                    <View style={styles.infoRow}>
-                      <ThemedText variant="text2" style={styles.infoValue}>
-                        장소: {placeText}
-                      </ThemedText>
+                    <View style={styles.kvRow}>
+                      <ThemedText variant="text2" style={styles.kvLabel}>{placeLabel}</ThemedText>
+                      <ThemedText variant="text2" style={styles.kvValue}>{detailText}</ThemedText>
+                    </View>
+
+                    <View style={styles.kvRow}>
+                      <ThemedText variant="text2" style={styles.kvLabel}>메모</ThemedText>
+                      <ThemedText variant="text2" style={styles.kvValue}>{note}</ThemedText>
                     </View>
                   </View>
 
                   {/* 하단 한줄: 📍 | 👥 | 🚙 */}
                   <View style={styles.routeRow}>
                     <ThemedText variant="text3" style={styles.routeText} numberOfLines={1}>
-                      📍 {post.placeText} | 👥 {post.seatsLeft}/{post.seatsTotal} | 🚙 {post.carInfo}
+                      📍 {detailText} | 👥 {post.seatsLeft}/{post.seatsTotal} | 🚙 {post.carInfo}
                     </ThemedText>
                   </View>
                 </Pressable>
@@ -265,6 +257,6 @@ export default function CarpoolHomeScreen() {
           )}
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }

@@ -2,11 +2,22 @@ import { GetAvailableCarpoolsUseCase } from '@application/carpool/GetAvailableCa
 import { GetParticipatingCarpoolsUseCase } from '@application/carpool/GetParticipatingCarpoolsUseCase';
 import { container } from '@shared/di/container';
 import { useAuthStore } from '@shared/stores/useAuthStore';
+import { formatDateTimePretty } from '@shared/utils/dateFormat';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 
 const RETREAT_PLACE = '딱따구리 수련원';
 export type DestinationTab = 'HOME' | 'RETREAT';
+
+export type CarpoolCardStatus = 'AVAILABLE' | 'CLOSED';
+
+function getCarpoolCardStatus(post: any): { status: CarpoolCardStatus; label: string } {
+  const isClosed = (post.seatsLeft ?? 0) <= 0;
+  return {
+    status: isClosed ? 'CLOSED' : 'AVAILABLE',
+    label: isClosed ? '마감' : '신청가능',
+  };
+}
 
 function matchTab(destination?: string | null, tab?: DestinationTab): boolean {
   const isRetreat = destination === RETREAT_PLACE;
@@ -37,30 +48,6 @@ function toArray<T = any>(res: unknown): T[] {
   return [];
 }
 
-function formatKoreanDateTime(iso?: string | null): string {
-  if (!iso) return '-';
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '-';
-
-  const m = d.getMonth() + 1;
-  const day = d.getDate();
-
-  const weekdayMap = ['주일', '월', '화', '수', '목', '금', '토'];
-  const weekday = weekdayMap[d.getDay()];
-
-  const hour = d.getHours();
-  const hour12 = ((hour + 11) % 12) + 1;
-
-  const ampm = hour < 12 ? '오전' : '저녁';
-
-  return `${m}/${day}(${weekday}) ${ampm} ${hour12}시`;
-}
-
-/**
- * swagger 기준:
- * - seatsTotal: 전체 좌석
- * - seatsLeft: 남은 좌석
- */
 function deriveIsClosed(p: any): boolean {
   // 백에서 isClosed를 내려주면 그대로 사용
   if (typeof p?.isClosed === 'boolean') return p.isClosed;
@@ -75,14 +62,12 @@ function deriveIsClosed(p: any): boolean {
 }
 
 function buildSummary(p: any): string {
-  const time = formatKoreanDateTime(p?.departureTime);
+  const time = formatDateTimePretty(p?.departureTime);
 
   const origin = (p?.originDetailed ?? p?.origin ?? '').toString().trim();
   const dest = (p?.destinationDetailed ?? p?.destination ?? '').toString().trim();
 
-  if (origin && dest) return `${time} | ${origin} → ${dest}`;
-  if (dest) return `${time} | ${dest}`;
-  return `${time}`;
+  return `${time} | ${origin} → ${dest}`;
 }
 
 function buildRouteText(p: any): string {
@@ -92,7 +77,6 @@ function buildRouteText(p: any): string {
 
   if (total > 0) return `${p?.destination ?? '-'} | ${left} / ${total}`;
 
-  // 혹시 예전 필드가 섞여 들어오면 fallback
   const current = Number(p?.currentCount ?? p?.currentMemberCount ?? p?.passengerCount ?? p?.appliedCount ?? 0) || 0;
   const max = Number(p?.maxCount ?? p?.capacity ?? p?.maxMemberCount ?? p?.limitCount ?? 0) || 0;
   if (max > 0) return `${p?.destination ?? '-'} | ${current} / ${max}`;
@@ -128,9 +112,7 @@ export function useCarpoolHomeViewModel() {
         throw new Error(`userId가 올바르지 않습니다. raw=${String(rawUserId)}`);
       }
 
-      const [
-        allRes,
-        myRes] = await Promise.all([
+      const [allRes,myRes] = await Promise.all([
           getAvailableCarpools.execute(userId),
           getParticipatingCarpools.execute(userId),
         ]);
@@ -189,12 +171,15 @@ export function useCarpoolHomeViewModel() {
       });
 
     return filtered.map((p) => {
-      const timeText = p?.timeText ?? formatKoreanDateTime(p?.departureTime);
-
+      const timeText = p?.timeText ?? formatDateTimePretty(p?.departureTime);
+      let placeText = '';
       // 장소 표시는 originDetailed 우선, 없으면 origin
-      const placeText =
-        p?.placeText ??
-        (p?.originDetailed ?? p?.origin ?? '-');
+      if(p?.destinationDetailed == RETREAT_PLACE) {
+        placeText = (p?.originDetailed ?? p?.origin ?? '-');
+      } else {
+        placeText = (p?.destinationDetailed ?? p?.destination ?? '-');
+
+      }
 
       const routeText = p?.routeText ?? buildRouteText(p);
 
@@ -211,7 +196,6 @@ export function useCarpoolHomeViewModel() {
   const goDetail = (id: number) => router.push(`/carpool/${id}`);
   const goRegister = () => router.push('/carpool/register');
   const goHistory = () => router.push('/carpool/history');
-  const goBack = () => router.back();
 
   return {
     isLoading,
@@ -219,6 +203,8 @@ export function useCarpoolHomeViewModel() {
 
     activeTab,
     setActiveTab,
+
+    getCarpoolCardStatus,
 
     query,
     setQuery,
@@ -230,6 +216,5 @@ export function useCarpoolHomeViewModel() {
     goDetail,
     goRegister,
     goHistory,
-    goBack,
   };
 }
