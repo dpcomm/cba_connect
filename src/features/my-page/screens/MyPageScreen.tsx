@@ -1,11 +1,14 @@
+import { LogoutUseCase } from '@application/auth/LogoutUseCase';
 import { Ionicons } from '@expo/vector-icons';
 import { Header } from '@shared/components/header/Header';
 import { ThemedText } from '@shared/components/themed-text/ThemedText';
 import { Color } from '@shared/constants/color';
 import { Layout } from '@shared/constants/layout';
+import { container } from '@shared/di/container';
+import { useAuthStore } from '@shared/stores/useAuthStore';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { ScrollView, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MenuItem } from '../components/MenuItem';
 import { MenuSection } from '../components/MenuSection';
@@ -14,9 +17,32 @@ import { ProfileCard } from '../components/ProfileCard';
 
 export default function MyPageScreen() {
   const router = useRouter();
+  const { logout: clearAuthState } = useAuthStore();
 
   const handleLogout = () => {
-    console.log('logout');
+    Alert.alert(
+      '로그아웃',
+      '정말 로그아웃 하시겠습니까?',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '로그아웃',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const logoutUseCase = container.resolve(LogoutUseCase);
+              await logoutUseCase.execute();
+              clearAuthState();
+              router.replace('/');
+            } catch (error) {
+              console.error('Logout failed:', error);
+              clearAuthState();
+              router.replace('/');
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
