@@ -145,8 +145,6 @@ export function useCarpoolRegisterFormViewModel() {
   const incCapacity = () => setCapacity((v) => Math.min(8, v + 1));
   const decCapacity = () => setCapacity((v) => Math.max(1, v - 1));
 
-  const goBack = () => router.back();
-
   // 지도에 표시할 마커는 "입력 가능한 필드" 하나만
   const editableMarker = useMemo(() => {
     const editable = isHome ? dest : origin;
@@ -274,7 +272,6 @@ export function useCarpoolRegisterFormViewModel() {
     destDisabled,
     editableMarker,
 
-    goBack,
     submit,
 
     // 필요하면 노출(디버깅용)

@@ -5,18 +5,6 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Color.default.background },
 
-  header: {
-    height: 56,
-    paddingHorizontal: Layout.spacing.l,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: Color.secondary.main,
-    ...Layout.shadow.default,
-  },
-  headerSide: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  headerTitle: { color: Color.text.main },
-
   content: {
     paddingHorizontal: Layout.spacing.l,
     paddingTop: Layout.spacing.m,
@@ -40,7 +28,7 @@ export const styles = StyleSheet.create({
 
   fieldBlock: {
     width: '100%',
-    gap: Layout.spacing.xs,
+    gap: Layout.spacing.s,
   },
   fieldLabel: {
     marginTop: 0,
@@ -114,7 +102,7 @@ export const styles = StyleSheet.create({
 
   labelRow: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignItems: 'center',
     gap: Layout.spacing.xs,
   },
 

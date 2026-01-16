@@ -7,9 +7,12 @@ import { Color } from '@shared/constants/color';
 
 import { AddressSearchModal } from '@shared/components/address/AddressSearchModal';
 
+import { Header } from '@shared/components/header/Header';
 import { SelectBox } from '@shared/components/select-box/SelectBox';
 import { InlineOption, InlineSelectModal } from '@shared/components/select-inline/InlineSelectModal';
 import { Layout } from '@shared/constants/layout';
+import { router } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from './formStyles';
 import { useCarpoolRegisterFormViewModel } from './useCarpoolRegisterFormViewModel';
 
@@ -61,7 +64,6 @@ export default function CarpoolRegisterFormScreen() {
     originDisabled, destDisabled,
     editableMarker,
 
-    goBack,
     submit,
   } = useCarpoolRegisterFormViewModel();
 
@@ -153,26 +155,24 @@ export default function CarpoolRegisterFormScreen() {
   }, [mainPickup, setMainPickup]);
 
   return (
-    <ScrollView nestedScrollEnabled keyboardShouldPersistTaps="handled" scrollEnabled={!openDropdown} >
-      <View style={styles.container}>
-        {/* ✅ 드롭다운 외부 클릭 닫기 overlay (2번) */}
-        {openDropdown && (
-          <Pressable
-            style={styles.dropdownDismissOverlay}
-            onPress={() => setOpenDropdown(null)}
-          />
-        )}
+    <SafeAreaView style={{ flex: 1, backgroundColor: Color.default.background }}>
+      {/* ✅ 드롭다운 외부 클릭 닫기 overlay (2번) */}
+      {openDropdown && (
+        <Pressable
+          style={styles.dropdownDismissOverlay}
+          onPress={() => setOpenDropdown(null)}
+        />
+      )}
+      <Header
+        title="카풀 등록"
+        onBack={() => router.back()}
+      />
+      <ScrollView
+        contentContainerStyle={{ paddingHorizontal: Layout.spacing.l, paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+      >
 
-        {/* Header */}
-        <View style={styles.header}>
-          <Pressable onPress={goBack} style={styles.headerSide} hitSlop={10}>
-            <ThemedText variant="heading3" color={Color.text.main}>←</ThemedText>
-          </Pressable>
-          <ThemedText variant="heading3" style={styles.headerTitle}>카풀 등록</ThemedText>
-          <View style={styles.headerSide} />
-        </View>
-
-        <View style={[styles.content, openDropdown && styles.contentOnDropdown]}>
+        <View style={{ gap: 28 }}>
           <FieldBlock label="운전자명">
             <TextInput value={driverName} disabled placeholder="운전자명" />
           </FieldBlock>
@@ -185,7 +185,7 @@ export default function CarpoolRegisterFormScreen() {
             <TextInput value={carInfo} onChangeText={setCarInfo} placeholder="예: 셀토스/흰색/00가0000" />
           </FieldBlock>
 
-          <FieldBlock label="수용 가능한 인원">
+          <FieldBlock label="탑승 인원(운전자 포함)">
             <View style={styles.stepperRow}>
               <Pressable
                 onPress={decCapacity}
@@ -275,7 +275,7 @@ export default function CarpoolRegisterFormScreen() {
               </>
             )}
           </View>
-          
+
           {/* 메모 */}
           <FieldBlock label="메모">
             <TextInput
@@ -336,7 +336,7 @@ export default function CarpoolRegisterFormScreen() {
             setAddressModalOpen(null);
           }}
         />
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView >
   );
 }
