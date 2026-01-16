@@ -34,8 +34,8 @@ export interface UpdateCarpoolData extends CreateCarpoolData {
 }
 
 export interface ICarpoolRepository {
-  getAvailableCarpools(userId?: number): Promise<Carpool[]>;
-  getParticipatingCarpools(userId: number): Promise<Carpool[]>;
+  getAvailableCarpools(userId?: number): Promise<CarpoolDetail[]>;
+  getParticipatingCarpools(userId: number): Promise<CarpoolDetail[]>;
 
   getAllCarpools(): Promise<Carpool[]>;
   createCarpool(data: CreateCarpoolData): Promise<Carpool>;
@@ -43,7 +43,7 @@ export interface ICarpoolRepository {
   getCarpoolById(id: number): Promise<Carpool>;
   getCarpoolDetail(id: number): Promise<CarpoolDetail>;
 
-  findMyCarpools(userId: number): Promise<Carpool[]>;
+  findMyCarpools(userId: number): Promise<CarpoolDetail[]>;
 
   updateCarpool(id: number, data: UpdateCarpoolData): Promise<Carpool>;
 

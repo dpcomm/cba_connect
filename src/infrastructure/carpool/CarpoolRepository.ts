@@ -18,44 +18,31 @@ import {
 
 @injectable()
 export class CarpoolRepository implements ICarpoolRepository {
-  async getAvailableCarpools(userId: number): Promise<Carpool[]> {
+  async getAvailableCarpools(userId: number): Promise<CarpoolDetail[]> {
     const uid = Number(userId);
     if (Number.isNaN(uid) || uid <= 0) return [];
 
     try {
-      const res = await apiClient.post<ApiResponse<CarpoolResponseDto[]>>(
+      const res = await apiClient.post<ApiResponse<CarpoolDetailResponseDto[]>>(
         '/api/carpool/available',
         { userId: uid }
       );
-      return res.data.data.map(this.mapToCarpool);
+      return res.data.data.map(this.mapToCarpoolDetail);
     } catch (e) {
-      if (isAxiosError<ApiErrorResponse>(e)) {
-        console.log('[available axios]', {
-          status: e.response?.status,
-          data: e.response?.data,
-          message: e.message,
-        });
-      } else {
-        console.log('[available non-axios]', e);
-      }
-
       if (isAxiosError<ApiErrorResponse>(e) && e.response?.status === 404) return [];
       throw this.normalizeError(e);
     }
   }
 
-
-
-
-  async getParticipatingCarpools(userId: number): Promise<Carpool[]> {
+  async getParticipatingCarpools(userId: number): Promise<CarpoolDetail[]> {
     const id = Number(userId);
     if (!id || Number.isNaN(id)) return [];
 
     try {
-      const res = await apiClient.get<ApiResponse<CarpoolResponseDto[]>>(
+      const res = await apiClient.get<ApiResponse<CarpoolDetailResponseDto[]>>(
         `/api/carpool/participating/${id}`
       );
-      return res.data.data.map(this.mapToCarpool);
+      return res.data.data.map(this.mapToCarpoolDetail);
     } catch (e) {
       if (isAxiosError<ApiErrorResponse>(e) && e.response?.status === 404) return [];
       throw this.normalizeError(e);
@@ -110,18 +97,16 @@ export class CarpoolRepository implements ICarpoolRepository {
   async getCarpoolDetail(id: number): Promise<CarpoolDetail> {
     try {
       const res = await apiClient.get<ApiResponse<CarpoolDetailResponseDto>>(`/api/carpool/detail/${id}`);
-      console.log('[detail raw]', res.data.data); // ✅ 이거
       return this.mapToCarpoolDetail(res.data.data);
     } catch (e) {
       throw this.normalizeError(e);
     }
   }
 
-
-  async findMyCarpools(userId: number): Promise<Carpool[]> {
+  async findMyCarpools(userId: number): Promise<CarpoolDetail[]> {
     try {
-      const res = await apiClient.get<ApiResponse<CarpoolResponseDto[]>>(`/api/carpool/my/${userId}`);
-      return res.data.data.map(this.mapToCarpool);
+      const res = await apiClient.get<ApiResponse<CarpoolDetailResponseDto[]>>(`/api/carpool/my/${userId}`);
+      return res.data.data.map(this.mapToCarpoolDetail);
     } catch (e) {
       if (isAxiosError<ApiErrorResponse>(e) && e.response?.status === 404) return [];
       throw this.normalizeError(e);
