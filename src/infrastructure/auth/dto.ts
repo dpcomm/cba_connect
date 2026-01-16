@@ -29,5 +29,24 @@ export interface RefreshResponseDto {
   access_token: string;
 }
 
+export interface VerifyEmailRequestDto {
+  email: string;
+  code: string;
+}
+
+export interface VerifyEmailResponseDto {
+  verificationToken: string;
+}
+
+export interface CheckIdResponseDto {
+  isDuplicate: boolean;
+}
+
+export interface ResetPasswordRequestDto {
+  email: string;
+  verificationToken: string;
+  newPassword: string;
+}
+
 
 

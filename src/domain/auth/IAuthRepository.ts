@@ -1,4 +1,5 @@
 import { Auth } from './Auth';
+import { EmailVerificationType } from './EmailVerificationType';
 
 export interface RegisterData {
   userId: string;
@@ -13,6 +14,12 @@ export interface RegisterData {
   rank: string;
 }
 
+export interface ResetPasswordData {
+  email: string;
+  verificationToken: string;
+  newPassword: string;
+}
+
 export interface IAuthRepository {
   login(userId: string, password: string): Promise<Auth>;
   register(data: RegisterData): Promise<Auth>;
@@ -22,6 +29,12 @@ export interface IAuthRepository {
   setAutoLoginEnabled(enabled: boolean): Promise<void>;
   getAutoLoginEnabled(): Promise<boolean>;
   getStoredRefreshToken(): Promise<string | null>;
+
+  sendEmailVerification(email: string, type: EmailVerificationType): Promise<void>;
+  verifyEmailCode(email: string, code: string): Promise<string>;
+
+  checkIdDuplicate(id: string): Promise<boolean>;
+  resetPassword(data: ResetPasswordData): Promise<void>;
 }
 
 

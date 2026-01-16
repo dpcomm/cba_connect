@@ -11,3 +11,12 @@ export interface UserResponseDto {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface UpdateProfileRequestDto {
+  name?: string;
+  group?: string;
+  phone?: string;
+  birth?: string;
+  gender?: string;
+  password?: string;
+}
