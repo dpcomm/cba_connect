@@ -4,8 +4,9 @@ import { Color } from '@shared/constants/color';
 import { Layout } from '@shared/constants/layout';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
-import { View } from 'react-native';
+import { Alert, Keyboard, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRegisterStore } from '../../stores/useRegisterStore';
 import { CodeVerificationStep } from './components/CodeVerificationStep';
 import { EmailInputStep } from './components/EmailInputStep';
 import { useEmailVerificationViewModel } from './useEmailVerificationViewModel';
@@ -17,6 +18,7 @@ export default function EmailVerificationScreen() {
   const params = useLocalSearchParams<{ source?: EmailVerificationSource }>();
   const source = params.source || 'register';
 
+  const { updateData } = useRegisterStore();
   const vm = useEmailVerificationViewModel();
 
   const handleBack = () => {
@@ -31,27 +33,33 @@ export default function EmailVerificationScreen() {
     if (vm.step === 'email') {
       await vm.sendVerificationCode();
     } else {
-      const success = await vm.verifyCode();
-      if (success) {
-        // 인증 성공 후 source에 따라 분기
-        switch (source) {
-          case 'register':
-            // 회원가입 완료로 이동
-            console.log('Email verified from register flow');
-            router.back(); // 회원가입 화면으로 돌아가서 다음 단계 진행
-            break;
-          case 'home':
-            // 홈으로 이동
-            console.log('Email verified from home flow');
-            router.replace('/home');
-            break;
-          case 'mypage':
-            // 마이페이지로 이동
-            console.log('Email verified from mypage flow');
-            router.back();
-            break;
-          default:
-            router.back();
+      const token = await vm.verifyCode();
+      if (token) {
+        if (source === 'register') {
+           Alert.alert('인증 성공', '이메일 인증이 완료되었습니다.', [
+             {
+               text: '확인',
+               onPress: () => {
+                 updateData({ 
+                   email: vm.email,
+                   verificationToken: token 
+                 });
+                 console.log('Email verified and saved to store:', vm.email);
+                 router.back();
+               }
+             }
+           ]);
+        } else {
+          switch (source) {
+            case 'home':
+              router.replace('/home');
+              break;
+            case 'mypage':
+              router.back();
+              break;
+            default:
+              router.back();
+          }
         }
       }
     }
@@ -60,28 +68,35 @@ export default function EmailVerificationScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Color.default.background }} edges={['top']}>
       <Header title="이메일 인증" onBack={handleBack} />
-      <View style={{ flex: 1 }}>
-        {vm.step === 'email' ? (
-          <EmailInputStep
-            email={vm.email}
-            setEmail={vm.setEmail}
-          />
-        ) : (
-          <CodeVerificationStep
-            verificationCode={vm.verificationCode}
-            setVerificationCode={vm.setVerificationCode}
-            onResend={vm.resendVerificationCode}
-          />
-        )}
-      </View>
-      <View style={{ padding: Layout.spacing.l }}>
-        <Button
-          title={vm.getButtonTitle()}
-          onPress={handleSubmit}
-          size="large"
-          disabled={vm.isSubmitDisabled()}
-        />
-      </View>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1 }}
+        >
+          <View style={{ flex: 1 }}>
+            {vm.step === 'email' ? (
+              <EmailInputStep
+                email={vm.email}
+                setEmail={vm.setEmail}
+              />
+            ) : (
+              <CodeVerificationStep
+                verificationCode={vm.verificationCode}
+                setVerificationCode={vm.setVerificationCode}
+                onResend={vm.resendVerificationCode}
+              />
+            )}
+          </View>
+          <View style={{ padding: Layout.spacing.l }}>
+            <Button
+              title={vm.getButtonTitle()}
+              onPress={handleSubmit}
+              size="large"
+              disabled={vm.isSubmitDisabled()}
+            />
+          </View>
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
     </SafeAreaView>
   );
 }

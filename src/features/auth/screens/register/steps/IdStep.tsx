@@ -13,9 +13,10 @@ interface Props {
   setUserId?: (text: string) => void;
   onNext?: () => void;
   readOnly?: boolean;
+  onCheckDuplicate?: (id: string) => Promise<boolean>;
 }
 
-export function IdStep({ userId, setUserId, onNext, readOnly }: Props) {
+export function IdStep({ userId, setUserId, onNext, readOnly, onCheckDuplicate }: Props) {
   const [checkStatus, setCheckStatus] = useState<'idle' | 'checking' | 'available' | 'duplicate'>('idle');
 
   if (readOnly) {
@@ -23,17 +24,16 @@ export function IdStep({ userId, setUserId, onNext, readOnly }: Props) {
   }
 
   const handleDuplicateCheck = async () => {
-    if (!userId.trim()) {
+    if (!userId.trim() || !onCheckDuplicate) {
       return;
     }
     setCheckStatus('checking');
-    // TODO: Replace with actual API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    // Mock: IDs starting with 'test' are duplicates
-    if (userId.toLowerCase().startsWith('test')) {
-      setCheckStatus('duplicate');
-    } else {
-      setCheckStatus('available');
+    try {
+      const isDuplicate = await onCheckDuplicate(userId);
+      setCheckStatus(isDuplicate ? 'duplicate' : 'available');
+    } catch (error) {
+      console.error('ID check failed:', error);
+      setCheckStatus('idle');
     }
   };
 

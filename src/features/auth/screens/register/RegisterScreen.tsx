@@ -3,11 +3,12 @@ import { Header } from '@shared/components/header/Header';
 import { ThemedText } from '@shared/components/themed-text/ThemedText';
 import { Color } from '@shared/constants/color';
 import { Layout } from '@shared/constants/layout';
-import { useNavigation, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Alert, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import RecbaLogo from '../../../../../assets/svgs/recba_logo.svg';
+import { ReadOnlyStepValue } from '../../components/ReadOnlyStepValue';
 import { AffiliationStep } from './steps/AffiliationStep';
 import { ConfirmationStep } from './steps/ConfirmationStep';
 import { GenderStep } from './steps/GenderStep';
@@ -21,23 +22,22 @@ import { styles } from './styles';
 import { REGISTER_STEPS, RegisterStep, useRegisterViewModel } from './useRegisterViewModel';
 
 export default function RegisterScreen() {
-  const { currentStep, next, prev, hasPrev, registerData, updateData, stepIndex, register } = useRegisterViewModel();
+  const { currentStep, next, prev, hasPrev, registerData, updateData, stepIndex, register, reset, checkIdDuplicate } = useRegisterViewModel();
   const router = useRouter();
-  const navigation = useNavigation();
+
+  // 이메일 인증 완료 감지
+  useEffect(() => {
+    if (currentStep === 'Email' && registerData.verificationToken && registerData.email) {
+      console.log('Email verification detected, moving to next step');
+      next();
+    }
+  }, [currentStep, registerData.verificationToken, registerData.email, next]);
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener('beforeRemove', (e: any) => {
-      if (currentStep === 'Welcome') {
-        return;
-      }
-      if (hasPrev) {
-        e.preventDefault();
-        prev();
-      }
-    });
-
-    return unsubscribe;
-  }, [navigation, hasPrev, prev, currentStep]);
+    return () => {
+      reset();
+    };
+  }, [reset]);
 
   const handleNextAction = () => {
     if (currentStep === 'Name' && !registerData.name.trim()) {
@@ -96,7 +96,7 @@ export default function RegisterScreen() {
       case 'Affiliation':
         return <AffiliationStep affiliation={registerData.affiliation} setAffiliation={(v) => updateData({ affiliation: v })} onNext={handleNextAction} />;
       case 'Id':
-        return <IdStep userId={registerData.userId} setUserId={(v) => updateData({ userId: v })} onNext={handleNextAction} />;
+        return <IdStep userId={registerData.userId} setUserId={(v) => updateData({ userId: v })} onNext={handleNextAction} onCheckDuplicate={checkIdDuplicate} />;
       case 'Password':
         return <PasswordStep password={registerData.password} setPassword={(v) => updateData({ password: v })} onNext={handleNextAction} />;
       default:
@@ -106,6 +106,12 @@ export default function RegisterScreen() {
 
   const renderCompletedStep = (step: RegisterStep) => {
     switch (step) {
+      case 'Email':
+        return (
+           <View key={step} style={{ marginBottom: Layout.spacing.l }}>
+             <ReadOnlyStepValue label="이메일" value={registerData.email} />
+           </View>
+        );
       case 'Name':
         return <NameStep key={step} name={registerData.name} readOnly />;
       case 'Gender':
@@ -124,6 +130,20 @@ export default function RegisterScreen() {
   };
 
   const handleBack = () => {
+    if (currentStep === 'Name') {
+      Alert.alert('알림', '입력한 내용이 초기화됩니다.\n나가시겠습니까?', [
+        { text: '취소', style: 'cancel' },
+        { 
+          text: '확인', 
+          onPress: () => {
+            reset();
+            router.replace('/' as any);
+          }
+        }
+      ]);
+      return;
+    }
+
     if (hasPrev) {
       prev();
     } else {
@@ -134,7 +154,6 @@ export default function RegisterScreen() {
   if (currentStep === 'Welcome') {
     return (
       <SafeAreaView style={[styles.container, { paddingTop: 0 }]} edges={['top']}>
-        <Header onBack={handleBack} />
         <WelcomeStep name={registerData.name} onGoToLogin={handleGoToLogin} />
       </SafeAreaView>
     );
@@ -190,14 +209,13 @@ export default function RegisterScreen() {
     );
   }
 
+
+
   if (currentStep === 'Email') {
     const handleEmailVerification = () => {
       router.push('/auth/email-verification?source=register' as any);
     };
 
-    // 이메일 인증 완료 후 돌아오면 다음 단계로 진행
-    // TODO: 실제로는 이메일 인증 완료 시 콜백으로 처리하거나 상태 확인 필요
-    // 현재는 간단하게 버튼으로 이동하도록 구현
     return (
       <SafeAreaView style={[styles.container, { paddingTop: 0 }]} edges={['top']}>
         <Header onBack={handleBack} />
@@ -210,20 +228,18 @@ export default function RegisterScreen() {
             <ThemedText variant="text2" color={Color.text.sub} style={{ marginTop: Layout.spacing.s }}>
               회원가입을 위해 이메일 인증을 진행해주세요.
             </ThemedText>
+            {registerData.email ? (
+              <ThemedText variant="text2" color={Color.primary.main} style={{ marginTop: Layout.spacing.m }}>
+                인증된 이메일: {registerData.email}
+              </ThemedText>
+            ) : null}
           </View>
         </View>
         <View style={{ padding: Layout.spacing.l, gap: Layout.spacing.m }}>
           <Button 
-            title="이메일 인증하기" 
-            onPress={handleEmailVerification} 
+            title={registerData.verificationToken ? "인증 완료" : "이메일 인증하기"}
+            onPress={registerData.verificationToken ? () => next() : handleEmailVerification} 
             size="large"
-          />
-          {/* 개발용: 인증 스킵 버튼 (추후 제거) */}
-          <Button 
-            title="인증 완료 (다음으로)" 
-            onPress={() => next()} 
-            size="large"
-            disabled={false}
           />
         </View>
       </SafeAreaView>

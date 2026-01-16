@@ -1,14 +1,19 @@
 import { AutoLoginUseCase } from '@application/auth/AutoLoginUseCase';
+import { CheckIdDuplicateUseCase } from '@application/auth/CheckIdDuplicateUseCase';
 import { LoginUseCase } from '@application/auth/LoginUseCase';
 import { LogoutUseCase } from '@application/auth/LogoutUseCase';
 import { RefreshUseCase } from '@application/auth/RefreshUseCase';
 import { RegisterUseCase } from '@application/auth/RegisterUseCase';
-import { RegisterExpoTokenUseCase } from '@application/notification/RegistExpoTokenUseCase';
+import { ResetPasswordUseCase } from '@application/auth/ResetPasswordUseCase';
+import { SendEmailVerificationUseCase } from '@application/auth/SendEmailVerificationUseCase';
+import { VerifyEmailCodeUseCase } from '@application/auth/VerifyEmailCodeUseCase';
 import { CreateCarpoolUseCase, DeleteCarpoolUseCase, FindMyCarpoolsUseCase, GetAllCarpoolsUseCase, GetCarpoolByIdUseCase, GetCarpoolDetailUseCase, JoinCarpoolUseCase, LeaveCarpoolUseCase, UpdateCarpoolStatusUseCase, UpdateCarpoolUseCase } from '@application/carpool';
+import { RegisterExpoTokenUseCase } from '@application/notification/RegistExpoTokenUseCase';
 import { GetMeUseCase } from '@application/user/GetMeUseCase';
+import { UpdateProfileUseCase } from '@application/user/UpdateProfileUseCase';
 import { AuthRepository } from '@infrastructure/auth/AuthRepository';
-import { ApiExpoPushTokenRepository } from '@infrastructure/notification/ApiExpoPushTokenRepository';
 import { CarpoolRepository } from '@infrastructure/carpool/CarpoolRepository';
+import { ApiExpoPushTokenRepository } from '@infrastructure/notification/ApiExpoPushTokenRepository';
 import { UserRepository } from '@infrastructure/user/UserRepository';
 import 'reflect-metadata';
 import { container } from 'tsyringe';
@@ -25,7 +30,12 @@ container.register(LogoutUseCase, { useClass: LogoutUseCase });
 container.register(RefreshUseCase, { useClass: RefreshUseCase });
 container.register(AutoLoginUseCase, { useClass: AutoLoginUseCase });
 container.register(GetMeUseCase, { useClass: GetMeUseCase });
-container.register(RegisterExpoTokenUseCase, { useClass: RegisterExpoTokenUseCase})
+container.register(RegisterExpoTokenUseCase, { useClass: RegisterExpoTokenUseCase});
+container.register(SendEmailVerificationUseCase, { useClass: SendEmailVerificationUseCase });
+container.register(VerifyEmailCodeUseCase, { useClass: VerifyEmailCodeUseCase });
+container.register(CheckIdDuplicateUseCase, { useClass: CheckIdDuplicateUseCase });
+container.register(ResetPasswordUseCase, { useClass: ResetPasswordUseCase });
+container.register(UpdateProfileUseCase, { useClass: UpdateProfileUseCase });
 
 container.register(GetAllCarpoolsUseCase, { useClass: GetAllCarpoolsUseCase });
 container.register(CreateCarpoolUseCase, { useClass: CreateCarpoolUseCase });

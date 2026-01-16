@@ -41,6 +41,9 @@ export default function MyPageScreen() {
           <MenuSection>
             <MenuItem label="공지사항" showBorder={false} />
           </MenuSection>
+          <MenuSection title="계정">
+            <MenuItem label="비밀번호 변경" onPress={() => router.push('/my-page/change-password' as any)} showBorder={false} />
+          </MenuSection>
           <MenuSection title="마이 수련회">
             <MenuItem label="수련회 신청 조회" />
             <MenuItem label="회비 납부 조회" />

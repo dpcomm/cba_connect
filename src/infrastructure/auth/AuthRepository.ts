@@ -1,5 +1,6 @@
 import { Auth } from '@domain/auth/Auth';
-import { IAuthRepository, RegisterData } from '@domain/auth/IAuthRepository';
+import { EmailVerificationType } from '@domain/auth/EmailVerificationType';
+import { IAuthRepository, RegisterData, ResetPasswordData } from '@domain/auth/IAuthRepository';
 import { User } from '@domain/user/User';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { apiClient } from '@shared/api/client';
@@ -10,9 +11,13 @@ import { injectable } from 'tsyringe';
 
 import {
   AuthResponseDto,
+  CheckIdResponseDto,
   LoginRequestDto,
   RefreshResponseDto,
-  RegisterRequestDto
+  RegisterRequestDto,
+  ResetPasswordRequestDto,
+  VerifyEmailRequestDto,
+  VerifyEmailResponseDto,
 } from './dto';
 
 const AUTO_LOGIN_KEY = 'auto_login_enabled';
@@ -46,11 +51,53 @@ export class AuthRepository implements IAuthRepository {
 
       const response = await apiClient.post<ApiResponse<AuthResponseDto>>('/api/auth/register', requestBody);
       const responseData = response.data.data;
-      const auth = this.mapToAuth(responseData);
 
-      await this.persistTokens(auth);
+      if (responseData.access_token) {
+        await SecureStore.setItemAsync('access_token', responseData.access_token);
+      }
+      if (responseData.refresh_token) {
+        await SecureStore.setItemAsync('refresh_token', responseData.refresh_token);
+      }
 
-      return auth;
+      // user 객체가 없는 경우 getMe로 사용자 정보 조회
+      let user: User;
+      if (responseData.user) {
+        user = new User(
+          responseData.user.id,
+          responseData.user.userId,
+          responseData.user.name,
+          responseData.user.group,
+          responseData.user.phone,
+          responseData.user.birth,
+          responseData.user.gender,
+          responseData.user.rank,
+          responseData.user.isDeleted,
+          responseData.user.createdAt,
+          responseData.user.updatedAt
+        );
+      } else {
+        const meResponse = await apiClient.get<ApiResponse<any>>('/api/users/me');
+        const userData = meResponse.data.data;
+        user = new User(
+          userData.id,
+          userData.userId,
+          userData.name,
+          userData.group,
+          userData.phone,
+          userData.birth,
+          userData.gender,
+          userData.rank,
+          userData.isDeleted,
+          userData.createdAt,
+          userData.updatedAt
+        );
+      }
+
+      return new Auth(
+        responseData.access_token,
+        responseData.refresh_token,
+        user
+      );
     } catch (error: any) {
       throw this.normalizeError(error);
     }
@@ -62,10 +109,8 @@ export class AuthRepository implements IAuthRepository {
     } catch (error) {
       console.warn('Logout API failed:', error);
     } finally {
-      // 토큰 삭제
       await SecureStore.deleteItemAsync('access_token');
       await SecureStore.deleteItemAsync('refresh_token');
-      // 자동 로그인 설정도 초기화
       await AsyncStorage.removeItem(AUTO_LOGIN_KEY);
     }
   }
@@ -82,10 +127,10 @@ export class AuthRepository implements IAuthRepository {
         {},
         { headers: { Authorization: `Bearer ${refreshToken}` } }
       );
-      
+
       const newAccessToken = response.data.data.access_token;
       await SecureStore.setItemAsync('access_token', newAccessToken);
-      
+
       return newAccessToken;
     } catch (error: any) {
       throw this.normalizeError(error);
@@ -132,6 +177,51 @@ export class AuthRepository implements IAuthRepository {
     );
   }
 
+  async sendEmailVerification(email: string, type: EmailVerificationType): Promise<void> {
+    try {
+      await apiClient.get<ApiResponse<void>>(`/api/auth/email/${encodeURIComponent(email)}?type=${type}`);
+    } catch (error: any) {
+      throw this.normalizeError(error);
+    }
+  }
+
+  async verifyEmailCode(email: string, code: string): Promise<string> {
+    try {
+      const requestBody: VerifyEmailRequestDto = { email, code };
+      const response = await apiClient.post<ApiResponse<VerifyEmailResponseDto>>(
+        '/api/auth/email/verify',
+        requestBody
+      );
+      return response.data.data.verificationToken;
+    } catch (error: any) {
+      throw this.normalizeError(error);
+    }
+  }
+
+  async checkIdDuplicate(id: string): Promise<boolean> {
+    try {
+      const response = await apiClient.get<ApiResponse<CheckIdResponseDto>>(
+        `/api/auth/check-id/${encodeURIComponent(id)}`
+      );
+      return response.data.data.isDuplicate;
+    } catch (error: any) {
+      throw this.normalizeError(error);
+    }
+  }
+
+  async resetPassword(data: ResetPasswordData): Promise<void> {
+    try {
+      const requestBody: ResetPasswordRequestDto = {
+        email: data.email,
+        verificationToken: data.verificationToken,
+        newPassword: data.newPassword,
+      };
+      await apiClient.post<ApiResponse<void>>('/api/auth/reset-password', requestBody);
+    } catch (error: any) {
+      throw this.normalizeError(error);
+    }
+  }
+
   /** 토큰 저장 */
   private async persistTokens(auth: Auth): Promise<void> {
     await SecureStore.setItemAsync('access_token', auth.accessToken);
@@ -143,11 +233,12 @@ export class AuthRepository implements IAuthRepository {
     if (isAxiosError<ApiErrorResponse>(error)) {
       const responseData = error.response?.data;
       const message = responseData?.message || error.message || '요청 중 오류가 발생했습니다.';
-      
+
       const statusCode = error.response?.status;
-      
+
       if (statusCode === 400) {
         if (message === 'User already exists') return new Error('이미 존재하는 사용자입니다.');
+        if (message === 'Email already exists') return new Error('이미 등록된 이메일입니다.');
         return new Error(message || '잘못된 요청입니다.');
       }
       if (statusCode === 401) {
@@ -156,7 +247,7 @@ export class AuthRepository implements IAuthRepository {
       if (statusCode === 404) {
         return new Error('존재하지 않는 사용자입니다.');
       }
-      
+
       return new Error(message);
     }
 

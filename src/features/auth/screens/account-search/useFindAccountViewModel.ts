@@ -1,4 +1,10 @@
+import { ResetPasswordUseCase } from '@application/auth/ResetPasswordUseCase';
+import { SendEmailVerificationUseCase } from '@application/auth/SendEmailVerificationUseCase';
+import { VerifyEmailCodeUseCase } from '@application/auth/VerifyEmailCodeUseCase';
+import { EmailVerificationType } from '@domain/auth/EmailVerificationType';
+import { container } from '@shared/di/container';
 import { useState } from 'react';
+import { Alert } from 'react-native';
 
 export type FindAccountTab = 'ID' | 'PW';
 export type FindIdStep = 'input' | 'result';
@@ -6,6 +12,7 @@ export type FindPwStep = 'input' | 'verification' | 'newPassword';
 
 export function useFindAccountViewModel() {
   const [activeTab, setActiveTab] = useState<FindAccountTab>('ID');
+  const [isLoading, setIsLoading] = useState(false);
   
   // 아이디 찾기
   const [name, setName] = useState('');
@@ -18,29 +25,88 @@ export function useFindAccountViewModel() {
   const [email, setEmail] = useState('');
   const [findPwStep, setFindPwStep] = useState<FindPwStep>('input');
   const [verificationCode, setVerificationCode] = useState('');
+  const [verificationToken, setVerificationToken] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
   const findId = async () => {
+    // TODO: 아이디 찾기 API 연동 (현재 미구현)
     setFoundId('----@----');
     setFindIdStep('result');
   };
 
   const sendVerificationCode = async () => {
-    setFindPwStep('verification');
+    if (!email.trim()) {
+      Alert.alert('오류', '이메일을 입력해주세요.');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const sendEmailVerificationUseCase = container.resolve(SendEmailVerificationUseCase);
+      await sendEmailVerificationUseCase.execute(email, EmailVerificationType.RESET_PASSWORD);
+      setFindPwStep('verification');
+    } catch (error: any) {
+      Alert.alert('오류', error.message || '인증번호 발송에 실패했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const resendVerificationCode = async () => {
-    console.log('Resend verification code');
+    setIsLoading(true);
+    try {
+      const sendEmailVerificationUseCase = container.resolve(SendEmailVerificationUseCase);
+      await sendEmailVerificationUseCase.execute(email, EmailVerificationType.RESET_PASSWORD);
+      Alert.alert('알림', '인증번호가 재발송되었습니다.');
+    } catch (error: any) {
+      Alert.alert('오류', error.message || '인증번호 재발송에 실패했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const verifyCode = async () => {
-    console.log('Verify code:', verificationCode);
-    setFindPwStep('newPassword');
+    if (!verificationCode.trim()) {
+      Alert.alert('오류', '인증번호를 입력해주세요.');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const verifyEmailCodeUseCase = container.resolve(VerifyEmailCodeUseCase);
+      const token = await verifyEmailCodeUseCase.execute(email, verificationCode);
+      setVerificationToken(token);
+      setFindPwStep('newPassword');
+    } catch (error: any) {
+      Alert.alert('오류', error.message || '인증번호 확인에 실패했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const resetPassword = async () => {
-    console.log('Reset password');
+    if (!newPassword || !confirmPassword) {
+      Alert.alert('오류', '비밀번호를 입력해주세요.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      Alert.alert('오류', '비밀번호가 일치하지 않습니다.');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const resetPasswordUseCase = container.resolve(ResetPasswordUseCase);
+      await resetPasswordUseCase.execute({
+        email,
+        verificationToken,
+        newPassword,
+      });
+      Alert.alert('성공', '비밀번호가 변경되었습니다. 로그인해주세요.');
+      // 상태 초기화는 AccountSearchScreen에서 로그인 이동 후 처리
+    } catch (error: any) {
+      Alert.alert('오류', error.message || '비밀번호 재설정에 실패했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const submit = () => {
@@ -73,6 +139,7 @@ export function useFindAccountViewModel() {
   const isConfirmMatch = newPassword === confirmPassword && confirmPassword.length > 0;
 
   const isSubmitDisabled = () => {
+    if (isLoading) return true;
     if (activeTab === 'PW' && findPwStep === 'newPassword') {
       return !isPasswordValid || !isConfirmMatch;
     }
@@ -103,5 +170,6 @@ export function useFindAccountViewModel() {
     submit,
     getButtonTitle,
     isSubmitDisabled,
+    isLoading,
   };
 }

@@ -1,10 +1,10 @@
-import { IUserRepository } from '@domain/user/IUserRepository';
+import { IUserRepository, UpdateProfileData } from '@domain/user/IUserRepository';
 import { User } from '@domain/user/User';
 import { apiClient } from '@shared/api/client';
 import { ApiResponse } from '@shared/api/types';
 import { injectable } from 'tsyringe';
 
-import { UserResponseDto } from './dto';
+import { UpdateProfileRequestDto, UserResponseDto } from './dto';
 
 @injectable()
 export class UserRepository implements IUserRepository {
@@ -12,6 +12,13 @@ export class UserRepository implements IUserRepository {
     const response = await apiClient.get<ApiResponse<UserResponseDto>>('/api/users/me');
     const { data } = response.data;
     return this.mapToUser(data);
+  }
+
+  async updateProfile(data: UpdateProfileData): Promise<void> {
+    const requestBody: UpdateProfileRequestDto = {
+      ...data
+    };
+    await apiClient.patch<ApiResponse<void>>('/api/users/me', requestBody);
   }
 
   private mapToUser(dto: UserResponseDto): User {
