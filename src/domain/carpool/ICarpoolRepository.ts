@@ -18,20 +18,31 @@ export interface CreateCarpoolData {
   destLng: number;
 }
 
-export interface UpdateCarpoolData extends CreateCarpoolData {
-  carInfo: string;
-  departureTime: string;
-  origin: string;
-  originDetailed: string;
-  destination: string;
-  destinationDetailed: string;
-  seatsTotal: number;
+export interface UpdateCarpoolData {
+  driverId?: number;
+
+  carInfo?: string;
+  departureTime?: string;
+
+  origin?: string;
+  originDetailed?: string | null;
+
+  destination?: string;
+  destinationDetailed?: string | null;
+
+  seatsTotal?: number;
+  seatsLeft?: number;
+
+  isArrived?: boolean;
   note?: string;
-  originLat: number;
-  originLng: number;
-  destLat: number;
-  destLng: number;
+
+  originLat?: number;
+  originLng?: number;
+
+  destLat?: number;
+  destLng?: number;
 }
+
 
 export interface ICarpoolRepository {
   getAvailableCarpools(userId?: number): Promise<CarpoolDetail[]>;

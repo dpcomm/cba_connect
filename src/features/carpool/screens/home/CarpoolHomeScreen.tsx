@@ -101,7 +101,6 @@ export default function CarpoolHomeScreen() {
                         </ThemedText>
                       </View>
                     </View>
-                    F
                     {/* 시간 */}
                     <View style={styles.kvRow}>
                       <ThemedText variant="text2" style={styles.kvLabel}>

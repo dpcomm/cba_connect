@@ -48,11 +48,11 @@ export default function CarpoolEditScreen() {
   const {
     isHome,
 
-    driverName, setDriverName,
+    driverName, 
     carInfo, setCarInfo,
     capacity, incCapacity, decCapacity,
 
-    phone, setPhone,
+    phone,
     mainPickup, setMainPickup,
     memo, setMemo,
 
@@ -65,6 +65,7 @@ export default function CarpoolEditScreen() {
     editableMarker,
 
     submit,
+    confirmSubmit
   } = useCarpoolEditScreenViewModel();
 
   const mapRef = useRef<any>(null);
@@ -163,7 +164,7 @@ export default function CarpoolEditScreen() {
         />
       )}
       <Header
-        title="마이 페이지"
+        title="카풀 수정"
         onBack={() => router.back()}
       />
 
@@ -185,7 +186,7 @@ export default function CarpoolEditScreen() {
             <TextInput value={carInfo} onChangeText={setCarInfo} placeholder="예: 셀토스/흰색/00가0000" />
           </FieldBlock>
 
-          <FieldBlock label="수용 가능한 인원">
+          <FieldBlock label="탑승 인원(운전자 포함)">
             <View style={styles.stepperRow}>
               <Pressable
                 onPress={decCapacity}
@@ -239,7 +240,7 @@ export default function CarpoolEditScreen() {
             </View>
           </FieldBlock>
 
-          {/* 출발지/도착지}
+          {/* 출발지/도착지 */}
           {/* ✅ RETREAT일 때 출발지 */}
           <View style={styles.fieldBlock}>
             <ThemedText variant="text3" color={Color.text.main} style={styles.fieldLabel}>출발지</ThemedText>
@@ -290,8 +291,8 @@ export default function CarpoolEditScreen() {
           </FieldBlock>
 
           {/* 버튼 */}
-          <Pressable onPress={submit} style={styles.submitBtn} hitSlop={10}>
-            <ThemedText variant="text2" style={styles.submitText}>등록하기</ThemedText>
+          <Pressable onPress={confirmSubmit} style={styles.submitBtn} hitSlop={10}>
+            <ThemedText variant="text2" style={styles.submitText}>수정하기</ThemedText>
           </Pressable>
         </View>
       </ScrollView>

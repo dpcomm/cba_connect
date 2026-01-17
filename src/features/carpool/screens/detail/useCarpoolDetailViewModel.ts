@@ -28,7 +28,6 @@ export function useCarpoolDetailViewModel({ carpoolId, userId }: Args) {
     try {
       const detail = await getDetailUseCase.execute(carpoolId);
       setCarpool(detail);
-      console.log(detail);
     } catch (e) {
       console.log('[carpool detail load error]', e);
       setCarpool(null);
@@ -118,22 +117,28 @@ export function useCarpoolDetailViewModel({ carpoolId, userId }: Args) {
   }, [carpoolId, userId, leaveUseCase, load]);
 
   const toEdit = (carpoolId: number) => {
-    let message = '';
-    if (carpool.members && carpool.members.length > 1) {
-      message = "카풀 신청자가 있습니다. 정말로 수정 하시겠습니까? \n탑승자에게는 수정 알림이 발송됩니다."
-    } else {
-      message = "정말로 수정 하시겠습니까?"
-    }
-    Alert.alert('수정', message, [
-      { text: '아니요', style: 'cancel' },
-      {
-        text: '예',
-        onPress: async () => {
-          router.push(`/carpool/edit/${carpoolId}`);
+    const hasMembers = (carpool.members?.length ?? 0) > 1;
+
+    const message = hasMembers
+      ? '카풀 신청자가 있습니다.\n정말로 수정하시겠습니까?\n\n탑승자에게 수정 알림이 발송됩니다.'
+      : '정말로 수정하시겠습니까?';
+
+    Alert.alert(
+      '수정',
+      message,
+      [
+        { text: '아니요', style: 'cancel' },
+        {
+          text: '예',
+          onPress: () => {
+            router.push(`/carpool/edit/${carpoolId}`);
+          },
         },
-      },
-    ]);
+      ],
+      { cancelable: true }
+    );
   };
+
 
   const deleteCarpool = useCallback(async () => {
     if (!carpoolId) return;

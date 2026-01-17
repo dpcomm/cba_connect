@@ -115,27 +115,46 @@ export class CarpoolRepository implements ICarpoolRepository {
 
   async updateCarpool(id: number, data: UpdateCarpoolData): Promise<Carpool> {
     try {
-      const body: any = {
-        driverId: data.driverId,
-        carInfo: data.carInfo,
-        departureTime: data.departureTime,
-        origin: data.origin,
-        originDetailed: data.originDetailed ?? null,
-        destination: data.destination,
-        destinationDetailed: data.destinationDetailed ?? null,
-        seatsTotal: data.seatsTotal,
-        note: data.note ?? '',
-        originLat: data.originLat,
-        originLng: data.originLng,
-        destLat: data.destLat,
-        destLng: data.destLng,
-      };
-      // 필요 시: body.carpoolId = id;
+      const body: any = { carpoolId: id };
 
-      const res = await apiClient.post<ApiResponse<CarpoolResponseDto>>(`/api/carpool/update/${id}`, body);
+      const putIfDefined = (key: string, value: any) => {
+        if (value !== undefined && value !== null) body[key] = value;
+      };
+
+      putIfDefined('carInfo', data.carInfo);
+      // putIfDefined('departureTime', data.departureTime);
+
+      putIfDefined('origin', data.origin);
+      putIfDefined('originDetailed', data.originDetailed);
+      putIfDefined('destination', data.destination);
+      putIfDefined('destinationDetailed', data.destinationDetailed);
+
+      putIfDefined('seatsTotal', data.seatsTotal);
+      putIfDefined('seatsLeft', data.seatsLeft);
+
+      putIfDefined('note', data.note);
+
+      putIfDefined('originLat', data.originLat);
+      putIfDefined('originLng', data.originLng);
+      putIfDefined('destLat', data.destLat);
+      putIfDefined('destLng', data.destLng);
+
+      const res = await apiClient.post<ApiResponse<CarpoolResponseDto>>(
+        `/api/carpool/update/${id}`,
+        body
+      );
+      console.log('[update res.data]', res.data);
       return this.mapToCarpool(res.data.data);
     } catch (e) {
-      throw this.normalizeError(e);
+      if (isAxiosError(e)) {
+      console.log('[update axios status]', e.response?.status);
+      console.log('[update axios data]', e.response?.data);
+      console.log('[update axios url]', e.config?.url);
+      console.log('[update axios body]', e.config?.data);
+    } else {
+      console.log('[update non-axios error]', e);
+    }
+    throw this.normalizeError(e);
     }
   }
 

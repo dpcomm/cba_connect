@@ -1,16 +1,14 @@
-import { CreateCarpoolUseCase } from '@application/carpool';
+import { GetCarpoolDetailUseCase } from '@application/carpool/GetCarpoolDetailUseCase';
+import { UpdateCarpoolUseCase } from '@application/carpool/UpdateCarpoolUseCase';
+import { UpdateCarpoolData } from '@domain/carpool/ICarpoolRepository';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthStore } from '@shared/stores/useAuthStore';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
+import { Alert } from 'react-native';
 import { container } from 'tsyringe';
 
-type Destination = 'HOME' | 'RETREAT';
-
 const RETREAT_NAME = '딱따구리 수련원';
-const RETREAT_ROAD_ADDRESS = '경기 양주시 광적면 현석로 313-44';
-const RETREAT_LAT = 37.832712368176;
-const RETREAT_LNG = 126.941490563411;
 
 type DateOption = { label: string; value: string };
 
@@ -29,24 +27,20 @@ function formatDateWithDay(date: Date) {
   const m = String(date.getMonth() + 1).padStart(2, '0');
   const d = String(date.getDate()).padStart(2, '0');
   const dayLabel = DAY_LABEL_KR[date.getDay()];
-  return `${y}-${m}-${d}(${dayLabel})`;
+  return `${y}.${m}.${d}(${dayLabel})`;
 }
 
 function buildDateOptions(dates: string[]): DateOption[] {
   return dates.map((value) => {
-    const [y, m, day] = value.split('-').map(Number);
-    const date = new Date(y, m - 1, day);
+    const [y, m, d] = value.split('-').map(Number);
+    const date = new Date(y, m - 1, d);
     return { value, label: formatDateWithDay(date) };
   });
 }
 
-// 기준 날짜만 관리 (value는 YYYY-MM-DD 유지)
 const BASE_DATES = ['2026-01-29', '2026-01-30', '2026-01-31', '2026-02-01'];
-
-// ✅ 화면 라벨은 요일 붙인 버전, 내부 값은 YYYY-MM-DD
 const DATE_OPTIONS = buildDateOptions(BASE_DATES);
 
-// ✅ 시간 옵션
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
 const MINUTE_OPTIONS = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '0'));
 
@@ -57,214 +51,249 @@ type Place = {
   lng?: number;
 };
 
-const RETREAT_PLACE: Place = {
-  roadAddress: RETREAT_ROAD_ADDRESS, // ✅ 저장/표시/좌표용 실제 주소
-  detail: RETREAT_NAME,              // ✅ 화면에서 이름이 필요하면 사용
-  lat: RETREAT_LAT,
-  lng: RETREAT_LNG,
-};
-
 const EMPTY_PLACE: Place = { roadAddress: '' };
 
-function toUtcISOStringFromKst(dateStr: string, hour: string, minute: string) {
-  // dateStr: 'YYYY-MM-DD'
-  const [y, m, d] = dateStr.split('-').map((v) => Number(v));
-  const hh = Number(hour);
-  const mm = Number(minute);
-
-  // KST(UTC+9) → UTC: 9시간 빼서 Date.UTC에 넣기
-  const utc = new Date(Date.UTC(y, m - 1, d, hh - 9, mm, 0, 0));
-  return utc.toISOString();
-}
-
 export function useCarpoolEditScreenViewModel() {
-  const createUseCase = container.resolve(CreateCarpoolUseCase);
+  const getDetailUseCase = container.resolve(GetCarpoolDetailUseCase);
+  const updateUseCase = container.resolve(UpdateCarpoolUseCase);
+
   const router = useRouter();
-  const authStore = useAuthStore();
-  const { user, setError, setLoading } = authStore;
+  const { user, setError, setLoading } = useAuthStore();
 
-  const STORAGE_KEYS = {
-    carInfo: 'carpool.carInfo',
-  };
+  const params = useLocalSearchParams();
+  const raw = (params as any).carpoolId;
+  const carpoolId = Number(Array.isArray(raw) ? raw[0] : raw);
 
-  // 로그인 유저 기반 기본값 + carInfo 로드
-  useEffect(() => {
-    if (!user) return;
+  const STORAGE_KEYS = { carInfo: 'carpool.carInfo' };
 
-    setDriverName(user.name ?? '');
-    setPhone(user.phone ?? '');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authStore.user]);
-
-  const params = useLocalSearchParams<{ destination?: Destination }>();
-  const destination: Destination = (params.destination as Destination) ?? 'RETREAT';
-
-  const isHome = destination === 'HOME'; // HOME = 집으로 / RETREAT = 수련회장으로
-
-  // 공통 입력 필드
+  const [driverId, setDriverId] = useState<number>();
   const [driverName, setDriverName] = useState('');
+  const [phone, setPhone] = useState('');
+
   const [carInfo, setCarInfo] = useState('');
   const [capacity, setCapacity] = useState(1);
-  const [phone, setPhone] = useState('');
-  const [mainPickup, setMainPickup] = useState('');
   const [memo, setMemo] = useState('');
+  const [mainPickup, setMainPickup] = useState('');
 
-  // 날짜/시간 (SelectBox)
+  const [membersCount, setMembersCount] = useState(0);
+
+  const [originDisabled, setOriginDisabled] = useState(false);
+  const [destDisabled, setDestDisabled] = useState(false);
+
+  const isHome = originDisabled;
+
   const [date, setDate] = useState(DATE_OPTIONS[0].value);
   const [hour, setHour] = useState('00');
   const [minute, setMinute] = useState('00');
 
-  // 출발/도착
   const [origin, setOrigin] = useState<Place>(EMPTY_PLACE);
   const [dest, setDest] = useState<Place>(EMPTY_PLACE);
 
-  // ✅ destination에 따라 “수련원 고정 위치”를 origin 또는 dest에 주입
   useEffect(() => {
-    if (isHome) {
-      // HOME: 출발지 고정(수련원) / 도착지 입력
-      setOrigin(RETREAT_PLACE);
-      setDest((prev) => (prev.roadAddress ? prev : EMPTY_PLACE));
-    } else {
-      // RETREAT: 도착지 고정(수련원) / 출발지 입력
-      setDest(RETREAT_PLACE);
-      setOrigin((prev) => (prev.roadAddress ? prev : EMPTY_PLACE));
-    }
-  }, [isHome]);
+    if (!Number.isFinite(carpoolId)) return;
 
-  const originDisabled = isHome; // HOME: 출발지 고정
-  const destDisabled = !isHome; // RETREAT: 도착지 고정
+    (async () => {
+      try {
+        setLoading?.(true);
+
+        const detail = await getDetailUseCase.execute(carpoolId);
+
+        setDriverId(detail.driverId);
+        setDriverName(detail.driver?.name ?? '');
+        setPhone(detail.driver?.phone ?? '');
+
+        setCarInfo(detail.carInfo ?? '');
+        setCapacity(detail.seatsTotal ?? 1);
+        setMemo(detail.note ?? '');
+
+        const originIsRetreat = detail.originDetailed === RETREAT_NAME;
+        const destIsRetreat = detail.destinationDetailed === RETREAT_NAME;
+
+        setOriginDisabled(originIsRetreat);
+        setDestDisabled(destIsRetreat);
+
+        setOrigin({
+          roadAddress: detail.origin ?? '',
+          detail: detail.originDetailed ?? '',
+          lat: detail.originLat ?? undefined,
+          lng: detail.originLng ?? undefined,
+        });
+
+        setDest({
+          roadAddress: detail.destination ?? '',
+          detail: detail.destinationDetailed ?? '',
+          lat: detail.destLat ?? undefined,
+          lng: detail.destLng ?? undefined,
+        });
+
+        const pickup = originIsRetreat
+          ? detail.destinationDetailed ?? ''
+          : detail.originDetailed ?? '';
+        setMainPickup(pickup);
+
+        if (detail.departureTime) {
+          const d = new Date(detail.departureTime);
+          if (!Number.isNaN(d.getTime())) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const hh = String(d.getHours()).padStart(2, '0');
+            const mm = String(d.getMinutes()).padStart(2, '0');
+
+            setDate(`${y}-${m}-${day}`);
+            setHour(hh);
+            setMinute(mm);
+          }
+        }
+
+        setMembersCount(detail.members?.length ?? 0);
+      } catch {
+        const msg = '카풀 정보를 불러오지 못했습니다.';
+        setError?.(msg);
+        alert(msg);
+      } finally {
+        setLoading?.(false);
+      }
+    })();
+  }, [carpoolId]);
+
+  const editableMarker = useMemo(() => {
+    const target = isHome ? dest : origin;
+    if (target.lat == null || target.lng == null) return null;
+    return { lat: target.lat, lng: target.lng };
+  }, [isHome, origin, dest]);
 
   const incCapacity = () => setCapacity((v) => Math.min(8, v + 1));
   const decCapacity = () => setCapacity((v) => Math.max(1, v - 1));
 
-  // 지도에 표시할 마커는 "입력 가능한 필드" 하나만
-  const editableMarker = useMemo(() => {
-    const editable = isHome ? dest : origin;
-    if (editable.lat == null || editable.lng == null) return null;
-    return { lat: editable.lat, lng: editable.lng };
-  }, [isHome, origin, dest]);
-
-  // (참고) 기존 함수 유지
-  const departureTime = useMemo(() => toUtcISOStringFromKst(date, hour, minute), [date, hour, minute]);
-  const buildDepartureTimeISO = (d: string, h: string, m: string) => {
-    const dt = new Date(`${d}T${h}:${m}:00`);
-    return dt.toISOString();
-  };
-
   const submit = async () => {
-    // ✅ 로그인 유저 필수
-    if (!user?.id) {
-      alert('로그인이 필요합니다.');
-      return;
-    }
+    const errorMsg = validate();
+    if (errorMsg) return alert(errorMsg);
 
-    // ✅ 필수값: note(메모) 제외 전부
-    if (!driverName?.trim()) return alert('운전자명을 입력해 주세요.');
-    if (!carInfo?.trim()) return alert('내 차 정보를 입력해 주세요.');
-    if (!phone?.trim()) return alert('연락처를 입력해 주세요.');
+    const departureTimeISO = new Date(
+      `${date}T${hour}:${minute}:00`
+    ).toISOString();
 
-    if (!date) return alert('날짜를 선택해 주세요.');
-    if (!hour) return alert('시를 선택해 주세요.');
-    if (!minute) return alert('분을 선택해 주세요.');
+    const seatsLeft = Math.max(0, capacity - membersCount);
 
-    // 출발/도착 주소
-    if (!origin?.roadAddress?.trim()) return alert('출발지를 입력해 주세요.');
-    if (!dest?.roadAddress?.trim()) return alert('도착지를 입력해 주세요.');
-
-    // 좌표 (수련원 쪽은 RETREAT_PLACE에 이미 들어있어서 통과)
-    if (origin.lat == null || origin.lng == null) return alert('출발지 좌표가 없습니다. 다시 선택해 주세요.');
-    if (dest.lat == null || dest.lng == null) return alert('도착지 좌표가 없습니다. 다시 선택해 주세요.');
-
-    // 상세(현재 UI에서 "주요 위치"만 있으므로 originDetailed에 매핑)
-    if (!mainPickup?.trim()) return alert('주요 위치를 입력해 주세요.');
-
-    // 메모
-    if (!memo?.trim()) return alert('메모를 입력해 주세요.');
-
-    // 인원
-    if (!capacity || capacity < 1) return alert('수용 가능한 인원을 1명 이상으로 설정해 주세요.');
-
-    const departureTimeISO = buildDepartureTimeISO(date, hour, minute);
-
-    const originDetailed = isHome ? (origin.detail ?? RETREAT_NAME) : mainPickup.trim();
-    const destinationDetailed = isHome ? mainPickup.trim() : (dest.detail ?? RETREAT_NAME);
-
-    const payload = {
-      driverId: user.id,
+    const payload: UpdateCarpoolData = {
+      driverId,
       carInfo: carInfo.trim(),
       departureTime: departureTimeISO,
-
-      origin: origin.roadAddress.trim(),
-      originDetailed: originDetailed,
-
-      destination: dest.roadAddress.trim(),
-      destinationDetailed: destinationDetailed,
-
       seatsTotal: capacity,
-
-      note: memo?.trim() ? memo.trim() : '',
-
-      originLat: Number(origin.lat!.toFixed(6)),
-      originLng: Number(origin.lng!.toFixed(6)),
-      destLat: Number(dest.lat!.toFixed(6)),
-      destLng: Number(dest.lng!.toFixed(6)),
+      seatsLeft,
+      note: memo.trim(),
+      isArrived: false,
     };
 
-    console.log(payload);
+    if (isHome) {
+      payload.destination = dest.roadAddress.trim();
+      payload.destinationDetailed = mainPickup.trim();
+      payload.destLat = dest.lat;
+      payload.destLng = dest.lng;
+    } else {
+      payload.origin = origin.roadAddress.trim();
+      payload.originDetailed = mainPickup.trim();
+      payload.originLat = origin.lat;
+      payload.originLng = origin.lng;
+    }
+    console.log('[submit] carpoolId', carpoolId);
+    console.log('[submit] payload', payload);
 
     try {
       setLoading?.(true);
-      const created = await createUseCase.execute(payload);
+      await updateUseCase.execute(carpoolId, payload);
       await AsyncStorage.setItem(STORAGE_KEYS.carInfo, carInfo.trim());
-      alert('카풀이 등록되었습니다.');
-      router.replace('/carpool');
-    } catch (error: unknown) {
-      const msg = '카풀 등록에 실패하였습니다.';
+      alert('수정이 완료되었습니다.');
+      router.push(`/carpool`);
+    } catch {
+      const msg = '수정에 실패하였습니다.';
       setError?.(msg);
       alert(msg);
+    } finally {
+      setLoading?.(false);
     }
   };
 
+  const confirmSubmit = () => {
+    const hasMembers = membersCount > 1;
+
+    const message = hasMembers
+      ? '카풀 신청자가 있습니다.\n정말로 수정하시겠습니까?\n\n탑승자에게는 수정 알림이 발송됩니다.'
+      : '정말로 수정하시겠습니까?';
+
+    Alert.alert('수정', message, [
+      { text: '아니요', style: 'cancel' },
+      { text: '예', onPress: submit },
+    ]);
+  };
+
+  const validate = (): string | null => {
+    if (driverId !== user?.id) return '로그인 정보가 일치하지 않습니다.';
+    if (!Number.isFinite(carpoolId)) return '잘못된 접근입니다.';
+
+    const carInfoTrim = carInfo.trim();
+    if (!carInfoTrim) return '차량 정보를 입력해주세요.';
+
+    if (capacity < membersCount) {
+      return '수정 후 탑승 인원이 현재 신청 인원보다 적습니다.\n수정하시려면 삭제 후 다시 등록해주세요.';
+    }
+
+    // 장소 필수
+    const road = isHome ? dest.roadAddress?.trim() : origin.roadAddress?.trim();
+    if (!road) return isHome ? '도착지를 선택해주세요.' : '출발지를 선택해주세요.';
+
+    const pickupTrim = mainPickup.trim();
+    if (!pickupTrim) return '탑승 장소(상세)를 입력해주세요.';
+
+    // 좌표는 있으면 숫자여야 함(없어도 저장 가능하게 할지 여부는 너 정책에 맞춰)
+    const lat = isHome ? dest.lat : origin.lat;
+    const lng = isHome ? dest.lng : origin.lng;
+    if (lat != null && !Number.isFinite(lat)) return '좌표(lat)가 올바르지 않습니다.';
+    if (lng != null && !Number.isFinite(lng)) return '좌표(lng)가 올바르지 않습니다.';
+
+    return null;
+  };
+
   return {
-    destination,
     isHome,
 
-    // 공통
     driverName,
-    setDriverName,
     carInfo,
     setCarInfo,
+
     capacity,
     incCapacity,
     decCapacity,
+
     phone,
-    setPhone,
     mainPickup,
     setMainPickup,
+
     memo,
     setMemo,
 
-    // 날짜/시간
     date,
     setDate,
     hour,
     setHour,
     minute,
     setMinute,
+
     DATE_OPTIONS,
     HOUR_OPTIONS,
     MINUTE_OPTIONS,
 
-    // 출발/도착
     origin,
     setOrigin,
     dest,
     setDest,
+
     originDisabled,
     destDisabled,
     editableMarker,
 
     submit,
-    departureTime,
+    confirmSubmit
   };
 }

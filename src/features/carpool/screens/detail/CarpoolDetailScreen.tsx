@@ -185,7 +185,7 @@ export default function CarpoolDetailScreen() {
           <View style={styles.bottomButtonRow}>
             <Button
               title="수정하기"
-              onPress={() => toEdit(carpool.carpoolId)}
+              onPress={() => toEdit(carpool.id)}
               size="large"
               textVariant="text1"
               style={styles.bottomButtonHalf}
