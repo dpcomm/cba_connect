@@ -7,17 +7,23 @@ import { Layout } from '@shared/constants/layout';
 import { container } from '@shared/di/container';
 import { useAuthStore } from '@shared/stores/useAuthStore';
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useState } from 'react';
 import { Alert, ScrollView, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { CarInfoModal } from '../components/CarInfoModal';
 import { MenuItem } from '../components/MenuItem';
 import { MenuSection } from '../components/MenuSection';
 import { ProfileCard } from '../components/ProfileCard';
 
+type ActiveModal = null | 'CAR_INFO' | 'NOTICE' | 'SUPPORT';
 
 export default function MyPageScreen() {
   const router = useRouter();
   const { logout: clearAuthState } = useAuthStore();
+
+  const [activeModal, setActiveModal] = useState<ActiveModal>(null);
+  const [carInfo, setCarInfo] = useState('');
+  const closeModal = () => setActiveModal(null);
 
   const handleLogout = () => {
     Alert.alert(
@@ -57,7 +63,7 @@ export default function MyPageScreen() {
         }
       />
 
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={{ paddingHorizontal: Layout.spacing.l, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
@@ -76,8 +82,8 @@ export default function MyPageScreen() {
             <MenuItem label="수련회 히스토리" showBorder={false} />
           </MenuSection>
           <MenuSection title="마이 카풀">
-            <MenuItem label="카풀 히스토리" />
-            <MenuItem label="내 차 정보 조회" showBorder={false} />
+            <MenuItem label="카풀 히스토리" onPress={() => router.push('/carpool/history' as any)} showBorder={false} />
+            <MenuItem label="내 차 정보 조회" showBorder={false} onPress={() => setActiveModal('CAR_INFO')}/>
           </MenuSection>
           <MenuSection title="Support">
             <MenuItem label="기술 지원 안내" showBorder={false} />
@@ -90,6 +96,7 @@ export default function MyPageScreen() {
         </TouchableOpacity>
 
       </ScrollView>
+      <CarInfoModal visible={activeModal === 'CAR_INFO'} onClose={closeModal} />
     </SafeAreaView>
   );
 }

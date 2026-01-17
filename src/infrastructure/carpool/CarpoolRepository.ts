@@ -122,7 +122,7 @@ export class CarpoolRepository implements ICarpoolRepository {
       };
 
       putIfDefined('carInfo', data.carInfo);
-      // putIfDefined('departureTime', data.departureTime);
+      putIfDefined('departureTime', data.departureTime);
 
       putIfDefined('origin', data.origin);
       putIfDefined('originDetailed', data.originDetailed);
