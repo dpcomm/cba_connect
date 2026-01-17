@@ -63,7 +63,18 @@ export function useRegisterViewModel() {
       // reset()은 RegisterScreen 언마운트 시 호출됨
     } catch (error: any) {
       console.error(error);
-      alert(error.message || '회원가입에 실패했습니다.');
+      const errorMsg = error.message || '';
+      
+      // 인증 토큰 만료 관련 오류만 재인증 유도 (일반 토큰 오류는 제외)
+      if (errorMsg.includes('존재하지 않는 사용자') || 
+          errorMsg.includes('verificationToken') ||
+          errorMsg.includes('인증이 만료')) {
+        updateData({ verificationToken: '', email: '' });
+        funnel.goTo('Email');
+        alert('이메일 인증이 만료되었습니다. 다시 인증해주세요.');
+      } else {
+        alert(errorMsg || '회원가입에 실패했습니다.');
+      }
     }
   };
 

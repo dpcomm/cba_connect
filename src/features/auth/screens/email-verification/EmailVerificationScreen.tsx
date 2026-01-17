@@ -1,5 +1,6 @@
 import { Button } from '@shared/components/button/Button';
 import { Header } from '@shared/components/header/Header';
+import { LoadingOverlay } from '@shared/components/loading-overlay/LoadingOverlay';
 import { Color } from '@shared/constants/color';
 import { Layout } from '@shared/constants/layout';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -66,10 +67,11 @@ export default function EmailVerificationScreen() {
   };
 
   return (
+    <>
     <SafeAreaView style={{ flex: 1, backgroundColor: Color.default.background }} edges={['top']}>
       <Header title="이메일 인증" onBack={handleBack} />
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <KeyboardAvoidingView 
+        <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1 }}
         >
@@ -98,5 +100,7 @@ export default function EmailVerificationScreen() {
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
     </SafeAreaView>
+    <LoadingOverlay visible={vm.isLoading} />
+    </>
   );
 }

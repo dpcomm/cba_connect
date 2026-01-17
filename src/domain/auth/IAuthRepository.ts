@@ -25,15 +25,16 @@ export interface IAuthRepository {
   register(data: RegisterData): Promise<Auth>;
   logout(): Promise<void>;
   refreshAccessToken(): Promise<string>;
-  
+
   setAutoLoginEnabled(enabled: boolean): Promise<void>;
   getAutoLoginEnabled(): Promise<boolean>;
   getStoredRefreshToken(): Promise<string | null>;
 
-  sendEmailVerification(email: string, type: EmailVerificationType): Promise<void>;
+  sendEmailVerification(email: string, type: EmailVerificationType, userId?: string): Promise<void>;
   verifyEmailCode(email: string, code: string): Promise<string>;
 
   checkIdDuplicate(id: string): Promise<boolean>;
+  findId(name: string, phone: string): Promise<string[]>;
   resetPassword(data: ResetPasswordData): Promise<void>;
 }
 

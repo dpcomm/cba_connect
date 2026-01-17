@@ -1,4 +1,5 @@
 import { TextInputLined } from '@shared/components/text-input-lined/TextInputLined';
+import { formatPhoneNumber } from '@shared/utils/format';
 import React from 'react';
 import { View } from 'react-native';
 import { ReadOnlyStepValue } from '../../../components/ReadOnlyStepValue';
@@ -17,8 +18,15 @@ export function PhoneStep({ phoneNumber, setPhoneNumber, onNext, readOnly }: Pro
   }
 
   const handleSubmit = () => {
-    if (phoneNumber.length >= 10 && onNext) {
+    const rawNumber = phoneNumber.replace(/-/g, '');
+    if (rawNumber.length >= 10 && onNext) {
       onNext();
+    }
+  };
+
+  const handleChangeText = (text: string) => {
+    if (setPhoneNumber) {
+      setPhoneNumber(formatPhoneNumber(text));
     }
   };
 
@@ -26,9 +34,9 @@ export function PhoneStep({ phoneNumber, setPhoneNumber, onNext, readOnly }: Pro
     <View style={{ width: '100%' }}>
       <StepLabel label="전화번호" />
       <TextInputLined
-        placeholder="01011111111"
+        placeholder="010-1111-1111"
         value={phoneNumber}
-        onChangeText={setPhoneNumber}
+        onChangeText={handleChangeText}
         onSubmitEditing={handleSubmit}
         returnKeyType="next"
         keyboardType="phone-pad"

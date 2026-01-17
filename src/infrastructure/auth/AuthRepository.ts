@@ -12,6 +12,8 @@ import { injectable } from 'tsyringe';
 import {
   AuthResponseDto,
   CheckIdResponseDto,
+  FindIdRequestDto,
+  FindIdResponseDto,
   LoginRequestDto,
   RefreshResponseDto,
   RegisterRequestDto,
@@ -51,6 +53,7 @@ export class AuthRepository implements IAuthRepository {
 
       const response = await apiClient.post<ApiResponse<AuthResponseDto>>('/api/auth/register', requestBody);
       const responseData = response.data.data;
+      console.log('Register Response Data:', JSON.stringify(responseData, null, 2));
 
       if (responseData.access_token) {
         await SecureStore.setItemAsync('access_token', responseData.access_token);
@@ -177,9 +180,13 @@ export class AuthRepository implements IAuthRepository {
     );
   }
 
-  async sendEmailVerification(email: string, type: EmailVerificationType): Promise<void> {
+  async sendEmailVerification(email: string, type: EmailVerificationType, userId?: string): Promise<void> {
     try {
-      await apiClient.get<ApiResponse<void>>(`/api/auth/email/${encodeURIComponent(email)}?type=${type}`);
+      let url = `/api/auth/email/${encodeURIComponent(email)}?type=${type}`;
+      if (userId) {
+        url += `&userId=${encodeURIComponent(userId)}`;
+      }
+      await apiClient.get<ApiResponse<void>>(url);
     } catch (error: any) {
       throw this.normalizeError(error);
     }
@@ -204,6 +211,16 @@ export class AuthRepository implements IAuthRepository {
         `/api/auth/check-id/${encodeURIComponent(id)}`
       );
       return response.data.data.isDuplicate;
+    } catch (error: any) {
+      throw this.normalizeError(error);
+    }
+  }
+
+  async findId(name: string, phone: string): Promise<string[]> {
+    try {
+      const requestBody: FindIdRequestDto = { name, phone };
+      const response = await apiClient.post<ApiResponse<FindIdResponseDto>>('/api/auth/find-id', requestBody);
+      return response.data.data.userIds;
     } catch (error: any) {
       throw this.normalizeError(error);
     }
@@ -239,6 +256,8 @@ export class AuthRepository implements IAuthRepository {
       if (statusCode === 400) {
         if (message === 'User already exists') return new Error('이미 존재하는 사용자입니다.');
         if (message === 'Email already exists') return new Error('이미 등록된 이메일입니다.');
+        if (message === 'Email not registered') return new Error('등록되지 않은 이메일입니다.');
+        if (message === 'User email mismatch' || message === 'User ID and email do not match') return new Error('아이디와 이메일 정보가 일치하지 않습니다.');
         return new Error(message || '잘못된 요청입니다.');
       }
       if (statusCode === 401) {

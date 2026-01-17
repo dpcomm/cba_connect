@@ -48,5 +48,11 @@ export interface ResetPasswordRequestDto {
   newPassword: string;
 }
 
+export interface FindIdRequestDto {
+  name: string;
+  phone: string;
+}
 
-
+export interface FindIdResponseDto {
+  userIds: string[];
+}

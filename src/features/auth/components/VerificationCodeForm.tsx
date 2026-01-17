@@ -12,17 +12,16 @@ interface VerificationCodeFormProps {
   initialTimeSeconds?: number;
 }
 
-export function VerificationCodeForm({ 
-  verificationCode, 
-  setVerificationCode, 
+export function VerificationCodeForm({
+  verificationCode,
+  setVerificationCode,
   onResend,
-  initialTimeSeconds = 300,
+  initialTimeSeconds = 180,
 }: VerificationCodeFormProps) {
   const [timeLeft, setTimeLeft] = useState(initialTimeSeconds);
 
   useEffect(() => {
     if (timeLeft <= 0) return;
-    
     const timer = setInterval(() => {
       setTimeLeft(prev => prev - 1);
     }, 1000);
@@ -76,7 +75,7 @@ export function VerificationCodeForm({
 
       <View style={{ marginBottom: Layout.spacing.l }}>
         <ThemedText variant="text3" color={Color.text.sub}>• 메일이 보이지 않으면 스팸함을 확인해주세요</ThemedText>
-        <ThemedText variant="text3" color={Color.text.sub}>• 5분 내 도착하지 않으면 다시 요청해주세요</ThemedText>
+        <ThemedText variant="text3" color={Color.text.sub}>• 3분 내 도착하지 않으면 다시 요청해주세요</ThemedText>
         <ThemedText variant="text3" color={Color.primary.main}>• 남은 유효시간 {formatTime(timeLeft)}</ThemedText>
       </View>
     </View>

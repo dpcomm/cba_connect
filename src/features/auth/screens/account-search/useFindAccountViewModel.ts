@@ -1,3 +1,4 @@
+import { FindIdUseCase } from '@application/auth/FindIdUseCase';
 import { ResetPasswordUseCase } from '@application/auth/ResetPasswordUseCase';
 import { SendEmailVerificationUseCase } from '@application/auth/SendEmailVerificationUseCase';
 import { VerifyEmailCodeUseCase } from '@application/auth/VerifyEmailCodeUseCase';
@@ -10,7 +11,7 @@ export type FindAccountTab = 'ID' | 'PW';
 export type FindIdStep = 'input' | 'result';
 export type FindPwStep = 'input' | 'verification' | 'newPassword';
 
-export function useFindAccountViewModel() {
+export function useFindAccountViewModel(onPasswordResetSuccess?: () => void) {
   const [activeTab, setActiveTab] = useState<FindAccountTab>('ID');
   const [isLoading, setIsLoading] = useState(false);
   
@@ -18,7 +19,7 @@ export function useFindAccountViewModel() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [findIdStep, setFindIdStep] = useState<FindIdStep>('input');
-  const [foundId, setFoundId] = useState('');
+  const [foundIds, setFoundIds] = useState<string[]>([]);
   
   // 비밀번호 찾기
   const [userId, setUserId] = useState('');
@@ -30,9 +31,26 @@ export function useFindAccountViewModel() {
   const [confirmPassword, setConfirmPassword] = useState('');
 
   const findId = async () => {
-    // TODO: 아이디 찾기 API 연동 (현재 미구현)
-    setFoundId('----@----');
-    setFindIdStep('result');
+    if (!name.trim()) {
+      Alert.alert('오류', '이름을 입력해주세요.');
+      return;
+    }
+    if (!phone.trim()) {
+      Alert.alert('오류', '전화번호를 입력해주세요.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const findIdUseCase = container.resolve(FindIdUseCase);
+      const ids = await findIdUseCase.execute(name, phone);
+      setFoundIds(ids);
+      setFindIdStep('result');
+    } catch (error: any) {
+      Alert.alert('오류', error.message || '아이디 찾기에 실패했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const sendVerificationCode = async () => {
@@ -43,7 +61,7 @@ export function useFindAccountViewModel() {
     setIsLoading(true);
     try {
       const sendEmailVerificationUseCase = container.resolve(SendEmailVerificationUseCase);
-      await sendEmailVerificationUseCase.execute(email, EmailVerificationType.RESET_PASSWORD);
+      await sendEmailVerificationUseCase.execute(email, EmailVerificationType.RESET_PASSWORD, userId);
       setFindPwStep('verification');
     } catch (error: any) {
       Alert.alert('오류', error.message || '인증번호 발송에 실패했습니다.');
@@ -56,7 +74,7 @@ export function useFindAccountViewModel() {
     setIsLoading(true);
     try {
       const sendEmailVerificationUseCase = container.resolve(SendEmailVerificationUseCase);
-      await sendEmailVerificationUseCase.execute(email, EmailVerificationType.RESET_PASSWORD);
+      await sendEmailVerificationUseCase.execute(email, EmailVerificationType.RESET_PASSWORD, userId);
       Alert.alert('알림', '인증번호가 재발송되었습니다.');
     } catch (error: any) {
       Alert.alert('오류', error.message || '인증번호 재발송에 실패했습니다.');
@@ -100,8 +118,14 @@ export function useFindAccountViewModel() {
         verificationToken,
         newPassword,
       });
-      Alert.alert('성공', '비밀번호가 변경되었습니다. 로그인해주세요.');
-      // 상태 초기화는 AccountSearchScreen에서 로그인 이동 후 처리
+      Alert.alert('성공', '비밀번호가 변경되었습니다.', [
+        {
+          text: '확인',
+          onPress: () => {
+            onPasswordResetSuccess?.();
+          },
+        },
+      ]);
     } catch (error: any) {
       Alert.alert('오류', error.message || '비밀번호 재설정에 실패했습니다.');
     } finally {
@@ -154,7 +178,7 @@ export function useFindAccountViewModel() {
     phone,
     setPhone,
     findIdStep,
-    foundId,
+    foundIds,
     userId,
     setUserId,
     email,

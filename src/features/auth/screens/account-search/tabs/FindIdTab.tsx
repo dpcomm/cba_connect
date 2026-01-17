@@ -1,6 +1,7 @@
 import { TextInput } from '@shared/components/text-input/TextInput';
 import { Color } from '@shared/constants/color';
 import { Layout } from '@shared/constants/layout';
+import { formatPhoneNumber } from '@shared/utils/format';
 import React from 'react';
 import { View } from 'react-native';
 
@@ -21,9 +22,9 @@ export function FindIdTab({ name, setName, phone, setPhone }: Props) {
         containerStyle={{ marginBottom: Layout.spacing.m }}
       />
       <TextInput
-        placeholder="전화번호 입력"
+        placeholder="010-1111-1111"
         value={phone}
-        onChangeText={setPhone}
+        onChangeText={(text) => setPhone(formatPhoneNumber(text))}
         keyboardType="phone-pad"
       />
     </View>

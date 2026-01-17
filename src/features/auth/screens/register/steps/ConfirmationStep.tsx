@@ -12,6 +12,7 @@ interface RegisterData {
   affiliation: string;
   userId: string;
   password: string;
+  email: string;
 }
 
 interface Props {
@@ -36,11 +37,12 @@ export function ConfirmationStep({ data, onConfirm }: Props) {
       {data.birthdate && <ReadOnlyStepValue label="생년월일" value={data.birthdate} />}
       <ReadOnlyStepValue label="성별" value={getGenderText(data.gender)} />
       <ReadOnlyStepValue label="전화번호" value={data.phoneNumber} />
+      <ReadOnlyStepValue label="이메일" value={data.email} />
       <ReadOnlyStepValue label="중그룹" value={data.affiliation} />
 
       <View style={{ marginTop: Layout.spacing.xl }}>
-        <Button 
-          title="회원가입" 
+        <Button
+          title="회원가입"
           onPress={onConfirm}
           size="large"
         />

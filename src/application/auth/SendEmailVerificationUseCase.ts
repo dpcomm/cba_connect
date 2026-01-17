@@ -8,7 +8,7 @@ export class SendEmailVerificationUseCase {
     @inject('AuthRepository') private authRepository: IAuthRepository
   ) {}
 
-  async execute(email: string, type: EmailVerificationType): Promise<void> {
-    await this.authRepository.sendEmailVerification(email, type);
+  async execute(email: string, type: EmailVerificationType, userId?: string): Promise<void> {
+    await this.authRepository.sendEmailVerification(email, type, userId);
   }
 }
