@@ -12,8 +12,39 @@ const RETREAT_ROAD_ADDRESS = '경기 양주시 광적면 현석로 313-44';
 const RETREAT_LAT = 37.832712368176;
 const RETREAT_LNG = 126.941490563411;
 
-// ✅ 날짜 옵션(고정)
-const DATE_OPTIONS = ['2026-01-29', '2026-01-30', '2026-01-31', '2026-02-01'];
+type DateOption = { label: string; value: string };
+
+const DAY_LABEL_KR: Record<number, string> = {
+  0: '주일',
+  1: '월',
+  2: '화',
+  3: '수',
+  4: '목',
+  5: '금',
+  6: '토',
+};
+
+function formatDateWithDay(date: Date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  const dayLabel = DAY_LABEL_KR[date.getDay()];
+  return `${y}-${m}-${d}(${dayLabel})`;
+}
+
+function buildDateOptions(dates: string[]): DateOption[] {
+  return dates.map((value) => {
+    const [y, m, day] = value.split('-').map(Number);
+    const date = new Date(y, m - 1, day);
+    return { value, label: formatDateWithDay(date) };
+  });
+}
+
+// 기준 날짜만 관리 (value는 YYYY-MM-DD 유지)
+const BASE_DATES = ['2026-01-29', '2026-01-30', '2026-01-31', '2026-02-01'];
+
+// ✅ 화면 라벨은 요일 붙인 버전, 내부 값은 YYYY-MM-DD
+const DATE_OPTIONS = buildDateOptions(BASE_DATES);
 
 // ✅ 시간 옵션
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
@@ -87,7 +118,7 @@ export function useCarpoolRegisterFormViewModel() {
   const [memo, setMemo] = useState('');
 
   // 날짜/시간 (SelectBox)
-  const [date, setDate] = useState(DATE_OPTIONS[0]);
+  const [date, setDate] = useState(DATE_OPTIONS[0].value);
   const [hour, setHour] = useState('00');
   const [minute, setMinute] = useState('00');
 
@@ -113,8 +144,6 @@ export function useCarpoolRegisterFormViewModel() {
 
   const incCapacity = () => setCapacity((v) => Math.min(8, v + 1));
   const decCapacity = () => setCapacity((v) => Math.max(1, v - 1));
-
-  const goBack = () => router.back();
 
   // 지도에 표시할 마커는 "입력 가능한 필드" 하나만
   const editableMarker = useMemo(() => {
@@ -156,7 +185,7 @@ export function useCarpoolRegisterFormViewModel() {
 
     // 상세(현재 UI에서 "주요 위치"만 있으므로 originDetailed에 매핑)
     if (!mainPickup?.trim()) return alert('주요 위치를 입력해 주세요.');
-    
+
     // 메모
     if (!memo?.trim()) return alert('메모를 입력해 주세요.');
 
@@ -194,8 +223,9 @@ export function useCarpoolRegisterFormViewModel() {
     try {
       setLoading?.(true);
       const created = await createUseCase.execute(payload);
+      await AsyncStorage.setItem(STORAGE_KEYS.carInfo, carInfo.trim());
       alert('카풀이 등록되었습니다.');
-      router.replace(`/carpool/detail/${created.id}`);
+      router.replace('/carpool');
     } catch (error: unknown) {
       const msg = '카풀 등록에 실패하였습니다.';
       setError?.(msg);
@@ -242,7 +272,6 @@ export function useCarpoolRegisterFormViewModel() {
     destDisabled,
     editableMarker,
 
-    goBack,
     submit,
 
     // 필요하면 노출(디버깅용)

@@ -1,7 +1,5 @@
 import 'reflect-metadata';
 
-import { initializeNotifications } from '@shared/bootstrap/InitializeNotification';
-
 import { AutoLoginUseCase } from '@application/auth/AutoLoginUseCase';
 import { container } from '@shared/di/container';
 import { useAuthStore } from '@shared/stores/useAuthStore';
@@ -68,9 +66,9 @@ export default function RootLayout() {
     // 2. 현재 Expo SDK 버전의 Expo Go에서는 Android 푸시가 제거됨
     // Expo Go 환경에서의 제약 사항 등으로 인해 주석 처리되어 있었으나, 
     // 실제 디바이스 테스트(Development Build)를 위해 활성화합니다.
-    initializeNotifications().then(({ pushToken }) => {
-      console.log('Push Token:', pushToken);
-    });
+    // initializeNotifications().then(({ pushToken }) => {
+    //   console.log('Push Token:', pushToken);
+    // });
   }, [fontsLoaded]);
 
   useEffect(() => {
@@ -88,6 +86,7 @@ export default function RootLayout() {
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="auth" options={{ headerShown: false }} />
       <Stack.Screen name="home" options={{ headerShown: false }} />
+      <Stack.Screen name="carpool" options={{ headerShown: false }} />
       <Stack.Screen 
         name="my-page" 
         options={{ 

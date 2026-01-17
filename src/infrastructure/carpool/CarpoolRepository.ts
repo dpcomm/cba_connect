@@ -7,7 +7,9 @@ import { Carpool } from '@domain/carpool/Carpool';
 import { CarpoolStatus } from '@domain/carpool/CarpoolStatus';
 import { CreateCarpoolData, ICarpoolRepository, UpdateCarpoolData } from '@domain/carpool/ICarpoolRepository';
 
+import { CarpoolDetail } from '@domain/carpool/CarpoolDetail';
 import {
+  CarpoolDetailResponseDto,
   CarpoolResponseDto,
   CreateCarpoolRequestDto,
   ParticipationCarpoolRequestDto,
@@ -16,35 +18,31 @@ import {
 
 @injectable()
 export class CarpoolRepository implements ICarpoolRepository {
-  async getAvailableCarpools(userId?: number): Promise<Carpool[]> {
+  async getAvailableCarpools(userId: number): Promise<CarpoolDetail[]> {
+    const uid = Number(userId);
+    if (Number.isNaN(uid) || uid <= 0) return [];
+
     try {
-      const uid = userId == null ? undefined : Number(userId);
-      const hasUid = uid != null && !Number.isNaN(uid);
-
-      const res = await apiClient.request<ApiResponse<CarpoolResponseDto[]>>({
-        method: 'GET',
-        url: '/api/carpool/available',
-        params: hasUid ? { userId: uid } : undefined,
-        data: hasUid ? { userId: uid } : {},
-      });
-
-
-      return res.data.data.map(this.mapToCarpool);
+      const res = await apiClient.post<ApiResponse<CarpoolDetailResponseDto[]>>(
+        '/api/carpool/available',
+        { userId: uid }
+      );
+      return res.data.data.map(this.mapToCarpoolDetail);
     } catch (e) {
       if (isAxiosError<ApiErrorResponse>(e) && e.response?.status === 404) return [];
       throw this.normalizeError(e);
     }
   }
 
-  async getParticipatingCarpools(userId: number): Promise<Carpool[]> {
+  async getParticipatingCarpools(userId: number): Promise<CarpoolDetail[]> {
     const id = Number(userId);
     if (!id || Number.isNaN(id)) return [];
 
     try {
-      const res = await apiClient.get<ApiResponse<CarpoolResponseDto[]>>(
+      const res = await apiClient.get<ApiResponse<CarpoolDetailResponseDto[]>>(
         `/api/carpool/participating/${id}`
       );
-      return res.data.data.map(this.mapToCarpool);
+      return res.data.data.map(this.mapToCarpoolDetail);
     } catch (e) {
       if (isAxiosError<ApiErrorResponse>(e) && e.response?.status === 404) return [];
       throw this.normalizeError(e);
@@ -82,7 +80,6 @@ export class CarpoolRepository implements ICarpoolRepository {
       const res = await apiClient.post<ApiResponse<CarpoolResponseDto>>('/api/carpool', body);
       return this.mapToCarpool(res.data.data);
     } catch (e) {
-      console.log('--------------------');
       console.log(e);
       throw e;
     }
@@ -97,19 +94,19 @@ export class CarpoolRepository implements ICarpoolRepository {
     }
   }
 
-  async getCarpoolDetail(id: number): Promise<Carpool> {
+  async getCarpoolDetail(id: number): Promise<CarpoolDetail> {
     try {
-      const res = await apiClient.get<ApiResponse<CarpoolResponseDto>>(`/api/carpool/detail/${id}`);
-      return this.mapToCarpool(res.data.data);
+      const res = await apiClient.get<ApiResponse<CarpoolDetailResponseDto>>(`/api/carpool/detail/${id}`);
+      return this.mapToCarpoolDetail(res.data.data);
     } catch (e) {
       throw this.normalizeError(e);
     }
   }
 
-  async findMyCarpools(userId: number): Promise<Carpool[]> {
+  async findMyCarpools(userId: number): Promise<CarpoolDetail[]> {
     try {
-      const res = await apiClient.get<ApiResponse<CarpoolResponseDto[]>>(`/api/carpool/my/${userId}`);
-      return res.data.data.map(this.mapToCarpool);
+      const res = await apiClient.get<ApiResponse<CarpoolDetailResponseDto[]>>(`/api/carpool/my/${userId}`);
+      return res.data.data.map(this.mapToCarpoolDetail);
     } catch (e) {
       if (isAxiosError<ApiErrorResponse>(e) && e.response?.status === 404) return [];
       throw this.normalizeError(e);
@@ -118,27 +115,46 @@ export class CarpoolRepository implements ICarpoolRepository {
 
   async updateCarpool(id: number, data: UpdateCarpoolData): Promise<Carpool> {
     try {
-      const body: any = {
-        driverId: data.driverId,
-        carInfo: data.carInfo,
-        departureTime: data.departureTime,
-        origin: data.origin,
-        originDetailed: data.originDetailed ?? null,
-        destination: data.destination,
-        destinationDetailed: data.destinationDetailed ?? null,
-        seatsTotal: data.seatsTotal,
-        note: data.note ?? '',
-        originLat: data.originLat,
-        originLng: data.originLng,
-        destLat: data.destLat,
-        destLng: data.destLng,
-      };
-      // 필요 시: body.carpoolId = id;
+      const body: any = { carpoolId: id };
 
-      const res = await apiClient.post<ApiResponse<CarpoolResponseDto>>(`/api/carpool/update/${id}`, body);
+      const putIfDefined = (key: string, value: any) => {
+        if (value !== undefined && value !== null) body[key] = value;
+      };
+
+      putIfDefined('carInfo', data.carInfo);
+      putIfDefined('departureTime', data.departureTime);
+
+      putIfDefined('origin', data.origin);
+      putIfDefined('originDetailed', data.originDetailed);
+      putIfDefined('destination', data.destination);
+      putIfDefined('destinationDetailed', data.destinationDetailed);
+
+      putIfDefined('seatsTotal', data.seatsTotal);
+      putIfDefined('seatsLeft', data.seatsLeft);
+
+      putIfDefined('note', data.note);
+
+      putIfDefined('originLat', data.originLat);
+      putIfDefined('originLng', data.originLng);
+      putIfDefined('destLat', data.destLat);
+      putIfDefined('destLng', data.destLng);
+
+      const res = await apiClient.post<ApiResponse<CarpoolResponseDto>>(
+        `/api/carpool/update/${id}`,
+        body
+      );
+      console.log('[update res.data]', res.data);
       return this.mapToCarpool(res.data.data);
     } catch (e) {
-      throw this.normalizeError(e);
+      if (isAxiosError(e)) {
+      console.log('[update axios status]', e.response?.status);
+      console.log('[update axios data]', e.response?.data);
+      console.log('[update axios url]', e.config?.url);
+      console.log('[update axios body]', e.config?.data);
+    } else {
+      console.log('[update non-axios error]', e);
+    }
+    throw this.normalizeError(e);
     }
   }
 
@@ -181,8 +197,14 @@ export class CarpoolRepository implements ICarpoolRepository {
     }
   }
 
+  private toNumberOrNull(v: unknown): number | null {
+    if (v === null || v === undefined) return null;
+    const n = typeof v === 'number' ? v : Number(v);
+    return Number.isFinite(n) ? n : null;
+  }
+
   /** DTO -> Domain (README 원칙) */
-  private mapToCarpool(dto: CarpoolResponseDto): Carpool {
+  private mapToCarpool = (dto: CarpoolResponseDto): Carpool => {
     return new Carpool(
       dto.id,
       dto.driverId,
@@ -195,14 +217,43 @@ export class CarpoolRepository implements ICarpoolRepository {
       dto.seatsTotal,
       dto.seatsLeft,
       dto.note,
-      dto.originLat ?? null,
-      dto.originLng ?? null,
-      dto.destLat ?? null,
-      dto.destLng ?? null,
+      this.toNumberOrNull(dto.originLat),
+      this.toNumberOrNull(dto.originLng),
+      this.toNumberOrNull(dto.destLat),
+      this.toNumberOrNull(dto.destLng),
       dto.status as CarpoolStatus,
       dto.isArrived,
       dto.createdAt,
       dto.updatedAt
+    );
+  }
+
+  private mapToCarpoolDetail = (dto: CarpoolDetailResponseDto): CarpoolDetail => {
+    const driver = dto.driver ?? { id: dto.driverId, name: '', phone: '' };
+    const members = Array.isArray(dto.members) ? dto.members : [];
+
+    return new CarpoolDetail(
+      dto.id,
+      dto.driverId,
+      dto.carInfo ?? null,
+      dto.departureTime,
+      dto.origin,
+      dto.originDetailed ?? null,
+      dto.destination,
+      dto.destinationDetailed ?? null,
+      dto.seatsTotal,
+      dto.seatsLeft,
+      dto.note,
+      this.toNumberOrNull(dto.originLat),
+      this.toNumberOrNull(dto.originLng),
+      this.toNumberOrNull(dto.destLat),
+      this.toNumberOrNull(dto.destLng),
+      dto.status as CarpoolStatus,
+      dto.isArrived,
+      dto.createdAt,
+      dto.updatedAt,
+      driver,
+      members
     );
   }
 

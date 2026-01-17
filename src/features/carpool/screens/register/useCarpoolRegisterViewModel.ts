@@ -17,11 +17,8 @@ export function useCarpoolRegisterViewModel() {
     });
   };
 
-  const goBack = () => router.back();
-
   return {
     selected,
     selectDestination,
-    goBack,
   };
 }

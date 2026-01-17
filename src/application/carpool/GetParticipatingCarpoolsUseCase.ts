@@ -10,8 +10,6 @@ export class GetParticipatingCarpoolsUseCase {
     ) { }
 
     async execute(userId: number): Promise<Carpool[]> {
-        const id = Number(userId);
-        if (!id || Number.isNaN(id)) return [];
-        return this.carpoolRepository.getParticipatingCarpools(id);
+        return this.carpoolRepository.getParticipatingCarpools(userId);
     }
 }

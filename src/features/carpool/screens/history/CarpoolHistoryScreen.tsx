@@ -1,70 +1,115 @@
-import { ThemedText } from '@shared/components/themed-text/ThemedText';
 import React from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { FlatList, Pressable, ScrollView, View } from 'react-native';
+
+import { useRouter } from 'expo-router';
+
+import { ThemedText } from '@shared/components/themed-text/ThemedText';
+import { Layout } from '@shared/constants/layout';
+
+import CarpoolDriverIcon from '../../../../../assets/svgs/carpool_driver.svg';
+import CarpoolGuestIcon from '../../../../../assets/svgs/carpool_guest.svg';
+
+import { Header } from '@shared/components/header/Header';
+import { Color } from '@shared/constants/color';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { getStatusChipMeta } from './getCarpoolStatusChip';
 import { styles } from './styles';
 import { useCarpoolHistoryViewModel } from './useCarpoolHistoryViewModel';
 
 export default function CarpoolHistoryScreen() {
-  const { items, goBack } = useCarpoolHistoryViewModel();
+  const router = useRouter();
+  const { items, onPressItem } = useCarpoolHistoryViewModel();
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Pressable onPress={goBack} style={styles.headerSide} hitSlop={10}>
-          <ThemedText variant="heading3" style={styles.headerIcon}>←</ThemedText>
-        </Pressable>
+    <SafeAreaView style={{ flex: 1, backgroundColor: Color.default.background }}>
+      <Header title="카풀 전체 내역" onBack={() => router.back()} />
 
-        <ThemedText variant="heading3" style={styles.headerTitle}>
-          카풀 전체 내역
-        </ThemedText>
-
-        <View style={styles.headerSide} />
-      </View>
-
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.list}>
-          {items.map((item) => (
-            <View key={item.id} style={styles.card}>
-              {/* 상단: 날짜 + 뱃지 */}
-              <View style={styles.cardTopRow}>
-                <View style={styles.dateRow}>
-                  <View style={styles.dot} />
-                  <ThemedText variant="text2" style={styles.dateText}>
-                    {item.date}
-                  </ThemedText>
-                </View>
-
-                <View style={styles.roleBadge}>
-                  <ThemedText variant="text3" style={styles.roleBadgeText}>
-                    {item.roleLabel}
-                  </ThemedText>
-                </View>
-              </View>
-
-              {/* 내용 */}
-              <View style={styles.infoList}>
-                <View style={styles.infoRow}>
-                  <ThemedText variant="text3" style={styles.infoLabel}>만나는 장소</ThemedText>
-                  <ThemedText variant="text3" style={styles.infoValue}>{item.meetPlace}</ThemedText>
-                </View>
-                <View style={styles.infoRow}>
-                  <ThemedText variant="text3" style={styles.infoLabel}>만나는 시간</ThemedText>
-                  <ThemedText variant="text3" style={styles.infoValue}>{item.meetTime}</ThemedText>
-                </View>
-                <View style={styles.infoRow}>
-                  <ThemedText variant="text3" style={styles.infoLabel}>탑승 인원</ThemedText>
-                  <ThemedText variant="text3" style={styles.infoValue}>{item.seatsText}</ThemedText>
-                </View>
-                <View style={styles.infoRow}>
-                  <ThemedText variant="text3" style={styles.infoLabel}>도착지</ThemedText>
-                  <ThemedText variant="text3" style={styles.infoValue}>{item.destination}</ThemedText>
-                </View>
-              </View>
+      <ScrollView
+        contentContainerStyle={{ paddingHorizontal: Layout.spacing.l, paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {items.length === 0 ? (
+          <View style={{ gap: 28 }}>
+            <View style={styles.emptyCard}>
+              <ThemedText variant="text2" style={styles.emptyText}>
+                카풀 이용한 이력이 없습니다.
+              </ThemedText>
             </View>
-          ))}
-        </View>
+          </View>
+        ) : (
+          <FlatList
+            data={items}
+            keyExtractor={(it) => String(it.id)}
+            scrollEnabled={false}
+            renderItem={({ item }) => {
+              const RoleIcon = item.isDriver ? CarpoolDriverIcon : CarpoolGuestIcon;
+
+              const chip = getStatusChipMeta(item.status);
+
+              return (
+                <Pressable onPress={() => onPressItem(item.id)} style={styles.card}>
+                  <View style={styles.topRow}>
+                    <View style={styles.roleIconWrap}>
+                      <RoleIcon width={25} height={25} />
+                    </View>
+
+                    <ThemedText variant="heading3" style={styles.dateText}>
+                      {item.dateText}
+                    </ThemedText>
+
+                    <View style={[styles.statusChip, { backgroundColor: chip.backgroundColor }]}>
+                      <ThemedText
+                        variant="text4"
+                        style={[styles.statusChip, { color: chip.textColor }]}
+                      >
+                        {chip.label}
+                      </ThemedText>
+                    </View>
+                  </View>
+
+                  {/* Info rows */}
+                  <View style={styles.row}>
+                    <ThemedText variant="text2" style={styles.label}>
+                      출발지
+                    </ThemedText>
+                    <ThemedText variant="text2" style={styles.value}>
+                      {item.originDisplay}
+                    </ThemedText>
+                  </View>
+
+                  <View style={styles.row}>
+                    <ThemedText variant="text2" style={styles.label}>
+                      출발 시간
+                    </ThemedText>
+                    <ThemedText variant="text2" style={styles.value}>
+                      {item.timeText}
+                    </ThemedText>
+                  </View>
+
+                  <View style={styles.row}>
+                    <ThemedText variant="text2" style={styles.label}>
+                      탑승 인원
+                    </ThemedText>
+                    <ThemedText variant="text2" style={styles.value}>
+                      {item.seatText}
+                    </ThemedText>
+                  </View>
+
+                  <View style={styles.row}>
+                    <ThemedText variant="text2" style={styles.label}>
+                      도착지
+                    </ThemedText>
+                    <ThemedText variant="text2" style={styles.value}>
+                      {item.destDisplay}
+                    </ThemedText>
+                  </View>
+                </Pressable>
+              );
+            }}
+            ItemSeparatorComponent={() => <View style={{ height: Layout.spacing.m }} />}
+          />
+        )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }

@@ -13,8 +13,8 @@ import { InlineOption, InlineSelectModal } from '@shared/components/select-inlin
 import { Layout } from '@shared/constants/layout';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { styles } from './formStyles';
-import { useCarpoolRegisterFormViewModel } from './useCarpoolRegisterFormViewModel';
+import { styles } from './styles';
+import { useCarpoolEditScreenViewModel } from './useCarpoolEditScreenViewModel';
 
 // 네이티브에서만 로드
 let MapView: any = null;
@@ -44,15 +44,15 @@ function FieldBlock({ label, children }: { label: string; children: React.ReactN
   );
 }
 
-export default function CarpoolRegisterFormScreen() {
+export default function CarpoolEditScreen() {
   const {
     isHome,
 
-    driverName, setDriverName,
+    driverName, 
     carInfo, setCarInfo,
     capacity, incCapacity, decCapacity,
 
-    phone, setPhone,
+    phone,
     mainPickup, setMainPickup,
     memo, setMemo,
 
@@ -65,7 +65,8 @@ export default function CarpoolRegisterFormScreen() {
     editableMarker,
 
     submit,
-  } = useCarpoolRegisterFormViewModel();
+    confirmSubmit
+  } = useCarpoolEditScreenViewModel();
 
   const mapRef = useRef<any>(null);
 
@@ -156,7 +157,6 @@ export default function CarpoolRegisterFormScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Color.default.background }}>
-      {/* ✅ 드롭다운 외부 클릭 닫기 overlay (2번) */}
       {openDropdown && (
         <Pressable
           style={styles.dropdownDismissOverlay}
@@ -164,15 +164,16 @@ export default function CarpoolRegisterFormScreen() {
         />
       )}
       <Header
-        title="카풀 등록"
+        title="카풀 수정"
         onBack={() => router.back()}
       />
+
       <ScrollView
         contentContainerStyle={{ paddingHorizontal: Layout.spacing.l, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
 
-        <View style={{ gap: 28 }}>
+        <View style={{gap: 29}}>
           <FieldBlock label="운전자명">
             <TextInput value={driverName} disabled placeholder="운전자명" />
           </FieldBlock>
@@ -239,7 +240,7 @@ export default function CarpoolRegisterFormScreen() {
             </View>
           </FieldBlock>
 
-          {/* 출발지/도착지}
+          {/* 출발지/도착지 */}
           {/* ✅ RETREAT일 때 출발지 */}
           <View style={styles.fieldBlock}>
             <ThemedText variant="text3" color={Color.text.main} style={styles.fieldLabel}>출발지</ThemedText>
@@ -290,53 +291,53 @@ export default function CarpoolRegisterFormScreen() {
           </FieldBlock>
 
           {/* 버튼 */}
-          <Pressable onPress={submit} style={styles.submitBtn} hitSlop={10}>
-            <ThemedText variant="text2" style={styles.submitText}>등록하기</ThemedText>
+          <Pressable onPress={confirmSubmit} style={styles.submitBtn} hitSlop={10}>
+            <ThemedText variant="text2" style={styles.submitText}>수정하기</ThemedText>
           </Pressable>
         </View>
-
-        {/* 사용 모달 */}
-        <InlineSelectModal
-          visible={openDropdown === 'date'}
-          title="날짜 선택"
-          options={dateOptions}
-          selectedValue={date}
-          onClose={() => setOpenDropdown(null)}
-          onSelect={(opt) => setDate(opt.value)}
-        />
-
-        <InlineSelectModal
-          visible={openDropdown === 'hour'}
-          title="시간 선택"
-          options={hourOptions}
-          selectedValue={hour}
-          onClose={() => setOpenDropdown(null)}
-          onSelect={(opt) => setHour(opt.value)}
-        />
-
-        <InlineSelectModal
-          visible={openDropdown === 'minute'}
-          title="분 선택"
-          options={minuteOptions}
-          selectedValue={minute}
-          onClose={() => setOpenDropdown(null)}
-          onSelect={(opt) => setMinute(opt.value)}
-        />
-
-        <AddressSearchModal
-          visible={addressModalOpen != null}
-          title={addressModalOpen === 'origin' ? '출발지 검색(도로명)' : '도착지 검색(도로명)'}
-          onClose={() => setAddressModalOpen(null)}
-          onSelect={(r) => {
-            if (addressModalOpen === 'origin') {
-              setOrigin({ roadAddress: r.roadAddress, lat: r.lat, lng: r.lng, detail: origin.detail });
-            } else {
-              setDest({ roadAddress: r.roadAddress, lat: r.lat, lng: r.lng, detail: dest.detail });
-            }
-            setAddressModalOpen(null);
-          }}
-        />
       </ScrollView>
-    </SafeAreaView >
+
+      {/* 사용 모달 */}
+      <InlineSelectModal
+        visible={openDropdown === 'date'}
+        title="날짜 선택"
+        options={dateOptions}
+        selectedValue={date}
+        onClose={() => setOpenDropdown(null)}
+        onSelect={(opt) => setDate(opt.value)}
+      />
+
+      <InlineSelectModal
+        visible={openDropdown === 'hour'}
+        title="시간 선택"
+        options={hourOptions}
+        selectedValue={hour}
+        onClose={() => setOpenDropdown(null)}
+        onSelect={(opt) => setHour(opt.value)}
+      />
+
+      <InlineSelectModal
+        visible={openDropdown === 'minute'}
+        title="분 선택"
+        options={minuteOptions}
+        selectedValue={minute}
+        onClose={() => setOpenDropdown(null)}
+        onSelect={(opt) => setMinute(opt.value)}
+      />
+
+      <AddressSearchModal
+        visible={addressModalOpen != null}
+        title={addressModalOpen === 'origin' ? '출발지 검색(도로명)' : '도착지 검색(도로명)'}
+        onClose={() => setAddressModalOpen(null)}
+        onSelect={(r) => {
+          if (addressModalOpen === 'origin') {
+            setOrigin({ roadAddress: r.roadAddress, lat: r.lat, lng: r.lng, detail: origin.detail });
+          } else {
+            setDest({ roadAddress: r.roadAddress, lat: r.lat, lng: r.lng, detail: dest.detail });
+          }
+          setAddressModalOpen(null);
+        }}
+      />
+    </SafeAreaView>
   );
 }
