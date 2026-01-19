@@ -1,20 +1,24 @@
-import { apiClient } from '@shared/api/client';
-import { ApiErrorResponse, ApiResponse } from '@shared/api/types';
-import { isAxiosError } from 'axios';
-import { injectable } from 'tsyringe';
+import { API_PREFIX, apiClient } from "@shared/api/client";
+import { ApiErrorResponse, ApiResponse } from "@shared/api/types";
+import { isAxiosError } from "axios";
+import { injectable } from "tsyringe";
 
-import { Carpool } from '@domain/carpool/Carpool';
-import { CarpoolStatus } from '@domain/carpool/CarpoolStatus';
-import { CreateCarpoolData, ICarpoolRepository, UpdateCarpoolData } from '@domain/carpool/ICarpoolRepository';
+import { Carpool } from "@domain/carpool/Carpool";
+import { CarpoolStatus } from "@domain/carpool/CarpoolStatus";
+import {
+  CreateCarpoolData,
+  ICarpoolRepository,
+  UpdateCarpoolData,
+} from "@domain/carpool/ICarpoolRepository";
 
-import { CarpoolDetail } from '@domain/carpool/CarpoolDetail';
+import { CarpoolDetail } from "@domain/carpool/CarpoolDetail";
 import {
   CarpoolDetailResponseDto,
   CarpoolResponseDto,
   CreateCarpoolRequestDto,
   ParticipationCarpoolRequestDto,
   UpdateCarpoolStatusRequestDto,
-} from './dto';
+} from "./dto";
 
 @injectable()
 export class CarpoolRepository implements ICarpoolRepository {
@@ -24,12 +28,13 @@ export class CarpoolRepository implements ICarpoolRepository {
 
     try {
       const res = await apiClient.post<ApiResponse<CarpoolDetailResponseDto[]>>(
-        '/api/carpool/available',
-        { userId: uid }
+        `${API_PREFIX}/carpool/available`,
+        { userId: uid },
       );
       return res.data.data.map(this.mapToCarpoolDetail);
     } catch (e) {
-      if (isAxiosError<ApiErrorResponse>(e) && e.response?.status === 404) return [];
+      if (isAxiosError<ApiErrorResponse>(e) && e.response?.status === 404)
+        return [];
       throw this.normalizeError(e);
     }
   }
@@ -40,21 +45,25 @@ export class CarpoolRepository implements ICarpoolRepository {
 
     try {
       const res = await apiClient.get<ApiResponse<CarpoolDetailResponseDto[]>>(
-        `/api/carpool/participating/${id}`
+        `${API_PREFIX}/carpool/participating/${id}`,
       );
       return res.data.data.map(this.mapToCarpoolDetail);
     } catch (e) {
-      if (isAxiosError<ApiErrorResponse>(e) && e.response?.status === 404) return [];
+      if (isAxiosError<ApiErrorResponse>(e) && e.response?.status === 404)
+        return [];
       throw this.normalizeError(e);
     }
   }
 
   async getAllCarpools(): Promise<Carpool[]> {
     try {
-      const res = await apiClient.get<ApiResponse<CarpoolResponseDto[]>>('/api/carpool');
+      const res = await apiClient.get<ApiResponse<CarpoolResponseDto[]>>(
+        `${API_PREFIX}/carpool`,
+      );
       return res.data.data.map(this.mapToCarpool);
     } catch (e) {
-      if (isAxiosError<ApiErrorResponse>(e) && e.response?.status === 404) return [];
+      if (isAxiosError<ApiErrorResponse>(e) && e.response?.status === 404)
+        return [];
       throw this.normalizeError(e);
     }
   }
@@ -70,14 +79,17 @@ export class CarpoolRepository implements ICarpoolRepository {
         destination: data.destination,
         destinationDetailed: data.destinationDetailed ?? null,
         seatsTotal: data.seatsTotal,
-        note: data.note ?? '',
+        note: data.note ?? "",
         originLat: data.originLat,
         originLng: data.originLng,
         destLat: data.destLat,
         destLng: data.destLng,
       };
 
-      const res = await apiClient.post<ApiResponse<CarpoolResponseDto>>('/api/carpool', body);
+      const res = await apiClient.post<ApiResponse<CarpoolResponseDto>>(
+        "/api/carpool",
+        body,
+      );
       return this.mapToCarpool(res.data.data);
     } catch (e) {
       console.log(e);
@@ -87,7 +99,9 @@ export class CarpoolRepository implements ICarpoolRepository {
 
   async getCarpoolById(id: number): Promise<Carpool> {
     try {
-      const res = await apiClient.get<ApiResponse<CarpoolResponseDto>>(`/api/carpool/${id}`);
+      const res = await apiClient.get<ApiResponse<CarpoolResponseDto>>(
+        `${API_PREFIX}/carpool/${id}`,
+      );
       return this.mapToCarpool(res.data.data);
     } catch (e) {
       throw this.normalizeError(e);
@@ -96,7 +110,9 @@ export class CarpoolRepository implements ICarpoolRepository {
 
   async getCarpoolDetail(id: number): Promise<CarpoolDetail> {
     try {
-      const res = await apiClient.get<ApiResponse<CarpoolDetailResponseDto>>(`/api/carpool/detail/${id}`);
+      const res = await apiClient.get<ApiResponse<CarpoolDetailResponseDto>>(
+        `${API_PREFIX}/carpool/detail/${id}`,
+      );
       return this.mapToCarpoolDetail(res.data.data);
     } catch (e) {
       throw this.normalizeError(e);
@@ -105,10 +121,13 @@ export class CarpoolRepository implements ICarpoolRepository {
 
   async findMyCarpools(userId: number): Promise<CarpoolDetail[]> {
     try {
-      const res = await apiClient.get<ApiResponse<CarpoolDetailResponseDto[]>>(`/api/carpool/my/${userId}`);
+      const res = await apiClient.get<ApiResponse<CarpoolDetailResponseDto[]>>(
+        `${API_PREFIX}/carpool/my/${userId}`,
+      );
       return res.data.data.map(this.mapToCarpoolDetail);
     } catch (e) {
-      if (isAxiosError<ApiErrorResponse>(e) && e.response?.status === 404) return [];
+      if (isAxiosError<ApiErrorResponse>(e) && e.response?.status === 404)
+        return [];
       throw this.normalizeError(e);
     }
   }
@@ -121,47 +140,50 @@ export class CarpoolRepository implements ICarpoolRepository {
         if (value !== undefined && value !== null) body[key] = value;
       };
 
-      putIfDefined('carInfo', data.carInfo);
-      putIfDefined('departureTime', data.departureTime);
+      putIfDefined("carInfo", data.carInfo);
+      putIfDefined("departureTime", data.departureTime);
 
-      putIfDefined('origin', data.origin);
-      putIfDefined('originDetailed', data.originDetailed);
-      putIfDefined('destination', data.destination);
-      putIfDefined('destinationDetailed', data.destinationDetailed);
+      putIfDefined("origin", data.origin);
+      putIfDefined("originDetailed", data.originDetailed);
+      putIfDefined("destination", data.destination);
+      putIfDefined("destinationDetailed", data.destinationDetailed);
 
-      putIfDefined('seatsTotal', data.seatsTotal);
-      putIfDefined('seatsLeft', data.seatsLeft);
+      putIfDefined("seatsTotal", data.seatsTotal);
+      putIfDefined("seatsLeft", data.seatsLeft);
 
-      putIfDefined('note', data.note);
+      putIfDefined("note", data.note);
 
-      putIfDefined('originLat', data.originLat);
-      putIfDefined('originLng', data.originLng);
-      putIfDefined('destLat', data.destLat);
-      putIfDefined('destLng', data.destLng);
+      putIfDefined("originLat", data.originLat);
+      putIfDefined("originLng", data.originLng);
+      putIfDefined("destLat", data.destLat);
+      putIfDefined("destLng", data.destLng);
 
       const res = await apiClient.post<ApiResponse<CarpoolResponseDto>>(
-        `/api/carpool/update/${id}`,
-        body
+        `${API_PREFIX}/carpool/update/${id}`,
+        body,
       );
-      console.log('[update res.data]', res.data);
+      console.log("[update res.data]", res.data);
       return this.mapToCarpool(res.data.data);
     } catch (e) {
       if (isAxiosError(e)) {
-      console.log('[update axios status]', e.response?.status);
-      console.log('[update axios data]', e.response?.data);
-      console.log('[update axios url]', e.config?.url);
-      console.log('[update axios body]', e.config?.data);
-    } else {
-      console.log('[update non-axios error]', e);
-    }
-    throw this.normalizeError(e);
+        console.log("[update axios status]", e.response?.status);
+        console.log("[update axios data]", e.response?.data);
+        console.log("[update axios url]", e.config?.url);
+        console.log("[update axios body]", e.config?.data);
+      } else {
+        console.log("[update non-axios error]", e);
+      }
+      throw this.normalizeError(e);
     }
   }
 
   async joinCarpool(userId: number, roomId: number): Promise<boolean> {
     try {
       const body: ParticipationCarpoolRequestDto = { userId, roomId };
-      const res = await apiClient.post<ApiResponse<boolean>>('/api/carpool/join', body);
+      const res = await apiClient.post<ApiResponse<boolean>>(
+        `${API_PREFIX}/carpool/join`,
+        body,
+      );
       return Boolean(res.data.data);
     } catch (e) {
       throw this.normalizeError(e);
@@ -171,7 +193,10 @@ export class CarpoolRepository implements ICarpoolRepository {
   async leaveCarpool(userId: number, roomId: number): Promise<boolean> {
     try {
       const body: ParticipationCarpoolRequestDto = { userId, roomId };
-      const res = await apiClient.post<ApiResponse<boolean>>('/api/carpool/leave', body);
+      const res = await apiClient.post<ApiResponse<boolean>>(
+        `${API_PREFIX}/carpool/leave`,
+        body,
+      );
       return Boolean(res.data.data);
     } catch (e) {
       throw this.normalizeError(e);
@@ -180,17 +205,28 @@ export class CarpoolRepository implements ICarpoolRepository {
 
   async deleteCarpool(id: number): Promise<boolean> {
     try {
-      const res = await apiClient.post<ApiResponse<boolean>>(`/api/carpool/delete/${id}`);
+      const res = await apiClient.post<ApiResponse<boolean>>(
+        `${API_PREFIX}/carpool/delete/${id}`,
+      );
       return Boolean(res.data.data);
     } catch (e) {
       throw this.normalizeError(e);
     }
   }
 
-  async updateCarpoolStatus(roomId: number, newStatus: CarpoolStatus): Promise<Carpool> {
+  async updateCarpoolStatus(
+    roomId: number,
+    newStatus: CarpoolStatus,
+  ): Promise<Carpool> {
     try {
-      const body: UpdateCarpoolStatusRequestDto = { roomId, newStatus: newStatus as any };
-      const res = await apiClient.post<ApiResponse<CarpoolResponseDto>>('/api/carpool/status', body);
+      const body: UpdateCarpoolStatusRequestDto = {
+        roomId,
+        newStatus: newStatus as any,
+      };
+      const res = await apiClient.post<ApiResponse<CarpoolResponseDto>>(
+        `${API_PREFIX}/carpool/status`,
+        body,
+      );
       return this.mapToCarpool(res.data.data);
     } catch (e) {
       throw this.normalizeError(e);
@@ -199,7 +235,7 @@ export class CarpoolRepository implements ICarpoolRepository {
 
   private toNumberOrNull(v: unknown): number | null {
     if (v === null || v === undefined) return null;
-    const n = typeof v === 'number' ? v : Number(v);
+    const n = typeof v === "number" ? v : Number(v);
     return Number.isFinite(n) ? n : null;
   }
 
@@ -224,12 +260,14 @@ export class CarpoolRepository implements ICarpoolRepository {
       dto.status as CarpoolStatus,
       dto.isArrived,
       dto.createdAt,
-      dto.updatedAt
+      dto.updatedAt,
     );
-  }
+  };
 
-  private mapToCarpoolDetail = (dto: CarpoolDetailResponseDto): CarpoolDetail => {
-    const driver = dto.driver ?? { id: dto.driverId, name: '', phone: '' };
+  private mapToCarpoolDetail = (
+    dto: CarpoolDetailResponseDto,
+  ): CarpoolDetail => {
+    const driver = dto.driver ?? { id: dto.driverId, name: "", phone: "" };
     const members = Array.isArray(dto.members) ? dto.members : [];
 
     return new CarpoolDetail(
@@ -253,20 +291,26 @@ export class CarpoolRepository implements ICarpoolRepository {
       dto.createdAt,
       dto.updatedAt,
       driver,
-      members
+      members,
     );
-  }
+  };
 
   private normalizeError(error: unknown): Error {
     if (isAxiosError<ApiErrorResponse>(error)) {
-      const message = error.response?.data?.message || error.message || '요청 중 오류가 발생했습니다.';
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "요청 중 오류가 발생했습니다.";
       const statusCode = error.response?.status;
 
-      if (statusCode === 400) return new Error(message || '잘못된 요청입니다.');
-      if (statusCode === 401) return new Error('인증에 실패했습니다.');
-      if (statusCode === 404) return new Error('요청한 데이터를 찾을 수 없습니다.');
+      if (statusCode === 400) return new Error(message || "잘못된 요청입니다.");
+      if (statusCode === 401) return new Error("인증에 실패했습니다.");
+      if (statusCode === 404)
+        return new Error("요청한 데이터를 찾을 수 없습니다.");
       return new Error(message);
     }
-    return error instanceof Error ? error : new Error('알 수 없는 오류가 발생했습니다.');
+    return error instanceof Error
+      ? error
+      : new Error("알 수 없는 오류가 발생했습니다.");
   }
 }

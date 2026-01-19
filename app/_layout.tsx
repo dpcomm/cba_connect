@@ -1,6 +1,10 @@
 import "reflect-metadata";
 
 import { AutoLoginUseCase } from "@application/auth/AutoLoginUseCase";
+import { CheckConsentUseCase } from "@application/consent/CheckConsentUseCase";
+import { SubmitConsentUseCase } from "@application/consent/SubmitConsentUseCase";
+import { CheckVersionUseCase } from "@application/status/CheckVersionUseCase";
+import { PermissionModal } from "@shared/components/modal/PermissionModal";
 import { container } from "@shared/di/container";
 import { useAuthStore } from "@shared/stores/useAuthStore";
 import { useFonts } from "expo-font";
@@ -11,13 +15,14 @@ import { useEffect, useState } from "react";
 // 스플래시 화면이 자동으로 숨겨지지 않도록 설정
 SplashScreen.preventAutoHideAsync();
 
-// 모듈 레벨에서 자동 로그인 체크 여부 관리 (컴포넌트 리마운트에도 유지)
-let hasAutoLoginBeenChecked = false;
+// 모듈 레벨에서 앱 시작 체크 여부 관리 (컴포넌트 리마운트에도 유지)
+let hasAppStartChecked = false;
 
 export default function RootLayout() {
   const router = useRouter();
   const { setUser } = useAuthStore();
-  const [isReady, setIsReady] = useState(hasAutoLoginBeenChecked);
+  const [isReady, setIsReady] = useState(hasAppStartChecked);
+  const [showPermissionModal, setShowPermissionModal] = useState(false);
 
   const [fontsLoaded] = useFonts({
     "Pretendard-Black": require("../assets/fonts/Pretendard-Black.otf"),
@@ -32,42 +37,78 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (hasAutoLoginBeenChecked) {
+    if (hasAppStartChecked) {
       setIsReady(true);
       return;
     }
 
-    const checkAutoLogin = async () => {
+    const startAppFlow = async () => {
       try {
+        // 버전 체크
+        const checkVersionUseCase = container.resolve(CheckVersionUseCase);
+        const versionResult = await checkVersionUseCase.execute();
+
+        if (versionResult.isUpdateNeeded) {
+          // 업데이트 필요 여부 체크
+          hasAppStartChecked = true;
+          setIsReady(true);
+          router.replace({
+            pathname: "/update",
+            params: {
+              currentVersion: versionResult.currentVersion,
+              latestVersion: versionResult.latestVersion,
+            },
+          });
+          return;
+        }
+        // 자동 로그인 체크
         const autoLoginUseCase = container.resolve(AutoLoginUseCase);
         const user = await autoLoginUseCase.execute();
 
         if (user) {
           setUser(user);
+
+          // 약관 동의 체크 (API)
+          const checkConsentUseCase = container.resolve(CheckConsentUseCase);
+          const isConsented = await checkConsentUseCase.execute();
+
+          if (!isConsented) {
+            // 동의 필요 -> 모달 표시
+            setShowPermissionModal(true);
+            return; // 모달 확인 후 handlePermissionConfirm에서 처리
+          }
+
+          // 동의 완료됨 -> 홈으로 이동
           router.replace("/home");
         }
       } catch (error) {
-        console.warn("Auto login failed:", error);
+        console.warn("App flow error:", error);
       } finally {
-        hasAutoLoginBeenChecked = true;
+        hasAppStartChecked = true;
         setIsReady(true);
       }
     };
 
     if (fontsLoaded) {
-      checkAutoLogin();
+      startAppFlow();
     }
+  }, [fontsLoaded, router, setUser]);
 
-    // 현재 Expo Go 환경에서 Expo Notification을 테스트하지 못하는 상황입니다.
-    // 원인으로는 다음과 같습니다.
-    // 1. project id의 부재
-    // 2. 현재 Expo SDK 버전의 Expo Go에서는 Android 푸시가 제거됨
-    // Expo Go 환경에서의 제약 사항 등으로 인해 주석 처리되어 있었으나,
-    // 실제 디바이스 테스트(Development Build)를 위해 활성화합니다.
-    // initializeNotifications().then(({ pushToken }) => {
-    //   console.log('Push Token:', pushToken);
-    // });
-  }, [fontsLoaded]);
+  const handlePermissionConfirm = async () => {
+    try {
+      // API로 동의 제출
+      const submitConsentUseCase = container.resolve(SubmitConsentUseCase);
+      await submitConsentUseCase.execute();
+
+      setShowPermissionModal(false);
+      router.replace("/home");
+    } catch (error) {
+      console.warn("Consent submission failed:", error);
+      // 에러 발생해도 일단 진행 (사용자 경험 우선)
+      setShowPermissionModal(false);
+      router.replace("/home");
+    }
+  };
 
   useEffect(() => {
     if (fontsLoaded && isReady) {
@@ -80,18 +121,27 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack initialRouteName="index">
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="auth" options={{ headerShown: false }} />
-      <Stack.Screen name="home" options={{ headerShown: false }} />
-      <Stack.Screen name="carpool" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="my-page"
-        options={{
-          headerShown: false,
-          animation: "slide_from_right",
-        }}
-      />
-    </Stack>
+    <>
+      <Stack initialRouteName="index">
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="auth" options={{ headerShown: false }} />
+        <Stack.Screen name="update" options={{ headerShown: false }} />
+        <Stack.Screen name="home" options={{ headerShown: false }} />
+        <Stack.Screen name="carpool" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="my-page"
+          options={{
+            headerShown: false,
+            animation: "slide_from_right",
+          }}
+        />
+      </Stack>
+      {showPermissionModal && (
+        <PermissionModal
+          visible={showPermissionModal}
+          onConfirm={handlePermissionConfirm}
+        />
+      )}
+    </>
   );
 }

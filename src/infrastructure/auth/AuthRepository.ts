@@ -1,13 +1,17 @@
-import { Auth } from '@domain/auth/Auth';
-import { EmailVerificationType } from '@domain/auth/EmailVerificationType';
-import { IAuthRepository, RegisterData, ResetPasswordData } from '@domain/auth/IAuthRepository';
-import { User } from '@domain/user/User';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { apiClient } from '@shared/api/client';
-import { ApiErrorResponse, ApiResponse } from '@shared/api/types';
-import { isAxiosError } from 'axios';
-import * as SecureStore from 'expo-secure-store';
-import { injectable } from 'tsyringe';
+import { Auth } from "@domain/auth/Auth";
+import { EmailVerificationType } from "@domain/auth/EmailVerificationType";
+import {
+  IAuthRepository,
+  RegisterData,
+  ResetPasswordData,
+} from "@domain/auth/IAuthRepository";
+import { User } from "@domain/user/User";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_PREFIX, apiClient } from "@shared/api/client";
+import { ApiErrorResponse, ApiResponse } from "@shared/api/types";
+import { isAxiosError } from "axios";
+import * as SecureStore from "expo-secure-store";
+import { injectable } from "tsyringe";
 
 import {
   AuthResponseDto,
@@ -20,9 +24,9 @@ import {
   ResetPasswordRequestDto,
   VerifyEmailRequestDto,
   VerifyEmailResponseDto,
-} from './dto';
+} from "./dto";
 
-const AUTO_LOGIN_KEY = 'auto_login_enabled';
+const AUTO_LOGIN_KEY = "auto_login_enabled";
 
 @injectable()
 export class AuthRepository implements IAuthRepository {
@@ -33,7 +37,10 @@ export class AuthRepository implements IAuthRepository {
         password,
       };
 
-      const response = await apiClient.post<ApiResponse<AuthResponseDto>>('/api/auth/login', requestBody);
+      const response = await apiClient.post<ApiResponse<AuthResponseDto>>(
+        `${API_PREFIX}/auth/login`,
+        requestBody,
+      );
       const { data } = response.data;
       const auth = this.mapToAuth(data);
 
@@ -48,18 +55,30 @@ export class AuthRepository implements IAuthRepository {
   async register(data: RegisterData): Promise<Auth> {
     try {
       const requestBody: RegisterRequestDto = {
-        ...data
+        ...data,
       };
 
-      const response = await apiClient.post<ApiResponse<AuthResponseDto>>('/api/auth/register', requestBody);
+      const response = await apiClient.post<ApiResponse<AuthResponseDto>>(
+        `${API_PREFIX}/auth/register`,
+        requestBody,
+      );
       const responseData = response.data.data;
-      console.log('Register Response Data:', JSON.stringify(responseData, null, 2));
+      console.log(
+        "Register Response Data:",
+        JSON.stringify(responseData, null, 2),
+      );
 
       if (responseData.access_token) {
-        await SecureStore.setItemAsync('access_token', responseData.access_token);
+        await SecureStore.setItemAsync(
+          "access_token",
+          responseData.access_token,
+        );
       }
       if (responseData.refresh_token) {
-        await SecureStore.setItemAsync('refresh_token', responseData.refresh_token);
+        await SecureStore.setItemAsync(
+          "refresh_token",
+          responseData.refresh_token,
+        );
       }
 
       // user 객체가 없는 경우 getMe로 사용자 정보 조회
@@ -76,10 +95,12 @@ export class AuthRepository implements IAuthRepository {
           responseData.user.rank,
           responseData.user.isDeleted,
           responseData.user.createdAt,
-          responseData.user.updatedAt
+          responseData.user.updatedAt,
         );
       } else {
-        const meResponse = await apiClient.get<ApiResponse<any>>('/api/users/me');
+        const meResponse = await apiClient.get<ApiResponse<any>>(
+          `${API_PREFIX}/users/me`,
+        );
         const userData = meResponse.data.data;
         user = new User(
           userData.id,
@@ -92,14 +113,14 @@ export class AuthRepository implements IAuthRepository {
           userData.rank,
           userData.isDeleted,
           userData.createdAt,
-          userData.updatedAt
+          userData.updatedAt,
         );
       }
 
       return new Auth(
         responseData.access_token,
         responseData.refresh_token,
-        user
+        user,
       );
     } catch (error: any) {
       throw this.normalizeError(error);
@@ -108,31 +129,34 @@ export class AuthRepository implements IAuthRepository {
 
   async logout(): Promise<void> {
     try {
-      await apiClient.post<ApiResponse<void>>('/api/auth/logout');
+      const accessToken = await SecureStore.getItemAsync("access_token");
+      if (accessToken) {
+        await apiClient.post<ApiResponse<void>>(`${API_PREFIX}/auth/logout`);
+      }
     } catch (error) {
-      console.warn('Logout API failed:', error);
+      console.warn("Logout API failed:", error);
     } finally {
-      await SecureStore.deleteItemAsync('access_token');
-      await SecureStore.deleteItemAsync('refresh_token');
+      await SecureStore.deleteItemAsync("access_token");
+      await SecureStore.deleteItemAsync("refresh_token");
       await AsyncStorage.removeItem(AUTO_LOGIN_KEY);
     }
   }
 
   async refreshAccessToken(): Promise<string> {
     try {
-      const refreshToken = await SecureStore.getItemAsync('refresh_token');
+      const refreshToken = await SecureStore.getItemAsync("refresh_token");
       if (!refreshToken) {
-        throw new Error('No refresh token available');
+        throw new Error("No refresh token available");
       }
 
       const response = await apiClient.post<ApiResponse<RefreshResponseDto>>(
-        '/api/auth/refresh',
+        `${API_PREFIX}/auth/refresh`,
         {},
-        { headers: { Authorization: `Bearer ${refreshToken}` } }
+        { headers: { Authorization: `Bearer ${refreshToken}` } },
       );
 
       const newAccessToken = response.data.data.access_token;
-      await SecureStore.setItemAsync('access_token', newAccessToken);
+      await SecureStore.setItemAsync("access_token", newAccessToken);
 
       return newAccessToken;
     } catch (error: any) {
@@ -142,7 +166,7 @@ export class AuthRepository implements IAuthRepository {
 
   async setAutoLoginEnabled(enabled: boolean): Promise<void> {
     if (enabled) {
-      await AsyncStorage.setItem(AUTO_LOGIN_KEY, 'true');
+      await AsyncStorage.setItem(AUTO_LOGIN_KEY, "true");
     } else {
       await AsyncStorage.removeItem(AUTO_LOGIN_KEY);
     }
@@ -150,11 +174,11 @@ export class AuthRepository implements IAuthRepository {
 
   async getAutoLoginEnabled(): Promise<boolean> {
     const value = await AsyncStorage.getItem(AUTO_LOGIN_KEY);
-    return value === 'true';
+    return value === "true";
   }
 
   async getStoredRefreshToken(): Promise<string | null> {
-    return SecureStore.getItemAsync('refresh_token');
+    return SecureStore.getItemAsync("refresh_token");
   }
 
   /** AuthResponseDto -> Auth */
@@ -170,19 +194,19 @@ export class AuthRepository implements IAuthRepository {
       data.user.rank,
       data.user.isDeleted,
       data.user.createdAt,
-      data.user.updatedAt
+      data.user.updatedAt,
     );
 
-    return new Auth(
-      data.access_token,
-      data.refresh_token,
-      user
-    );
+    return new Auth(data.access_token, data.refresh_token, user);
   }
 
-  async sendEmailVerification(email: string, type: EmailVerificationType, userId?: string): Promise<void> {
+  async sendEmailVerification(
+    email: string,
+    type: EmailVerificationType,
+    userId?: string,
+  ): Promise<void> {
     try {
-      let url = `/api/auth/email/${encodeURIComponent(email)}?type=${type}`;
+      let url = `${API_PREFIX}/auth/email/${encodeURIComponent(email)}?type=${type}`;
       if (userId) {
         url += `&userId=${encodeURIComponent(userId)}`;
       }
@@ -195,10 +219,9 @@ export class AuthRepository implements IAuthRepository {
   async verifyEmailCode(email: string, code: string): Promise<string> {
     try {
       const requestBody: VerifyEmailRequestDto = { email, code };
-      const response = await apiClient.post<ApiResponse<VerifyEmailResponseDto>>(
-        '/api/auth/email/verify',
-        requestBody
-      );
+      const response = await apiClient.post<
+        ApiResponse<VerifyEmailResponseDto>
+      >(`${API_PREFIX}/auth/email/verify`, requestBody);
       return response.data.data.verificationToken;
     } catch (error: any) {
       throw this.normalizeError(error);
@@ -208,7 +231,7 @@ export class AuthRepository implements IAuthRepository {
   async checkIdDuplicate(id: string): Promise<boolean> {
     try {
       const response = await apiClient.get<ApiResponse<CheckIdResponseDto>>(
-        `/api/auth/check-id/${encodeURIComponent(id)}`
+        `${API_PREFIX}/auth/check-id/${encodeURIComponent(id)}`,
       );
       return response.data.data.isDuplicate;
     } catch (error: any) {
@@ -219,7 +242,10 @@ export class AuthRepository implements IAuthRepository {
   async findId(name: string, phone: string): Promise<string[]> {
     try {
       const requestBody: FindIdRequestDto = { name, phone };
-      const response = await apiClient.post<ApiResponse<FindIdResponseDto>>('/api/auth/find-id', requestBody);
+      const response = await apiClient.post<ApiResponse<FindIdResponseDto>>(
+        `${API_PREFIX}/auth/find-id`,
+        requestBody,
+      );
       return response.data.data.userIds;
     } catch (error: any) {
       throw this.normalizeError(error);
@@ -233,7 +259,10 @@ export class AuthRepository implements IAuthRepository {
         verificationToken: data.verificationToken,
         newPassword: data.newPassword,
       };
-      await apiClient.post<ApiResponse<void>>('/api/auth/reset-password', requestBody);
+      await apiClient.post<ApiResponse<void>>(
+        `${API_PREFIX}/auth/reset-password`,
+        requestBody,
+      );
     } catch (error: any) {
       throw this.normalizeError(error);
     }
@@ -241,35 +270,47 @@ export class AuthRepository implements IAuthRepository {
 
   /** 토큰 저장 */
   private async persistTokens(auth: Auth): Promise<void> {
-    await SecureStore.setItemAsync('access_token', auth.accessToken);
-    await SecureStore.setItemAsync('refresh_token', auth.refreshToken);
+    await SecureStore.setItemAsync("access_token", auth.accessToken);
+    await SecureStore.setItemAsync("refresh_token", auth.refreshToken);
   }
 
   /** 에러 정규화 */
   private normalizeError(error: unknown): Error {
     if (isAxiosError<ApiErrorResponse>(error)) {
       const responseData = error.response?.data;
-      const message = responseData?.message || error.message || '요청 중 오류가 발생했습니다.';
+      const message =
+        responseData?.message ||
+        error.message ||
+        "요청 중 오류가 발생했습니다.";
 
       const statusCode = error.response?.status;
 
       if (statusCode === 400) {
-        if (message === 'User already exists') return new Error('이미 존재하는 사용자입니다.');
-        if (message === 'Email already exists') return new Error('이미 등록된 이메일입니다.');
-        if (message === 'Email not registered') return new Error('등록되지 않은 이메일입니다.');
-        if (message === 'User email mismatch' || message === 'User ID and email do not match') return new Error('아이디와 이메일 정보가 일치하지 않습니다.');
-        return new Error(message || '잘못된 요청입니다.');
+        if (message === "User already exists")
+          return new Error("이미 존재하는 사용자입니다.");
+        if (message === "Email already exists")
+          return new Error("이미 등록된 이메일입니다.");
+        if (message === "Email not registered")
+          return new Error("등록되지 않은 이메일입니다.");
+        if (
+          message === "User email mismatch" ||
+          message === "User ID and email do not match"
+        )
+          return new Error("아이디와 이메일 정보가 일치하지 않습니다.");
+        return new Error(message || "잘못된 요청입니다.");
       }
       if (statusCode === 401) {
-        return new Error('인증에 실패했습니다.');
+        return new Error("인증에 실패했습니다.");
       }
       if (statusCode === 404) {
-        return new Error('존재하지 않는 사용자입니다.');
+        return new Error("존재하지 않는 사용자입니다.");
       }
 
       return new Error(message);
     }
 
-    return error instanceof Error ? error : new Error('알 수 없는 오류가 발생했습니다.');
+    return error instanceof Error
+      ? error
+      : new Error("알 수 없는 오류가 발생했습니다.");
   }
 }
