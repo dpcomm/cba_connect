@@ -1,14 +1,14 @@
-import { Auth } from '@domain/auth/Auth';
-import { AuthRepository } from '@domain/auth/AuthRepository';
+import { IAuthRepository } from '@domain/auth/IAuthRepository';
 import { inject, injectable } from 'tsyringe';
 
 @injectable()
 export class RefreshUseCase {
   constructor(
-    @inject('AuthRepository') private authRepository: AuthRepository
+    @inject('AuthRepository') private authRepository: IAuthRepository
   ) {}
 
-  async execute(refreshToken: string): Promise<Auth> {
-    return this.authRepository.refresh(refreshToken);
+  async execute(): Promise<string> {
+    return this.authRepository.refreshAccessToken();
   }
 }
+

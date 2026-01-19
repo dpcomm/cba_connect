@@ -108,7 +108,7 @@ export class Auth {
 
 **파일**: `src/domain/auth/AuthRepository.ts`
 ```typescript
-export interface AuthRepository {
+export interface IAuthRepository {
   login(id: string, pw: string): Promise<Auth>;
 }
 ```
@@ -124,7 +124,7 @@ export interface AuthRepository {
 ```typescript
 @injectable()
 export class LoginUseCase {
-  constructor(@inject('AuthRepository') private repo: AuthRepository) {}
+  constructor(@inject('AuthRepository') private repo: IAuthRepository) {}
 
   async execute(id: string, pw: string): Promise<Auth> {
     return this.repo.login(id, pw);
@@ -153,10 +153,10 @@ export interface AuthResponseDto {
 }
 ```
 
-**파일**: `src/infrastructure/auth/ApiAuthRepository.ts`
+**파일**: `src/infrastructure/auth/AuthRepository.ts`
 ```typescript
 @injectable()
-export class ApiAuthRepository implements AuthRepository {
+export class AuthRepository implements IAuthRepository {
   async login(id: string, pw: string): Promise<Auth> {
     try {
       const res = await apiClient.post<ApiResponse<AuthResponseDto>>('/api/auth/login', { ... });
@@ -168,13 +168,26 @@ export class ApiAuthRepository implements AuthRepository {
   }
 
   private normalizeError(error: unknown) {
-    if (axios.isAxiosError(error)) {
+    if (isAxiosError(error)) {
       // Axios 에러 처리
     }
     // ...
   }
 }
 ```
+
+##### DTO 작성 가이드
+
+| 네이밍 | 예시 | 설명 |
+|---|---|---|
+| `[기능]RequestDto` | `LoginRequestDto` | 앱 → 서버 요청 데이터 |
+| `[기능]ResponseDto` | `AuthResponseDto` | 서버 → 앱 응답 데이터 |
+
+**작성 원칙:**
+1. **서버 스펙 그대로**: `snake_case` 유지 (예: `access_token`)
+2. **중복 시 재사용**: `UserResponseDto`를 `AuthResponseDto`에서 import
+3. **변환은 Repository에서**: `mapToAuth()` 같은 private 메서드로 DTO → Domain 변환
+
 
 
 #### Step 4: Presentation (UI & ViewModel)
@@ -217,5 +230,5 @@ export default function LoginScreen() {
 
 2. Start the app
    ```bash
-   npx expo start
+   npm run start
    ```

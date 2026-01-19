@@ -1,10 +1,10 @@
 export const Layout = {
   spacing: {
     xs: 4,
-    s: 8,
-    m: 16,
-    l: 24,
-    xl: 32,
+    s: 12,
+    m: 18,
+    l: 26,
+    xl: 36,
     xxl: 48,
   },
   radius: {
@@ -22,6 +22,16 @@ export const Layout = {
       shadowOpacity: 0.15,
       shadowRadius: 5,
       elevation: 2,
+    },
+    drop: {
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 4,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 4,
     }
   }
 };

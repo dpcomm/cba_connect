@@ -44,7 +44,13 @@ app-example
 
 # Secrets
 key.properties
+secrets/
 google-services.json
 GoogleService-Info.plist
 
+# env
 .env
+
+# Legacy code
+_LEGACY/
+_LEGACY_*/

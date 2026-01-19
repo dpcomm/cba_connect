@@ -1,5 +1,5 @@
-import MainScreen from '@features/home/screens/main/MainScreen';
+import HomeScreen from '@features/home/screens/HomeScreen';
 
 export default function HomeRoute() {
-  return <MainScreen />;
+  return <HomeScreen />;
 }

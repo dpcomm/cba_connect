@@ -1,6 +1,6 @@
 export interface RegisterRequestDto {
     userId: number;
-    expoPushToken: string;
+    token: string;
 }
 
 export interface ExpoTokenResponseDto {

@@ -1,23 +1,36 @@
-import axios from 'axios';
+import axios from "axios";
 
 import {
   authTokenRequestInterceptor,
-  responseErrorInterceptor,
+  createResponseErrorInterceptor,
   responseSuccessInterceptor,
-} from './interceptors';
+} from "./interceptors";
 
-const PRODUCT_URI = process.env.EXPO_PUBLIC_PRODUCT_URI || 'https://recba.me';
-const LOCAL_URI = process.env.EXPO_PUBLIC_LOCAL_URI || 'http://localhost:3000';
-const BASE_URL = PRODUCT_URI || LOCAL_URI;
+const PRODUCT_URI = process.env.EXPO_PUBLIC_PRODUCT_URI || "https://recba.me";
+const LOCAL_URI = process.env.EXPO_PUBLIC_LOCAL_URI || "https://dev.recba.me";
+// const LOCAL_URI = 'http://localhost:3000';
+
+// 개발 모드면 LOCAL_URI, 배포 모드면 PRODUCT_URI 사용
+const BASE_URL = __DEV__ ? LOCAL_URI : PRODUCT_URI;
 const REQUEST_TIMEOUT_MS = 5000;
+
+/**
+ * API Path Prefix Configuration
+ * Production (Release Build) -> /api/v2
+ * Development (Debug Build) -> /api
+ */
+export const API_PREFIX = !__DEV__ ? "/api/v2" : "/api";
 
 export const apiClient = axios.create({
   baseURL: BASE_URL,
   timeout: REQUEST_TIMEOUT_MS,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 apiClient.interceptors.request.use(authTokenRequestInterceptor);
-apiClient.interceptors.response.use(responseSuccessInterceptor, responseErrorInterceptor);
+apiClient.interceptors.response.use(
+  responseSuccessInterceptor,
+  createResponseErrorInterceptor(apiClient),
+);

@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { CheckBox, Container, LoginInputView, LogoBold, LogoLight, LogoView, TextButton, TextButtonView } from './LoginView.styled';
-import TextInput from '@components/TextInput';
-import SvgIcon from '@components/SvgIcon';
-import { EColor } from '@styles/color';
-import { IconButton } from '@components/IconButton';
-import usePageControll from '@hooks/usePageControll';
 import { requestLogin } from '@apis/index';
-import { useRecoilState, useSetRecoilState } from 'recoil';
+import { IconButton } from '@components/IconButton';
+import SvgIcon from '@components/SvgIcon';
+import TextInput from '@components/TextInput';
+import usePageControll from '@hooks/usePageControll';
 import { isLoadingState, userState } from '@modules/atoms';
+import { EColor } from '@styles/color';
+import { useEffect, useState } from 'react';
+import { useRecoilState, useSetRecoilState } from 'recoil';
+import { CheckBox, Container, LoginInputView, LogoBold, LogoLight, LogoView, TextButton, TextButtonView } from './LoginView.styled';
 
 
 const LoginView = () => {
