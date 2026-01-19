@@ -128,6 +128,7 @@ export default function RootLayout() {
         <Stack.Screen name="update" options={{ headerShown: false }} />
         <Stack.Screen name="home" options={{ headerShown: false }} />
         <Stack.Screen name="carpool" options={{ headerShown: false }} />
+        <Stack.Screen name="notice" options={{ headerShown: false }} />
         <Stack.Screen
           name="my-page"
           options={{
