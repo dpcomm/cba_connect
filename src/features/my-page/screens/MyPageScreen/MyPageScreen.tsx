@@ -21,6 +21,7 @@ export default function MyPageScreen() {
     openUnderConstruction,
     handleLogout,
     confirmLogout,
+    navigateToNotice,
     navigateToHistory,
     router,
   } = useMyPageViewModel();
@@ -55,7 +56,7 @@ export default function MyPageScreen() {
             <MenuItem
               label="공지사항"
               showBorder={false}
-              onPress={openUnderConstruction}
+              onPress={navigateToNotice}
             />
           </MenuSection>
 

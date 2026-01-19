@@ -21,6 +21,8 @@ import {
 } from "@application/carpool";
 import { CheckConsentUseCase } from "@application/consent/CheckConsentUseCase";
 import { SubmitConsentUseCase } from "@application/consent/SubmitConsentUseCase";
+import { GetNoticesUseCase } from "@application/notice/GetNoticesUseCase";
+import { GetNoticeUseCase } from "@application/notice/GetNoticeUseCase";
 import { RegisterExpoTokenUseCase } from "@application/notification/RegistExpoTokenUseCase";
 import { CheckVersionUseCase } from "@application/status/CheckVersionUseCase";
 import { GetMeUseCase } from "@application/user/GetMeUseCase";
@@ -28,6 +30,7 @@ import { UpdateProfileUseCase } from "@application/user/UpdateProfileUseCase";
 import { AuthRepository } from "@infrastructure/auth/AuthRepository";
 import { CarpoolRepository } from "@infrastructure/carpool/CarpoolRepository";
 import { ConsentRepository } from "@infrastructure/consent/ConsentRepository";
+import { NoticeRepository } from "@infrastructure/notice/NoticeRepository";
 import { ApiExpoPushTokenRepository } from "@infrastructure/notification/ApiExpoPushTokenRepository";
 import { StatusRepository } from "@infrastructure/status/StatusRepository";
 import { UserRepository } from "@infrastructure/user/UserRepository";
@@ -39,6 +42,7 @@ container.register("UserRepository", { useClass: UserRepository });
 container.register("CarpoolRepository", { useClass: CarpoolRepository });
 container.register("ConsentRepository", { useClass: ConsentRepository });
 container.register("StatusRepository", { useClass: StatusRepository });
+container.register('NoticeRepository', { useClass: NoticeRepository });
 
 container.register("ExpoPushTokenRepository", {
   useClass: ApiExpoPushTokenRepository,
@@ -83,4 +87,8 @@ container.register(UpdateCarpoolStatusUseCase, {
   useClass: UpdateCarpoolStatusUseCase,
 });
 
+container.register(GetNoticesUseCase, { useClass: GetNoticesUseCase });
+container.register(GetNoticeUseCase, { useClass: GetNoticeUseCase });
+
 export { container };
+
