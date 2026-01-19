@@ -1,10 +1,15 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Button } from '@shared/components/button/Button';
-import { ThemedText } from '@shared/components/themed-text/ThemedText';
-import { Color } from '@shared/constants/color';
-import React from 'react';
-import { Modal, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
-import { styles } from './styles';
+import { Ionicons } from "@expo/vector-icons";
+import { Button } from "@shared/components/button/Button";
+import { ThemedText } from "@shared/components/themed-text/ThemedText";
+import { Color } from "@shared/constants/color";
+import React from "react";
+import {
+  Modal,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
+import { styles } from "./styles";
 
 interface FooterButton {
   text: string;
@@ -21,7 +26,14 @@ interface Props {
   rightButton?: FooterButton;
 }
 
-export function BaseModal({ visible, onClose, title, children, leftButton, rightButton }: Props) {
+export function BaseModal({
+  visible,
+  onClose,
+  title,
+  children,
+  leftButton,
+  rightButton,
+}: Props) {
   if (!visible) return null;
 
   const hasFooter = leftButton || rightButton;
@@ -53,23 +65,31 @@ export function BaseModal({ visible, onClose, title, children, leftButton, right
                   <Ionicons name="close" size={24} color={Color.text.main} />
                 </TouchableOpacity>
               </View>
-              <View>
-                {children}
-              </View>
+              <View>{children}</View>
               {hasFooter && (
-                <View style={[
-                  styles.footer,
-                  leftButton && !rightButton && { justifyContent: 'flex-start' },
-                  !leftButton && rightButton && { justifyContent: 'flex-end' },
-                  leftButton && rightButton && { justifyContent: 'space-between' },
-                ]}>
+                <View
+                  style={[
+                    styles.footer,
+                    leftButton &&
+                      !rightButton && { justifyContent: "flex-start" },
+                    !leftButton &&
+                      rightButton && { justifyContent: "flex-end" },
+                    leftButton &&
+                      rightButton && { justifyContent: "space-between" },
+                  ]}
+                >
                   {leftButton && (
                     <View>
                       <Button
                         title={leftButton.text}
                         onPress={leftButton.onPress}
                         size="small"
-                        style={{ minWidth: 100, ...(leftButton.color && { backgroundColor: leftButton.color }) }}
+                        style={{
+                          minWidth: 100,
+                          ...(leftButton.color && {
+                            backgroundColor: leftButton.color,
+                          }),
+                        }}
                       />
                     </View>
                   )}
@@ -79,7 +99,12 @@ export function BaseModal({ visible, onClose, title, children, leftButton, right
                         title={rightButton.text}
                         onPress={rightButton.onPress}
                         size="small"
-                        style={{ minWidth: 100, ...(rightButton.color && { backgroundColor: rightButton.color }) }}
+                        style={{
+                          minWidth: 100,
+                          ...(rightButton.color && {
+                            backgroundColor: rightButton.color,
+                          }),
+                        }}
                       />
                     </View>
                   )}
@@ -92,4 +117,3 @@ export function BaseModal({ visible, onClose, title, children, leftButton, right
     </Modal>
   );
 }
-

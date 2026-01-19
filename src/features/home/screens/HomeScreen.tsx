@@ -1,57 +1,57 @@
-import { Color } from '@shared/constants/color';
-import { Layout } from '@shared/constants/layout';
-import { useRouter } from 'expo-router';
-import React from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { HomeHeader } from '../components/HomeHeader';
-import { HomeMenuGrid } from '../components/HomeMenuGrid';
-import { MainBanner } from '../components/MainBanner';
+import { Color } from "@shared/constants/color";
+import { Layout } from "@shared/constants/layout";
+import { useRouter } from "expo-router";
+import React from "react";
+import { Linking } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { HomeHeader } from "../components/HomeHeader";
+import { HomeMenuGrid } from "../components/HomeMenuGrid";
+import { MainBanner } from "../components/MainBanner";
 
 export default function HomeScreen() {
   const router = useRouter();
 
   const handleMenuPress = () => {
-    router.push('/my-page');
+    router.push("/my-page");
   };
 
   const handleRetreatPress = () => {
-    // TODO: 수련회 신청 화면으로 이동
-    console.log('Retreat pressed');
+    Linking.openURL("https://recba.me");
   };
 
   const handleCarpoolPress = () => {
-    // TODO: 카풀 서비스 화면으로 이동
-    router.push('/carpool');
+    router.push("/carpool");
   };
 
   const handleGuidebookPress = () => {
-    // TODO: 가이드북 화면으로 이동
-    console.log('Guidebook pressed');
+    Linking.openURL("https://recba.me");
   };
 
   const handleVideoPress = () => {
-    // TODO: 영상 자료실 화면으로 이동
-    console.log('Video pressed');
+    Linking.openURL("https://recba.me");
   };
 
   const handleLecturePress = () => {
-    // TODO: 선택식 강의 화면으로 이동
-    console.log('Lecture pressed');
+    Linking.openURL("https://recba.me");
   };
 
   return (
-    <SafeAreaView 
-      style={{ flex: 1, alignItems: 'center', backgroundColor: Color.default.background, paddingHorizontal: Layout.spacing.l, gap: 25 }}
+    <SafeAreaView
+      style={{
+        flex: 1,
+        alignItems: "center",
+        backgroundColor: Color.default.background,
+        paddingHorizontal: Layout.spacing.l,
+        gap: 25,
+      }}
     >
-      <HomeHeader 
-        dDay={0} 
-        onMenuPress={handleMenuPress} 
-      />
-      <MainBanner 
-        title="바라봄"
-        subtitle="Discover my calling"
-        currentPage={1}
-        totalPages={3}
+      <HomeHeader dDay={0} onMenuPress={handleMenuPress} />
+      <MainBanner
+        images={[
+          require("../../../../assets/images/rolling_banner_26_retreat.png"),
+          require("../../../../assets/images/rolling_banner_26_retreat.png"),
+          require("../../../../assets/images/rolling_banner_26_retreat.png"),
+        ]}
       />
       <HomeMenuGrid
         onRetreatPress={handleRetreatPress}

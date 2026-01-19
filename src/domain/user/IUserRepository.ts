@@ -1,4 +1,4 @@
-import { User } from './User';
+import { User } from "./User";
 
 export interface UpdateProfileData {
   name?: string;
@@ -12,4 +12,5 @@ export interface UpdateProfileData {
 export interface IUserRepository {
   getMe(): Promise<User>;
   updateProfile(data: UpdateProfileData): Promise<void>;
+  deleteAccount(): Promise<void>;
 }

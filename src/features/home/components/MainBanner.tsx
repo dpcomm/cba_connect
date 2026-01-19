@@ -1,125 +1,158 @@
-import { ThemedText } from '@shared/components/themed-text/ThemedText';
-import { Layout } from '@shared/constants/layout';
-import React from 'react';
-import { Dimensions, View } from 'react-native';
+import { Color } from "@shared/constants/color";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Dimensions,
+  Image,
+  ImageSourcePropType,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const HORIZONTAL_PADDING = 20;
 const BANNER_SIZE = SCREEN_WIDTH - HORIZONTAL_PADDING * 2;
+const AUTO_SCROLL_INTERVAL = 3000;
 
 interface MainBannerProps {
-  title?: string;
-  subtitle?: string;
-  currentPage?: number;
-  totalPages?: number;
+  images: ImageSourcePropType[];
 }
 
-export function MainBanner({ 
-  title = '바라봄', 
-  subtitle = 'Discover my calling',
-  currentPage = 1,
-  totalPages = 3,
-}: MainBannerProps) {
+export function MainBanner({ images }: MainBannerProps) {
+  const [pageIndex, setPageIndex] = useState(1);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const totalPages = images.length;
+
+  const extendedImages =
+    totalPages > 1 ? [images[totalPages - 1], ...images, images[0]] : images;
+
+  // 자동 스크롤
+  useEffect(() => {
+    if (totalPages <= 1) return;
+
+    const intervalId = setInterval(() => {
+      setPageIndex((prevIndex) => {
+        const nextIndex = prevIndex + 1;
+        scrollViewRef.current?.scrollTo({
+          x: nextIndex * BANNER_SIZE,
+          animated: true,
+        });
+        return nextIndex;
+      });
+    }, AUTO_SCROLL_INTERVAL);
+
+    return () => clearInterval(intervalId);
+  }, [totalPages]);
+
+  // 무한 스크롤 처리
+  useEffect(() => {
+    if (totalPages <= 1) return;
+
+    // 마지막 배너일 경우 처음으로 이동
+    if (pageIndex === totalPages + 1) {
+      const timeoutId = setTimeout(() => {
+        scrollViewRef.current?.scrollTo({
+          x: BANNER_SIZE,
+          animated: false,
+        });
+        setPageIndex(1);
+      }, 500);
+      return () => clearTimeout(timeoutId);
+    }
+
+    // 처음 배너일 경우 마지막으로 이동
+    if (pageIndex === 0) {
+      const timeoutId = setTimeout(() => {
+        scrollViewRef.current?.scrollTo({
+          x: totalPages * BANNER_SIZE,
+          animated: false,
+        });
+        setPageIndex(totalPages);
+      }, 500);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [pageIndex, totalPages]);
+
+  const handleMomentumScrollEnd = (
+    event: NativeSyntheticEvent<NativeScrollEvent>,
+  ) => {
+    const contentOffsetX = event.nativeEvent.contentOffset.x;
+    const newIndex = Math.round(contentOffsetX / BANNER_SIZE);
+
+    setPageIndex(newIndex);
+  };
+
+  const displayPage = (pageIndex - 1 + totalPages) % totalPages;
+
   return (
-    <View style={{
-      borderRadius: 20,
-      width: BANNER_SIZE,
-      height: BANNER_SIZE,
-      backgroundColor: '#06060bff',
-      overflow: 'hidden',
-    }}>
-      <View style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: '#1a1a2e',
-      }}>
-        <View style={{
-          position: 'absolute',
-          top: -50,
-          right: -50,
-          width: 200,
-          height: 200,
-          borderRadius: 100,
-          backgroundColor: 'rgba(138, 43, 226, 0.3)',
-        }} />
-        <View style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: 80,
-          backgroundColor: 'rgba(138, 43, 226, 0.2)',
-          borderTopLeftRadius: 300,
-          borderTopRightRadius: 300,
-        }} />
-      </View>
-
-      <View style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: Layout.spacing.l,
-      }}>
-        <ThemedText 
-          variant="text2" 
-          color="rgba(255,255,255,0.8)"
-          style={{ fontStyle: 'italic', marginBottom: 8 }}
-        >
-          {subtitle}
-        </ThemedText>
-        
-        <View style={{
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          paddingHorizontal: Layout.spacing.l,
-          paddingVertical: Layout.spacing.s,
-          borderRadius: Layout.radius.m,
-          marginTop: Layout.spacing.xl,
-        }}>
-          <ThemedText 
-            variant="text3" 
-            color="white"
-            style={{ textAlign: 'center' }}
-          >
-            포스터/시간표 등 롤링배너
-          </ThemedText>
-        </View>
-
-        <View style={{ marginTop: Layout.spacing.l, alignItems: 'center' }}>
-          <ThemedText variant="text5" color="rgba(255,255,255,0.7)">
-            장 18:19
-          </ThemedText>
-          <ThemedText variant="text5" color="rgba(255,255,255,0.6)" style={{ textAlign: 'center', marginTop: 4 }}>
-            여호와의 도를 지켜
-          </ThemedText>
-        </View>
-      </View>
-
-      <View style={{
-        position: 'absolute',
-        bottom: Layout.spacing.m,
-        left: 0,
-        right: 0,
-        flexDirection: 'row',
-        justifyContent: 'center',
-        gap: 6,
-      }}>
-        {Array.from({ length: totalPages }).map((_, index) => (
-          <View
-            key={index}
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: 4,
-              backgroundColor: index === currentPage - 1 
-                ? 'white' 
-                : 'rgba(255,255,255,0.4)',
-            }}
-          />
+    <View style={styles.container}>
+      <ScrollView
+        ref={scrollViewRef}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onMomentumScrollEnd={handleMomentumScrollEnd}
+        contentOffset={{ x: totalPages > 1 ? BANNER_SIZE : 0, y: 0 }}
+        style={styles.scrollView}
+      >
+        {extendedImages.map((image, index) => (
+          <Image key={index} source={image} style={styles.image} />
         ))}
-      </View>
+      </ScrollView>
+      {totalPages > 1 && (
+        <View style={styles.paginationContainer}>
+          {images.map((_, index) => (
+            <View
+              key={index}
+              style={[
+                styles.paginationDot,
+                {
+                  backgroundColor:
+                    index === displayPage
+                      ? Color.secondary.main
+                      : "rgba(255,255,255,0.4)",
+                },
+              ]}
+            />
+          ))}
+        </View>
+      )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    borderRadius: 20,
+    width: BANNER_SIZE,
+    height: BANNER_SIZE,
+    overflow: "hidden",
+    backgroundColor: "#f0f0f0",
+  },
+  scrollView: {
+    width: BANNER_SIZE,
+    height: BANNER_SIZE,
+  },
+  image: {
+    width: BANNER_SIZE,
+    height: BANNER_SIZE,
+    resizeMode: "cover",
+  },
+  paginationContainer: {
+    position: "absolute",
+    bottom: 16,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 6,
+  },
+  paginationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+});

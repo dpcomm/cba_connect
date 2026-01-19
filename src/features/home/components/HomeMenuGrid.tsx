@@ -1,19 +1,20 @@
-import React from 'react';
-import { Dimensions, View } from 'react-native';
-import CarpoolIcon from '../../../../assets/svgs/carpool.svg';
-import GuidebookIcon from '../../../../assets/svgs/guidebook.svg';
-import LectureIcon from '../../../../assets/svgs/lecture.svg';
-import RetreatIcon from '../../../../assets/svgs/retreat-application.svg';
-import YoutubeIcon from '../../../../assets/svgs/youtube.svg';
-import { MenuCard } from './MenuCard';
+import React from "react";
+import { Dimensions, View } from "react-native";
+import CarpoolIcon from "../../../../assets/svgs/carpool.svg";
+import GuidebookIcon from "../../../../assets/svgs/guidebook.svg";
+import LectureIcon from "../../../../assets/svgs/lecture.svg";
+import RetreatIcon from "../../../../assets/svgs/retreat-application.svg";
+import YoutubeIcon from "../../../../assets/svgs/youtube.svg";
+import { MenuCard } from "./MenuCard";
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const HORIZONTAL_PADDING = 20;
 const CARD_GAP = 12;
 
 const LARGE_CARD_WIDTH = (SCREEN_WIDTH - HORIZONTAL_PADDING * 2 - CARD_GAP) / 2;
 const LARGE_CARD_HEIGHT = LARGE_CARD_WIDTH * 0.89;
-const SMALL_CARD_WIDTH = (SCREEN_WIDTH - HORIZONTAL_PADDING * 2 - CARD_GAP * 2) / 3;
+const SMALL_CARD_WIDTH =
+  (SCREEN_WIDTH - HORIZONTAL_PADDING * 2 - CARD_GAP * 2) / 3;
 const SMALL_CARD_HEIGHT = SMALL_CARD_WIDTH * 0.83;
 
 interface HomeMenuGridProps {
@@ -32,12 +33,14 @@ export function HomeMenuGrid({
   onLecturePress,
 }: HomeMenuGridProps) {
   return (
-    <View style={{ alignItems: 'center' }}>
-      <View style={{ 
-        flexDirection: 'row', 
-        gap: CARD_GAP,
-        marginBottom: CARD_GAP,
-      }}>
+    <View style={{ alignItems: "center" }}>
+      <View
+        style={{
+          flexDirection: "row",
+          gap: CARD_GAP,
+          marginBottom: CARD_GAP,
+        }}
+      >
         <MenuCard
           title="수련회 신청"
           description={"2026 겨울 수련회\n'바라봄'"}
@@ -56,11 +59,13 @@ export function HomeMenuGrid({
         />
       </View>
 
-      <View style={{ 
-        justifyContent: 'space-between',
-        flexDirection: 'row', 
-        gap: CARD_GAP,
-      }}>
+      <View
+        style={{
+          justifyContent: "space-between",
+          flexDirection: "row",
+          gap: CARD_GAP,
+        }}
+      >
         <MenuCard
           title="가이드북"
           size="small"

@@ -1,30 +1,29 @@
-import { ThemedText } from '@shared/components/themed-text/ThemedText';
-import { Color } from '@shared/constants/color';
-import { Layout } from '@shared/constants/layout';
-import React, { ReactNode } from 'react';
-import { TouchableOpacity, View, ViewStyle } from 'react-native';
+import { ThemedText } from "@shared/components/themed-text/ThemedText";
+import { Color } from "@shared/constants/color";
+import { Layout } from "@shared/constants/layout";
+import React, { ReactNode } from "react";
+import { TouchableOpacity, View, ViewStyle } from "react-native";
 
 interface MenuCardProps {
   title: string;
   description?: string;
   icon?: ReactNode;
-  size: 'large' | 'small';
+  size: "large" | "small";
   onPress?: () => void;
   backgroundColor?: string;
   style?: ViewStyle;
 }
 
-export function MenuCard({ 
-  title, 
-  description, 
-  icon, 
-  size, 
+export function MenuCard({
+  title,
+  description,
+  icon,
+  size,
   onPress,
-  backgroundColor = '#F5F5F5',
   style,
 }: MenuCardProps) {
-  const isLarge = size === 'large';
-  
+  const isLarge = size === "large";
+
   if (isLarge) {
     return (
       <TouchableOpacity
@@ -46,13 +45,17 @@ export function MenuCard({
             {title}
           </ThemedText>
           {description && (
-            <ThemedText variant="text2" color={Color.text.sub} style={{ marginTop: 4 }}>
+            <ThemedText
+              variant="text2"
+              color={Color.text.sub}
+              style={{ marginTop: 4 }}
+            >
               {description}
             </ThemedText>
           )}
         </View>
         {icon && (
-          <View style={{ position: 'absolute', right: 8, bottom: 8 }}>
+          <View style={{ position: "absolute", right: 8, bottom: 8 }}>
             {icon}
           </View>
         )}
@@ -68,29 +71,24 @@ export function MenuCard({
         {
           backgroundColor: Color.secondary.main,
           borderRadius: Layout.radius.l,
-          paddingHorizontal: 8, // 패딩을 28 -> 8로 대폭 축소
+          paddingHorizontal: 8,
           paddingTop: 16,
           paddingBottom: 4,
-          justifyContent: 'center',
-          alignItems: 'center',
+          justifyContent: "center",
+          alignItems: "center",
           ...Layout.shadow.drop,
         },
         style,
       ]}
     >
-      <ThemedText 
-        variant="text3" 
+      <ThemedText
+        variant="text3"
         color={Color.text.main}
-        style={{ textAlign: 'center' }} // 텍스트 중앙 정렬 추가
+        style={{ textAlign: "center" }}
       >
         {title}
       </ThemedText>
-      {icon && (
-        <View style={{ marginTop: 'auto' }}>
-          {icon}
-        </View>
-      )}
+      {icon && <View style={{ marginTop: "auto" }}>{icon}</View>}
     </TouchableOpacity>
   );
 }
-

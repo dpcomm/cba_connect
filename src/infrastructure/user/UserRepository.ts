@@ -1,24 +1,32 @@
-import { IUserRepository, UpdateProfileData } from '@domain/user/IUserRepository';
-import { User } from '@domain/user/User';
-import { apiClient } from '@shared/api/client';
-import { ApiResponse } from '@shared/api/types';
-import { injectable } from 'tsyringe';
+import {
+    IUserRepository,
+    UpdateProfileData,
+} from "@domain/user/IUserRepository";
+import { User } from "@domain/user/User";
+import { apiClient } from "@shared/api/client";
+import { ApiResponse } from "@shared/api/types";
+import { injectable } from "tsyringe";
 
-import { UpdateProfileRequestDto, UserResponseDto } from './dto';
+import { UpdateProfileRequestDto, UserResponseDto } from "./dto";
 
 @injectable()
 export class UserRepository implements IUserRepository {
   async getMe(): Promise<User> {
-    const response = await apiClient.get<ApiResponse<UserResponseDto>>('/api/users/me');
+    const response =
+      await apiClient.get<ApiResponse<UserResponseDto>>("/api/users/me");
     const { data } = response.data;
     return this.mapToUser(data);
   }
 
   async updateProfile(data: UpdateProfileData): Promise<void> {
     const requestBody: UpdateProfileRequestDto = {
-      ...data
+      ...data,
     };
-    await apiClient.patch<ApiResponse<void>>('/api/users/me', requestBody);
+    await apiClient.patch<ApiResponse<void>>("/api/users/me", requestBody);
+  }
+
+  async deleteAccount(): Promise<void> {
+    await apiClient.delete<ApiResponse<void>>("/api/users/me");
   }
 
   private mapToUser(dto: UserResponseDto): User {
@@ -33,7 +41,7 @@ export class UserRepository implements IUserRepository {
       dto.rank,
       dto.isDeleted,
       dto.createdAt,
-      dto.updatedAt
+      dto.updatedAt,
     );
   }
 }

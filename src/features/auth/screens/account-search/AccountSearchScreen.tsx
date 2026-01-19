@@ -1,18 +1,27 @@
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { Button } from '@shared/components/button/Button';
-import { Header } from '@shared/components/header/Header';
-import { Color } from '@shared/constants/color';
-import { Layout } from '@shared/constants/layout';
-import { useRouter } from 'expo-router';
-import React from 'react';
-import { Keyboard, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { FindIdResultView } from './tabs/FindIdResultView';
-import { FindIdTab } from './tabs/FindIdTab';
-import { FindPasswordTab } from './tabs/FindPasswordTab';
-import { NewPasswordView } from './tabs/NewPasswordView';
-import { VerificationCodeView } from './tabs/VerificationCodeView';
-import { useFindAccountViewModel } from './useFindAccountViewModel';
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import { Button } from "@shared/components/button/Button";
+import { Header } from "@shared/components/header/Header";
+import { LoadingOverlay } from "@shared/components/loading-overlay/LoadingOverlay";
+import { BaseModal } from "@shared/components/modal/BaseModal";
+import { ThemedText } from "@shared/components/themed-text/ThemedText";
+import { Color } from "@shared/constants/color";
+import { Layout } from "@shared/constants/layout";
+import { useRouter } from "expo-router";
+import React from "react";
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { FindIdResultView } from "./tabs/FindIdResultView";
+import { FindIdTab } from "./tabs/FindIdTab";
+import { FindPasswordTab } from "./tabs/FindPasswordTab";
+import { NewPasswordView } from "./tabs/NewPasswordView";
+import { VerificationCodeView } from "./tabs/VerificationCodeView";
+import { useFindAccountViewModel } from "./useFindAccountViewModel";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -28,15 +37,11 @@ export default function AccountSearchScreen() {
     router.back();
   };
 
-  const handleLogin = () => {
-    router.back();
-  };
-
   const renderFindIdContent = () => {
-    if (vm.findIdStep === 'result') {
+    if (vm.findIdStep === "result") {
       return (
         <FindIdResultView
-          name={vm.name || '알 수 없음'}
+          name={vm.name || "알 수 없음"}
           maskedIds={vm.foundIds}
           onLogin={handleLogin}
         />
@@ -53,7 +58,7 @@ export default function AccountSearchScreen() {
   };
 
   const renderFindPwContent = () => {
-    if (vm.findPwStep === 'verification') {
+    if (vm.findPwStep === "verification") {
       return (
         <VerificationCodeView
           email={vm.email}
@@ -64,7 +69,7 @@ export default function AccountSearchScreen() {
         />
       );
     }
-    if (vm.findPwStep === 'newPassword') {
+    if (vm.findPwStep === "newPassword") {
       return (
         <NewPasswordView
           newPassword={vm.newPassword}
@@ -85,15 +90,19 @@ export default function AccountSearchScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Color.default.background }} edges={['top']}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: Color.default.background }}
+      edges={["top"]}
+    >
       <Header title="ID/PW 찾기" onBack={handleBack} />
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={{ flex: 1 }}
         >
           <View style={{ flex: 1 }}>
             <Tab.Navigator
+              backBehavior="none"
               screenOptions={{
                 tabBarActiveTintColor: Color.primary.main,
                 tabBarInactiveTintColor: Color.text.sub,
@@ -109,27 +118,28 @@ export default function AccountSearchScreen() {
                   borderBottomColor: Color.tertiary.main,
                 },
                 tabBarLabelStyle: {
-                  fontWeight: '600',
+                  fontWeight: "600",
                   fontSize: 14,
                 },
-                swipeEnabled: vm.findIdStep === 'input' && vm.findPwStep === 'input',
+                swipeEnabled:
+                  vm.findIdStep === "input" && vm.findPwStep === "input",
               }}
               screenListeners={{
                 state: (e) => {
                   const index = e.data.state?.index ?? 0;
-                  vm.setActiveTab(index === 0 ? 'ID' : 'PW');
+                  vm.setActiveTab(index === 0 ? "ID" : "PW");
                 },
               }}
             >
               <Tab.Screen
                 name="FindId"
-                options={{ tabBarLabel: '아이디 찾기' }}
+                options={{ tabBarLabel: "아이디 찾기" }}
               >
                 {() => renderFindIdContent()}
               </Tab.Screen>
               <Tab.Screen
                 name="FindPassword"
-                options={{ tabBarLabel: '비밀번호 찾기' }}
+                options={{ tabBarLabel: "비밀번호 찾기" }}
               >
                 {() => renderFindPwContent()}
               </Tab.Screen>
@@ -139,7 +149,7 @@ export default function AccountSearchScreen() {
             <Button
               title={vm.getButtonTitle()}
               onPress={() => {
-                if (vm.activeTab === 'ID' && vm.findIdStep === 'result') {
+                if (vm.activeTab === "ID" && vm.findIdStep === "result") {
                   handleLogin();
                 } else {
                   vm.submit();
@@ -151,6 +161,23 @@ export default function AccountSearchScreen() {
           </View>
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
+
+      <LoadingOverlay visible={vm.isLoading} />
+
+      {/* Global Alert Modal for Account Search */}
+      <BaseModal
+        visible={vm.modalState.visible}
+        onClose={vm.closeModal}
+        title={vm.modalState.title}
+        rightButton={{
+          text: "확인",
+          onPress: vm.handleConfirmModal,
+        }}
+      >
+        <ThemedText variant="text1" color={Color.text.main}>
+          {vm.modalState.message}
+        </ThemedText>
+      </BaseModal>
     </SafeAreaView>
   );
 }

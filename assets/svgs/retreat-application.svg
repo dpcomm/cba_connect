@@ -1,8 +1,11 @@
 <svg width="67" height="67" viewBox="0 0 67 67" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g filter="url(#filter0_d_2966_7020)">
-<rect x="3.84619" width="58.6538" height="58.6538" fill="url(#pattern0_2966_7020)" shape-rendering="crispEdges"/>
+<rect x="3.84619" width="58.6538" height="58.6538" fill="url(#pattern0_2966_7020)" shape-rendering="crispEdges" clip-path="url(#clip_remove_dot)"/>
 </g>
 <defs>
+<clipPath id="clip_remove_dot">
+<rect x="0" y="0" width="60" height="67"/>
+</clipPath>
 <filter id="filter0_d_2966_7020" x="3.79086e-05" y="0" width="66.3462" height="66.3461" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
 <feFlood flood-opacity="0" result="BackgroundImageFix"/>
 <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>

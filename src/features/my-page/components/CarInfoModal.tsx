@@ -1,15 +1,15 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, View } from 'react-native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useEffect, useMemo, useState } from "react";
+import { View } from "react-native";
 
-import { BaseModal } from '@shared/components/modal/BaseModal';
-import { TextInput } from '@shared/components/text-input/TextInput';
-import { ThemedText } from '@shared/components/themed-text/ThemedText';
-import { Color } from '@shared/constants/color';
-import { Layout } from '@shared/constants/layout';
+import { BaseModal } from "@shared/components/modal/BaseModal";
+import { TextInput } from "@shared/components/text-input/TextInput";
+import { ThemedText } from "@shared/components/themed-text/ThemedText";
+import { Color } from "@shared/constants/color";
+import { Layout } from "@shared/constants/layout";
 
 const STORAGE_KEYS = {
-  carInfo: 'carpool.carInfo',
+  carInfo: "carpool.carInfo",
 } as const;
 
 type Props = {
@@ -18,9 +18,10 @@ type Props = {
 };
 
 export function CarInfoModal({ visible, onClose }: Props) {
-  const [cached, setCached] = useState(''); // 저장돼있던 값
-  const [draft, setDraft] = useState('');   // 입력 중 값
+  const [cached, setCached] = useState(""); // 저장돼있던 값
+  const [draft, setDraft] = useState(""); // 입력 중 값
   const [loading, setLoading] = useState(false);
+  const [errorVisible, setErrorVisible] = useState(false);
 
   const hasCarInfo = useMemo(() => !!cached.trim(), [cached]);
 
@@ -40,14 +41,14 @@ export function CarInfoModal({ visible, onClose }: Props) {
       try {
         const v = await AsyncStorage.getItem(STORAGE_KEYS.carInfo);
         if (!mounted) return;
-        const value = v ?? '';
+        const value = v ?? "";
         setCached(value);
         setDraft(value);
       } catch (e) {
-        console.error('[CarInfoModal] load failed', e);
+        console.error("[CarInfoModal] load failed", e);
         if (!mounted) return;
-        setCached('');
-        setDraft('');
+        setCached("");
+        setDraft("");
       } finally {
         if (mounted) setLoading(false);
       }
@@ -68,38 +69,60 @@ export function CarInfoModal({ visible, onClose }: Props) {
       setCached(next);
       onClose();
     } catch (e) {
-      console.error('[CarInfoModal] save failed', e);
-      Alert.alert('저장 실패', '차 정보를 저장하지 못했습니다. 다시 시도해주세요.');
+      console.error("[CarInfoModal] save failed", e);
+      setErrorVisible(true);
     }
   };
+
+  const closeError = () => setErrorVisible(false);
 
   const onChangeDraft = (text: string) => {
     setDraft(text);
   };
 
   return (
-    <BaseModal
-      visible={visible}
-      onClose={onClose}
-      title="내 차 정보"
-      rightButton={{ text: '저장', onPress: onPressSave }}
-    >
-      <View style={{ paddingTop: Layout.spacing.m }}>
+    <>
+      <BaseModal
+        visible={visible}
+        onClose={onClose}
+        title="내 차 정보"
+        rightButton={{ text: "저장", onPress: onPressSave }}
+      >
+        <View style={{ paddingTop: Layout.spacing.m }}>
+          <ThemedText
+            variant="text2"
+            color={Color.text.sub}
+            style={{ marginBottom: Layout.spacing.s }}
+          >
+            차종/색상/차 번호
+          </ThemedText>
 
-        <ThemedText variant="text2" color={Color.text.sub} style={{ marginBottom: Layout.spacing.s }}>
-          차종/색상/차 번호
-        </ThemedText>
-
-        <View style={{  paddingBottom: 6 }}>
-          <TextInput
-            placeholder="예: K9/흰색/11가1111"
-            value={draft}
-            onChangeText={onChangeDraft as any}
-            onChange={(e: any) => onChangeDraft(e?.nativeEvent?.text ?? '')}
-            editable={!loading}
-          />
+          <View style={{ paddingBottom: 6 }}>
+            <TextInput
+              placeholder="예: K9/흰색/11가1111"
+              value={draft}
+              onChangeText={onChangeDraft as any}
+              onChange={(e: any) => onChangeDraft(e?.nativeEvent?.text ?? "")}
+              editable={!loading}
+            />
+          </View>
         </View>
-      </View>
-    </BaseModal>
+      </BaseModal>
+
+      {/* Error Modal */}
+      <BaseModal
+        visible={errorVisible}
+        onClose={closeError}
+        title="저장 실패"
+        rightButton={{
+          text: "확인",
+          onPress: closeError,
+        }}
+      >
+        <ThemedText variant="text1" color={Color.text.main}>
+          차 정보를 저장하지 못했습니다. 다시 시도해주세요.
+        </ThemedText>
+      </BaseModal>
+    </>
   );
 }
