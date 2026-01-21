@@ -2,7 +2,7 @@
   "expo": {
     "name": "CBA Connect",
     "slug": "cba-connect-application",
-    "version": "1.1.0",
+    "version": "1.1.01",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "cba-connect-application",
@@ -11,7 +11,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.cba.cbaConnectApplication",
-      "buildNumber": "4",
+      "buildNumber": "5",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -19,7 +19,7 @@
     "android": {
       "icon": "./assets/images/icon.png",
       "package": "com.cba.cba_connect_application",
-      "versionCode": 4,
+      "versionCode": 5,
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
