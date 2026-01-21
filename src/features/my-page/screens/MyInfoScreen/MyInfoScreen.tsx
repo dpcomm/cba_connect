@@ -41,9 +41,10 @@ export default function MyInfoScreen() {
         <ReadOnlyStepValue label="아이디" value={user.userId} />
         <ReadOnlyStepValue label="비밀번호" value={"•".repeat(8)} />
         <ReadOnlyStepValue label="이름" value={user.name} />
-        {user.birth && (
+        {/* {user.birth && (
           <ReadOnlyStepValue label="생년월일" value={user.birth} />
-        )}
+        )} */}
+
         <ReadOnlyStepValue label="성별" value={getGenderText(user.gender)} />
         <ReadOnlyStepValue label="전화번호" value={user.phone} />
         <ReadOnlyStepValue label="중그룹" value={user.group} />

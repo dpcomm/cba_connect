@@ -35,6 +35,16 @@ export default function HomeScreen() {
     Linking.openURL("https://recba.me");
   };
 
+  const dDay = React.useMemo(() => {
+    const target = new Date(2026, 0, 30);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    target.setHours(0, 0, 0, 0);
+    const diff = target.getTime() - today.getTime();
+    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    return days <= 0 ? "Day" : days;
+  }, []);
+
   return (
     <SafeAreaView
       style={{
@@ -45,7 +55,7 @@ export default function HomeScreen() {
         gap: 25,
       }}
     >
-      <HomeHeader dDay={0} onMenuPress={handleMenuPress} />
+      <HomeHeader dDay={dDay} onMenuPress={handleMenuPress} />
       <MainBanner
         images={[
           require("../../../../assets/images/rolling_banner_26_retreat.png"),

@@ -39,6 +39,10 @@ export function useMyPageViewModel() {
     }
   };
 
+  const navigateToNotice = () => {
+    router.push("/notice" as any);
+  };
+
   const navigateToHistory = () => {
     router.push("/carpool/history" as any);
   };
@@ -51,6 +55,7 @@ export function useMyPageViewModel() {
     openUnderConstruction,
     handleLogout,
     confirmLogout,
+    navigateToNotice,
     navigateToHistory,
     router,
   };
