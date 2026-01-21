@@ -5,11 +5,16 @@ import React from "react";
 import { TouchableOpacity, View } from "react-native";
 
 interface HomeHeaderProps {
-  dDay?: number;
+  dDay?: number | string;
   onMenuPress?: () => void;
 }
 
 export function HomeHeader({ dDay = 0, onMenuPress }: HomeHeaderProps) {
+  const dDayText =
+    typeof dDay === "number"
+      ? `D-${dDay.toString().padStart(2, "0")}`
+      : `D-${dDay}`;
+
   return (
     <View
       style={{
@@ -20,7 +25,7 @@ export function HomeHeader({ dDay = 0, onMenuPress }: HomeHeaderProps) {
     >
       <View style={{ flex: 1 }}>
         <ThemedText variant="heading1" color={Color.primary.main}>
-          D-{dDay.toString().padStart(2, "0")}
+          {dDayText}
         </ThemedText>
         <ThemedText variant="text2" color={Color.text.main}>
           주는 나의 목자시니

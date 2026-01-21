@@ -10,6 +10,7 @@ import { useAuthStore } from "@shared/stores/useAuthStore";
 import { useFonts } from "expo-font";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 
 // 스플래시 화면이 자동으로 숨겨지지 않도록 설정
@@ -143,6 +144,7 @@ export default function RootLayout() {
           onConfirm={handlePermissionConfirm}
         />
       )}
+      <StatusBar style="dark" />
     </>
   );
 }

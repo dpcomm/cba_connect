@@ -6,12 +6,16 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "cba-connect-application",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
+    "androidStatusBar": {
+      "barStyle": "dark-content",
+      "backgroundColor": "#F8F8F8"
+    },
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.cba.cbaConnectApplication",
-      "buildNumber": "5",
+      "buildNumber": "6",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -19,7 +23,12 @@
     "android": {
       "icon": "./assets/images/icon.png",
       "package": "com.cba.cba_connect_application",
-      "versionCode": 5,
+      "config": {
+        "googleMaps": {
+          "apiKey": ""
+        }
+      },
+      "versionCode": 6,
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },

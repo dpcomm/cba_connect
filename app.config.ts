@@ -41,17 +41,12 @@ export default ({ config }: { config: ExpoConfig }) => {
 
     extra: {
       ...config.extra,
-      KAKAO_REST_API_KEY: process.env.KAKAO_REST_API_KEY,
+      KAKAO_REST_API_KEY: "",
     },
 
     android: {
       ...config.android,
       googleServicesFile: "./google-services.json",
-      config: {
-        googleMaps: {
-          apiKey: process.env.GOOGLE_MAPS_API_KEY,
-        },
-      },
     },
   };
 };
