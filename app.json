@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "cba-connect-application",
+    "name": "CBA Connect",
     "slug": "cba-connect-application",
     "version": "1.1.0",
     "orientation": "portrait",
@@ -11,20 +11,15 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.cba.cbaConnectApplication",
-      "buildNumber": "3",
+      "buildNumber": "4",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
-      },
+      "icon": "./assets/images/icon.png",
       "package": "com.cba.cba_connect_application",
-      "versionCode": 3,
+      "versionCode": 4,
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
