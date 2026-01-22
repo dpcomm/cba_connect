@@ -3,12 +3,11 @@ import { GetParticipatingCarpoolsUseCase } from '@application/carpool/GetPartici
 import { container } from '@shared/di/container';
 import { useAuthStore } from '@shared/stores/useAuthStore';
 import { formatDateTimePretty } from '@shared/utils/dateFormat';
-import { useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useMemo, useState } from 'react';
 
-const RETREAT_PLACE = '딱따구리 수련원';
+const RETREAT_PLACE = '양평 십자수 기도원';
 export type DestinationTab = 'HOME' | 'RETREAT';
-
 export type CarpoolCardStatus = 'AVAILABLE' | 'CLOSED';
 
 function getCarpoolCardStatus(post: any): { status: CarpoolCardStatus; label: string } {
@@ -85,11 +84,18 @@ function buildRouteText(p: any): string {
 }
 
 export function useCarpoolHomeViewModel() {
-  const getAvailableCarpools = container.resolve(GetAvailableCarpoolsUseCase);
-  const getParticipatingCarpools = container.resolve(GetParticipatingCarpoolsUseCase);
-  const router = useRouter();
+  const getAvailableCarpools = useMemo(
+    () => container.resolve(GetAvailableCarpoolsUseCase),
+    [],
+  );
+  const getParticipatingCarpools = useMemo(
+    () => container.resolve(GetParticipatingCarpoolsUseCase),
+    [],
+  );
 
   const { user } = useAuthStore();
+  const userId = Number(user?.id);
+  const hasUserId = user?.id != null && !Number.isNaN(userId);
 
   const [isLoading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -100,24 +106,16 @@ export function useCarpoolHomeViewModel() {
   const [activeTab, setActiveTab] = useState<DestinationTab>('HOME');
   const [query, setQuery] = useState('');
 
-  const preload = async () => {
+  const preload = useCallback(async (uid: number) => {
     try {
       setLoading(true);
       setError(null);
 
-      const rawUserId = user?.id;
-      const userId = Number(rawUserId);
+      const [allRes, myRes] = await Promise.all([
+        getAvailableCarpools.execute(uid),
+        getParticipatingCarpools.execute(uid),
+      ]);
 
-      if (rawUserId == null || Number.isNaN(userId)) {
-        throw new Error(`userId가 올바르지 않습니다. raw=${String(rawUserId)}`);
-      }
-
-      const [allRes,myRes] = await Promise.all([
-          getAvailableCarpools.execute(userId),
-          getParticipatingCarpools.execute(userId),
-        ]);
-
-      console.log(allRes);
       setAllPosts(toArray(allRes));
       setMyCarpools(toArray(myRes));
     } catch (e: any) {
@@ -127,13 +125,15 @@ export function useCarpoolHomeViewModel() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getAvailableCarpools, getParticipatingCarpools]);
 
-  useEffect(() => {
-    if (!user?.id) return;
-    preload();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
+  // ✅ 홈 화면이 "보일 때마다" 무조건 새로고침
+  useFocusEffect(
+    useCallback(() => {
+      if (!hasUserId) return;
+      preload(userId);
+    }, [hasUserId, userId, preload]),
+  );
 
   /** 상단 신청내역: 내 신청 중 isArrived=false (탭 영향 없음) */
   const carpools = useMemo(() => {
@@ -174,7 +174,7 @@ export function useCarpoolHomeViewModel() {
       const timeText = p?.timeText ?? formatDateTimePretty(p?.departureTime);
       let placeText = '';
       // 장소 표시는 originDetailed 우선, 없으면 origin
-      if(p?.destinationDetailed == RETREAT_PLACE) {
+      if (p?.destinationDetailed == RETREAT_PLACE) {
         placeText = (p?.originDetailed ?? p?.origin ?? '-');
       } else {
         placeText = (p?.destinationDetailed ?? p?.destination ?? '-');

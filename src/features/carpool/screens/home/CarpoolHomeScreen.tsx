@@ -147,7 +147,7 @@ export default function CarpoolHomeScreen() {
           </View>
         </View>
 
-        {/* 집으로 / 수련회장 세그먼트 */}
+        {/* 수련회장으로 / 집으로 세그먼트 */}
         <View style={styles.segmentWrap}>
           <Pressable
             onPress={() => setActiveTab("HOME")}
@@ -182,6 +182,17 @@ export default function CarpoolHomeScreen() {
               ]}
             >
               수련회장으로
+            </ThemedText>
+          </Pressable>
+          <Pressable
+            onPress={() => setActiveTab('HOME')}
+            style={[styles.segmentBtn, activeTab === 'HOME' && styles.segmentBtnActive]}
+          >
+            <ThemedText
+              variant="text3"
+              style={[styles.segmentText, activeTab === 'HOME' && styles.segmentTextActive]}
+            >
+              집으로
             </ThemedText>
           </Pressable>
         </View>

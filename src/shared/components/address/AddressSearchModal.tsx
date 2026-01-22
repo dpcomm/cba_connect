@@ -1,7 +1,6 @@
 import { TextInput } from '@shared/components/text-input/TextInput';
 import { ThemedText } from '@shared/components/themed-text/ThemedText';
 import { Color } from '@shared/constants/color';
-import Constants from 'expo-constants';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Modal, Pressable, ScrollView, View } from 'react-native';
 import { styles } from './styles';
@@ -20,9 +19,7 @@ export interface AddressSearchModalProps {
   onSelect: (result: AddressResult) => void;
 }
 
-const KAKAO_REST_API_KEY =
-  (Constants.expoConfig?.extra?.KAKAO_REST_API_KEY as string | undefined) ??
-  (Constants.manifest2?.extra?.KAKAO_REST_API_KEY as string | undefined);
+const KAKAO_REST_API_KEY = process.env.EXPO_PUBLIC_KAKAO_REST_API_KEY;
 
 function normalizeKakaoDoc(doc: any): AddressResult | null {
   const road = doc?.road_address?.address_name as string | undefined;
@@ -50,9 +47,7 @@ function normalizeKakaoDoc(doc: any): AddressResult | null {
 }
 
 async function kakaoSearchAddress(query: string, signal?: AbortSignal): Promise<AddressResult[]> {
-  if (!KAKAO_REST_API_KEY) {
-    throw new Error('Missing KAKAO_REST_API_KEY');
-  }
+  if (!KAKAO_REST_API_KEY) throw new Error('Missing EXPO_PUBLIC_KAKAO_REST_API_KEY');
 
   const url = `https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(query)}`;
 

@@ -88,7 +88,7 @@ export class CarpoolRepository implements ICarpoolRepository {
       };
 
       const res = await apiClient.post<ApiResponse<CarpoolResponseDto>>(
-        "/api/carpool",
+        `${API_PREFIX}/carpool`,
         body,
       );
       return this.mapToCarpool(res.data.data);
