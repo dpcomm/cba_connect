@@ -103,7 +103,7 @@ export function useCarpoolHomeViewModel() {
   const [allPosts, setAllPosts] = useState<any[]>([]);
   const [myCarpools, setMyCarpools] = useState<any[]>([]);
 
-  const [activeTab, setActiveTab] = useState<DestinationTab>('HOME');
+  const [activeTab, setActiveTab] = useState<DestinationTab>('RETREAT');
   const [query, setQuery] = useState('');
 
   const preload = useCallback(async (uid: number) => {

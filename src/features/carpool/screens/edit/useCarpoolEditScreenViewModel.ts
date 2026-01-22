@@ -239,15 +239,13 @@ export function useCarpoolEditScreenViewModel() {
       payload.originLat = origin.lat;
       payload.originLng = origin.lng;
     }
-    console.log("[submit] carpoolId", carpoolId);
-    console.log("[submit] payload", payload);
 
     try {
       setLoading?.(true);
       await updateUseCase.execute(carpoolId, payload);
       await AsyncStorage.setItem(STORAGE_KEYS.carInfo, carInfo.trim());
       showModal("완료", "수정이 완료되었습니다.", () => {
-        router.push(`/carpool`);
+        router.replace(`/carpool/${carpoolId}`);
       });
     } catch {
       const msg = "수정에 실패하였습니다.";

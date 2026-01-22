@@ -8,6 +8,7 @@ import { Color } from "@shared/constants/color";
 import { AddressSearchModal } from "@shared/components/address/AddressSearchModal";
 
 import { Header } from "@shared/components/header/Header";
+import { BaseModal } from "@shared/components/modal/BaseModal";
 import { SelectBox } from "@shared/components/select-box/SelectBox";
 import {
   InlineOption,
@@ -95,6 +96,8 @@ export default function CarpoolRegisterFormScreen() {
     editableMarker,
 
     submit,
+    modalState,
+    closeModal,
   } = useCarpoolRegisterFormViewModel();
 
   const mapRef = useRef<any>(null);
@@ -439,6 +442,34 @@ export default function CarpoolRegisterFormScreen() {
           }}
         />
       </ScrollView>
+      <BaseModal
+        visible={modalState.visible}
+        onClose={closeModal}
+        title={modalState.title}
+        leftButton={
+          modalState.cancelText
+            ? {
+              text: modalState.cancelText,
+              onPress: () => {
+                if (modalState.onCancel) modalState.onCancel();
+                closeModal();
+              },
+              color: Color.tertiary.main,
+            }
+            : undefined
+        }
+        rightButton={{
+          text: modalState.confirmText ?? "확인",
+          onPress: () => {
+            if (modalState.onConfirm) modalState.onConfirm();
+            closeModal();
+          },
+        }}
+      >
+        <ThemedText variant="text1" color={Color.text.main}>
+          {modalState.message}
+        </ThemedText>
+      </BaseModal>
     </SafeAreaView>
   );
 }
