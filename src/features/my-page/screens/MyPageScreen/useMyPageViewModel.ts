@@ -14,6 +14,7 @@ export function useMyPageViewModel() {
   const router = useRouter();
   const { logout: clearAuthState } = useAuthStore();
   const [activeModal, setActiveModal] = useState<ModalType | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const closeModal = () => setActiveModal(null);
   const openCarInfoModal = () => setActiveModal("CAR_INFO");
@@ -25,6 +26,7 @@ export function useMyPageViewModel() {
   };
 
   const confirmLogout = async () => {
+    setIsLoading(true);
     try {
       const logoutUseCase = container.resolve(LogoutUseCase);
       await logoutUseCase.execute();
@@ -38,6 +40,8 @@ export function useMyPageViewModel() {
       setActiveModal(null);
       router.dismissAll();
       router.replace("/");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -51,6 +55,7 @@ export function useMyPageViewModel() {
 
   return {
     activeModal,
+    isLoading,
     closeModal,
     openCarInfoModal,
     openTechSupport,

@@ -300,11 +300,8 @@ export class AuthRepository implements IAuthRepository {
           return new Error("아이디와 이메일 정보가 일치하지 않습니다.");
         return new Error(message || "잘못된 요청입니다.");
       }
-      if (statusCode === 401) {
-        return new Error("인증에 실패했습니다.");
-      }
-      if (statusCode === 404) {
-        return new Error("존재하지 않는 사용자입니다.");
+      if (statusCode === 401 || statusCode === 404) {
+        return new Error("아이디 또는 비밀번호를 다시 확인해 주세요.");
       }
 
       return new Error(message);
