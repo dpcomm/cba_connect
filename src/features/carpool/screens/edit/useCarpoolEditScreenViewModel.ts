@@ -7,7 +7,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { container } from "tsyringe";
 
-const RETREAT_NAME = "딱따구리 수련원";
+const RETREAT_NAME = "양평 십자수 기도원";
 
 type DateOption = { label: string; value: string };
 
