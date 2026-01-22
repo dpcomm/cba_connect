@@ -30,11 +30,13 @@ export function useMyPageViewModel() {
       await logoutUseCase.execute();
       clearAuthState();
       setActiveModal(null);
+      router.dismissAll();
       router.replace("/");
     } catch (error) {
       console.error("Logout failed:", error);
       clearAuthState();
       setActiveModal(null);
+      router.dismissAll();
       router.replace("/");
     }
   };
