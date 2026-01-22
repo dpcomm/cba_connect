@@ -126,19 +126,27 @@ export default function CarpoolRegisterFormScreen() {
     return DATE_OPTIONS.find((o) => o.value === date)?.label ?? date;
   }, [DATE_OPTIONS, date]);
 
+  const safeMarker = useMemo(() => {
+    if (!editableMarker) return null;
+    const lat = Number(editableMarker.lat);
+    const lng = Number(editableMarker.lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+    return { lat, lng };
+  }, [editableMarker]);
+
   useEffect(() => {
-    if (!editableMarker || Platform.OS === "web" || !mapRef.current) return;
+    if (!safeMarker || Platform.OS === "web" || !mapRef.current) return;
 
     mapRef.current.animateToRegion(
       {
-        latitude: editableMarker.lat,
-        longitude: editableMarker.lng,
+        latitude: safeMarker.lat,
+        longitude: safeMarker.lng,
         latitudeDelta: 0.03,
         longitudeDelta: 0.03,
       },
       250,
     );
-  }, [editableMarker]);
+  }, [safeMarker]);
 
   // 한 명 이상 등록 가능
   const minusDisabled = capacity <= 1;
@@ -149,18 +157,18 @@ export default function CarpoolRegisterFormScreen() {
 
     return (
       <View style={styles.mapBox}>
-        <MapView ref={mapRef} style={{ flex: 1 }} initialRegion={SEOUL_REGION}>
-          {editableMarker && (
+        <MapView ref={mapRef} style={{ flex: 1 }} initialRegion={SEOUL_REGION} provider="google">
+          {safeMarker && (
             <Marker
               coordinate={{
-                latitude: editableMarker.lat,
-                longitude: editableMarker.lng,
+                latitude: safeMarker.lat,
+                longitude: safeMarker.lng,
               }}
             />
           )}
         </MapView>
 
-        {!editableMarker && (
+        {!safeMarker && (
           <View style={styles.mapOverlay}>
             <ThemedText variant="text2" color={Color.text.sub}>
               주소를 선택하면 지도에 표시돼요.
@@ -169,7 +177,7 @@ export default function CarpoolRegisterFormScreen() {
         )}
       </View>
     );
-  }, [editableMarker]);
+  }, [safeMarker]);
 
   const mainPickupSection = useMemo(() => {
     return (

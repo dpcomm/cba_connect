@@ -101,6 +101,11 @@ export default function CarpoolEditScreen() {
 
   const mapRef = useRef<any>(null);
 
+  const markerCoord = useMemo(() => {
+    if (!editableMarker) return null;
+    return { latitude: editableMarker.lat, longitude: editableMarker.lng };
+  }, [editableMarker]);
+
   const [openDropdown, setOpenDropdown] = useState<
     null | "date" | "hour" | "minute"
   >(null);
@@ -148,15 +153,8 @@ export default function CarpoolEditScreen() {
 
     return (
       <View style={styles.mapBox}>
-        <MapView ref={mapRef} style={{ flex: 1 }} initialRegion={SEOUL_REGION}>
-          {editableMarker && (
-            <Marker
-              coordinate={{
-                latitude: editableMarker.lat,
-                longitude: editableMarker.lng,
-              }}
-            />
-          )}
+        <MapView ref={mapRef} style={{ flex: 1 }} initialRegion={SEOUL_REGION} provider="google">
+          {markerCoord && <Marker coordinate={markerCoord} />}
         </MapView>
 
         {!editableMarker && (
@@ -453,13 +451,13 @@ export default function CarpoolEditScreen() {
         leftButton={
           modalState.cancelText
             ? {
-                text: modalState.cancelText,
-                onPress: () => {
-                  if (modalState.onCancel) modalState.onCancel();
-                  closeModal();
-                },
-                color: Color.tertiary.main,
-              }
+              text: modalState.cancelText,
+              onPress: () => {
+                if (modalState.onCancel) modalState.onCancel();
+                closeModal();
+              },
+              color: Color.tertiary.main,
+            }
             : undefined
         }
         rightButton={{

@@ -157,15 +157,15 @@ export function useCarpoolEditScreenViewModel() {
         setOrigin({
           roadAddress: detail.origin ?? "",
           detail: detail.originDetailed ?? "",
-          lat: detail.originLat ?? undefined,
-          lng: detail.originLng ?? undefined,
+          lat: detail.originLat != null ? Number(detail.originLat) : undefined,
+          lng: detail.originLng != null ? Number(detail.originLng) : undefined,
         });
 
         setDest({
           roadAddress: detail.destination ?? "",
           detail: detail.destinationDetailed ?? "",
-          lat: detail.destLat ?? undefined,
-          lng: detail.destLng ?? undefined,
+          lat: detail.destLat != null ? Number(detail.destLat) : undefined,
+          lng: detail.destLng != null ? Number(detail.destLng) : undefined,
         });
 
         const pickup = originIsRetreat
@@ -201,8 +201,12 @@ export function useCarpoolEditScreenViewModel() {
 
   const editableMarker = useMemo(() => {
     const target = isHome ? dest : origin;
-    if (target.lat == null || target.lng == null) return null;
-    return { lat: target.lat, lng: target.lng };
+
+    const lat = Number(target.lat);
+    const lng = Number(target.lng);
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+    return { lat, lng };
   }, [isHome, origin, dest]);
 
   const incCapacity = () => setCapacity((v) => Math.min(8, v + 1));

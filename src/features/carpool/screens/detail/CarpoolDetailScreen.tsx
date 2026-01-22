@@ -51,10 +51,8 @@ export default function CarpoolDetailScreen() {
     if (id) load();
   }, [id, load]);
 
-  if (!carpool) return null;
-
   const passengerMembers = useMemo(() => {
-    const list = Array.isArray(carpool?.members) ? carpool.members : [];
+    const list = Array.isArray(carpool?.members) ? carpool?.members : [];
     const driverId = carpool?.driver?.id ?? carpool?.driverId;
 
     return list.filter((m: any) => {
@@ -63,11 +61,11 @@ export default function CarpoolDetailScreen() {
     });
   }, [carpool]);
 
-  const isToRetreat = carpool.destinationDetailed === RETREAT_NAME;
+  const isToRetreat = carpool?.destinationDetailed === RETREAT_NAME;
 
   // ✅ 지도 기준
-  const mapLat = Number(isToRetreat ? carpool.originLat : carpool.destLat);
-  const mapLng = Number(isToRetreat ? carpool.originLng : carpool.destLng);
+  const mapLat = Number(isToRetreat ? carpool?.originLat : carpool?.destLat);
+  const mapLng = Number(isToRetreat ? carpool?.originLng : carpool?.destLng);
 
   const mapRegion = useMemo(() => {
     if (!Number.isFinite(mapLat) || !Number.isFinite(mapLng)) return null;
@@ -79,22 +77,31 @@ export default function CarpoolDetailScreen() {
     };
   }, [mapLat, mapLng]);
 
-  const currentMembers =
-    carpool.seatsTotal && carpool.seatsLeft != null
-      ? carpool.seatsTotal - carpool.seatsLeft
-      : undefined;
+  const markerCoord = useMemo(() => {
+    if (!Number.isFinite(mapLat) || !Number.isFinite(mapLng)) return null;
+    return { latitude: mapLat, longitude: mapLng };
+  }, [mapLat, mapLng]);
 
+  useEffect(() => {
+    if (!mapRegion) return;
+  }, [mapRegion]);
+
+  const currentMembers =
+    carpool?.seatsTotal && carpool?.seatsLeft != null
+      ? carpool?.seatsTotal - carpool?.seatsLeft
+      : undefined;
+  // if (!carpool) return null;
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: Color.default.background }}
     >
       <Header
-        title={`${carpool.driver.name}님의 카풀`}
+        title={`${carpool?.driver.name}님의 카풀`}
         onBack={() => router.back()}
         rightContent={
           <TouchableOpacity
             style={{ padding: 4 }}
-            onPress={() => Linking.openURL(`tel:${carpool.driver.phone}`)}
+            onPress={() => Linking.openURL(`tel:${carpool?.driver.phone}`)}
           >
             <Ionicons name="call" size={24} color={Color.text.main} />
           </TouchableOpacity>
@@ -124,10 +131,10 @@ export default function CarpoolDetailScreen() {
               </View>
               <View>
                 <ThemedText variant="heading3">
-                  {carpool.driver.name}
+                  {carpool?.driver.name}
                 </ThemedText>
                 <ThemedText variant="text4" color={Color.text.sub}>
-                  {carpool.driver.phone} | {carpool.carInfo}
+                  {carpool?.driver.phone} | {carpool?.carInfo}
                 </ThemedText>
               </View>
             </View>
@@ -139,8 +146,9 @@ export default function CarpoolDetailScreen() {
                   style={styles.map}
                   initialRegion={mapRegion}
                   scrollEnabled={false}
+                  provider="google"
                 >
-                  <Marker coordinate={mapRegion} />
+                  {markerCoord && <Marker coordinate={markerCoord} />}
                 </MapView>
               ) : (
                 <View style={styles.mapPlaceholder}>
@@ -158,8 +166,8 @@ export default function CarpoolDetailScreen() {
                 <View style={styles.infoTextCol}>
                   <ThemedText variant="text3">출발 위치</ThemedText>
                   <ThemedText variant="text2">
-                    {carpool.originDetailed ? `${carpool.originDetailed}` : ""}(
-                    {carpool.origin})
+                    {carpool?.originDetailed ? `${carpool?.originDetailed}` : ""}(
+                    {carpool?.origin})
                   </ThemedText>
                 </View>
               </View>
@@ -172,10 +180,10 @@ export default function CarpoolDetailScreen() {
                   <View style={styles.infoTextCol}>
                     <ThemedText variant="text3">도착 위치</ThemedText>
                     <ThemedText variant="text2">
-                      {carpool.destinationDetailed
-                        ? `${carpool.destinationDetailed}`
+                      {carpool?.destinationDetailed
+                        ? `${carpool?.destinationDetailed}`
                         : ""}
-                      ({carpool.destination})
+                      ({carpool?.destination})
                     </ThemedText>
                   </View>
                 </View>
@@ -188,7 +196,7 @@ export default function CarpoolDetailScreen() {
                 <ThemedText variant="text2">🕒</ThemedText>
               </View>
               <ThemedText variant="text2">
-                {formatDateTimePretty(carpool.departureTime)} 출발
+                {formatDateTimePretty(carpool?.departureTime)} 출발
               </ThemedText>
             </View>
 
@@ -198,7 +206,7 @@ export default function CarpoolDetailScreen() {
                 <ThemedText variant="text2">👥</ThemedText>
               </View>
               <ThemedText variant="text2">
-                현재 {currentMembers}명 / 정원 {carpool.seatsTotal}명
+                현재 {currentMembers}명 / 정원 {carpool?.seatsTotal}명
               </ThemedText>
             </View>
 
@@ -246,12 +254,12 @@ export default function CarpoolDetailScreen() {
             )}
 
             {/* 노트 */}
-            {!!carpool.note && (
+            {!!carpool?.note && (
               <View style={styles.infoRow}>
                 <View style={styles.iconCircle}>
                   <ThemedText variant="text2">⚡</ThemedText>
                 </View>
-                <ThemedText variant="text2">{carpool.note}</ThemedText>
+                <ThemedText variant="text2">{carpool?.note}</ThemedText>
               </View>
             )}
           </View>
@@ -264,7 +272,7 @@ export default function CarpoolDetailScreen() {
           <View style={styles.bottomButtonRow}>
             <Button
               title="수정하기"
-              onPress={() => toEdit(carpool.id)}
+              onPress={() => toEdit(carpool?.id)}
               size="large"
               textVariant="text1"
               style={styles.bottomButtonHalf}
