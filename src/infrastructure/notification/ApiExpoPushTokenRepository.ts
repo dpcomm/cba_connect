@@ -1,6 +1,7 @@
 import { ExpoPushToken } from "@domain/notification/ExpoPushToken";
 import { ExpoPushTokenRepository } from "@domain/notification/ExpoPushTokenRepository";
-import { API_PREFIX, apiClient } from "@shared/api/client";
+import { apiClient } from "@shared/api/client";
+import { API_PREFIX } from "@shared/api/config";
 import { ApiResponse } from "@shared/api/types";
 import { injectable } from "tsyringe";
 import { getExpoPushToken } from "./ExpoPushTokenProvider";

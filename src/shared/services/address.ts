@@ -1,8 +1,7 @@
-import axios from 'axios';
-import Constants from 'expo-constants';
+import axios from "axios";
+import Constants from "expo-constants";
 
-const KAKAO_REST_API_KEY =
-  Constants.expoConfig?.extra?.KAKAO_REST_API_KEY;
+const KAKAO_REST_API_KEY = Constants.expoConfig?.extra?.KAKAO_REST_API_KEY;
 
 export type AddressResult = {
   address: string;
@@ -12,7 +11,7 @@ export type AddressResult = {
 
 export async function searchAddresses(query: string): Promise<AddressResult[]> {
   const { data } = await axios.get(
-    'https://dapi.kakao.com/v2/local/search/address.json',
+    "https://dapi.kakao.com/v2/local/search/address.json",
     {
       params: { query, size: 15 },
       headers: {

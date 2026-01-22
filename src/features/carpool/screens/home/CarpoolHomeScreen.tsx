@@ -127,20 +127,8 @@ export default function CarpoolHomeScreen() {
           </View>
         </View>
 
-        {/* 집으로 / 수련회장 세그먼트 */}
+        {/* 수련회장으로 / 집으로 세그먼트 */}
         <View style={styles.segmentWrap}>
-          <Pressable
-            onPress={() => setActiveTab('HOME')}
-            style={[styles.segmentBtn, activeTab === 'HOME' && styles.segmentBtnActive]}
-          >
-            <ThemedText
-              variant="text3"
-              style={[styles.segmentText, activeTab === 'HOME' && styles.segmentTextActive]}
-            >
-              집으로
-            </ThemedText>
-          </Pressable>
-
           <Pressable
             onPress={() => setActiveTab('RETREAT')}
             style={[styles.segmentBtn, activeTab === 'RETREAT' && styles.segmentBtnActive]}
@@ -150,6 +138,17 @@ export default function CarpoolHomeScreen() {
               style={[styles.segmentText, activeTab === 'RETREAT' && styles.segmentTextActive]}
             >
               수련회장으로
+            </ThemedText>
+          </Pressable>
+          <Pressable
+            onPress={() => setActiveTab('HOME')}
+            style={[styles.segmentBtn, activeTab === 'HOME' && styles.segmentBtnActive]}
+          >
+            <ThemedText
+              variant="text3"
+              style={[styles.segmentText, activeTab === 'HOME' && styles.segmentTextActive]}
+            >
+              집으로
             </ThemedText>
           </Pressable>
         </View>
@@ -247,7 +246,7 @@ export default function CarpoolHomeScreen() {
                   {/* 하단 한줄: 📍 | 👥 | 🚙 */}
                   <View style={styles.routeRow}>
                     <ThemedText variant="text3" style={styles.routeText} numberOfLines={1}>
-                      📍 {detailText} | 👥 {post.seatsLeft}/{post.seatsTotal} | 🚙 {post.carInfo}
+                      📍 {detailText} | 👥 {post.seatsTotal-post.seatsLeft}/{post.seatsTotal} | 🚙 {post.carInfo}
                     </ThemedText>
                   </View>
                 </Pressable>

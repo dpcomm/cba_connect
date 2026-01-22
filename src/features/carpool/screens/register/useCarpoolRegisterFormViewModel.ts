@@ -4,13 +4,14 @@ import { useAuthStore } from "@shared/stores/useAuthStore";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { container } from "tsyringe";
+import { ModalState } from "../detail/useCarpoolDetailViewModel";
 
 type Destination = "HOME" | "RETREAT";
 
-const RETREAT_NAME = "딱따구리 수련원";
-const RETREAT_ROAD_ADDRESS = "경기 양주시 광적면 현석로 313-44";
-const RETREAT_LAT = 37.832712368176;
-const RETREAT_LNG = 126.941490563411;
+const RETREAT_NAME = "양평 십자수 기도원";
+const RETREAT_ROAD_ADDRESS = "경기 양평군 서종면 중미산로 938";
+const RETREAT_LAT = 37.5939493541455;
+const RETREAT_LNG = 127.438637548918;
 
 type DateOption = { label: string; value: string };
 
@@ -82,6 +83,37 @@ function toUtcISOStringFromKst(dateStr: string, hour: string, minute: string) {
 }
 
 export function useCarpoolRegisterFormViewModel() {
+
+  // Generic Modal State
+  const [modalState, setModalState] = useState<ModalState>({
+    visible: false,
+    title: "",
+    message: "",
+  });
+
+  const showModal = (
+    title: string,
+    message: string,
+    onConfirm?: () => void,
+    confirmText = "확인",
+    cancelText?: string,
+    onCancel?: () => void,
+  ) => {
+    setModalState({
+      visible: true,
+      title,
+      message,
+      onConfirm,
+      confirmText,
+      cancelText,
+      onCancel,
+    });
+  };
+
+  const closeModal = () => {
+    setModalState((prev) => ({ ...prev, visible: false }));
+  };
+
   const createUseCase = container.resolve(CreateCarpoolUseCase);
   const router = useRouter();
   const authStore = useAuthStore();
@@ -103,7 +135,7 @@ export function useCarpoolRegisterFormViewModel() {
       try {
         const saved = await AsyncStorage.getItem(STORAGE_KEYS.carInfo);
         if (saved && saved.trim().length > 0) setCarInfo(saved);
-      } catch {}
+      } catch { }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authStore.user]);
@@ -239,12 +271,14 @@ export function useCarpoolRegisterFormViewModel() {
       setLoading?.(true);
       const created = await createUseCase.execute(payload);
       await AsyncStorage.setItem(STORAGE_KEYS.carInfo, carInfo.trim());
-      alert("카풀이 등록되었습니다.");
-      router.back();
-    } catch (error: unknown) {
-      const msg = "카풀 등록에 실패하였습니다.";
-      setError?.(msg);
-      alert(msg);
+      showModal("완료", "카풀 신청이 완료되었습니다.", () => {
+        router.push("/carpool");
+      });
+    } catch (e) {
+      showModal(
+        "오류",
+        e instanceof Error ? e.message : "카풀 등록에 실패했습니다.",
+      );
     }
   };
 

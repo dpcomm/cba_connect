@@ -25,7 +25,7 @@ if (Platform.OS !== "web") {
   Marker = maps.Marker;
 }
 
-const RETREAT_NAME = "딱따구리 수련원";
+const RETREAT_NAME = "양평 십자수 기도원";
 
 export default function CarpoolDetailScreen() {
   const router = useRouter();

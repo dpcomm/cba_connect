@@ -1,5 +1,5 @@
-import { AddressResult, searchAddresses } from '@shared/api/address';
-import { useEffect, useRef, useState } from 'react';
+import { AddressResult, searchAddresses } from "@shared/services/address";
+import { useEffect, useRef, useState } from "react";
 
 type UseAddressSearchOptions = {
   debounceMs?: number;
@@ -9,7 +9,7 @@ type UseAddressSearchOptions = {
 export function useAddressSearch(options: UseAddressSearchOptions = {}) {
   const { debounceMs = 350, minLength = 2 } = options;
 
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [results, setResults] = useState<AddressResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +43,9 @@ export function useAddressSearch(options: UseAddressSearchOptions = {}) {
       } catch (e: any) {
         if (myRequestId !== requestIdRef.current) return;
         setResults([]);
-        setError(e?.message ? String(e.message) : '주소 검색 중 오류가 발생했습니다.');
+        setError(
+          e?.message ? String(e.message) : "주소 검색 중 오류가 발생했습니다.",
+        );
       } finally {
         if (myRequestId !== requestIdRef.current) return;
         setIsLoading(false);
@@ -57,7 +59,7 @@ export function useAddressSearch(options: UseAddressSearchOptions = {}) {
 
   const clear = () => {
     requestIdRef.current++;
-    setQuery('');
+    setQuery("");
     setResults([]);
     setIsLoading(false);
     setError(null);

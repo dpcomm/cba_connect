@@ -1,4 +1,5 @@
-import { API_PREFIX, apiClient } from "@shared/api/client";
+import { apiClient } from "@shared/api/client";
+import { API_PREFIX } from "@shared/api/config";
 import { ApiErrorResponse, ApiResponse } from "@shared/api/types";
 import { isAxiosError } from "axios";
 import { injectable } from "tsyringe";
@@ -87,7 +88,7 @@ export class CarpoolRepository implements ICarpoolRepository {
       };
 
       const res = await apiClient.post<ApiResponse<CarpoolResponseDto>>(
-        "/api/carpool",
+        `${API_PREFIX}/carpool`,
         body,
       );
       return this.mapToCarpool(res.data.data);
