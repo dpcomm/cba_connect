@@ -1,8 +1,8 @@
 import {
-    DeleteCarpoolUseCase,
-    GetCarpoolDetailUseCase,
-    JoinCarpoolUseCase,
-    LeaveCarpoolUseCase,
+  DeleteCarpoolUseCase,
+  GetCarpoolDetailUseCase,
+  JoinCarpoolUseCase,
+  LeaveCarpoolUseCase,
 } from "@application/carpool";
 import { container } from "@shared/di/container";
 import { router } from "expo-router";
@@ -93,8 +93,8 @@ export function useCarpoolDetailViewModel({ carpoolId, userId }: Args) {
     if (!carpool) return false;
     if (typeof carpool.isMember === "boolean") return carpool.isMember;
 
-    if (Array.isArray(carpool.members))
-      return carpool.members.some((m: any) => m.id === userId);
+    if (Array.isArray(carpool?.members))
+      return carpool.members?.some((m: any) => m.id === userId);
 
     return false;
   }, [carpool, userId]);
@@ -115,7 +115,9 @@ export function useCarpoolDetailViewModel({ carpoolId, userId }: Args) {
         try {
           await joinUseCase.execute(userId, carpoolId);
           await load();
-          showModal("완료", "카풀 신청이 완료되었습니다.");
+          showModal("완료", "카풀 신청이 완료되었습니다.", () => {
+            router.push("/carpool");
+          });
         } catch (e) {
           showModal(
             "오류",
@@ -146,7 +148,9 @@ export function useCarpoolDetailViewModel({ carpoolId, userId }: Args) {
         try {
           await leaveUseCase.execute(userId, carpoolId);
           await load();
-          showModal("완료", "카풀 신청이 취소되었습니다.");
+          showModal("완료", "카풀 신청이 취소되었습니다.", () => {
+            router.push("/carpool");
+          });
         } catch (e) {
           showModal(
             "오류",
@@ -162,7 +166,7 @@ export function useCarpoolDetailViewModel({ carpoolId, userId }: Args) {
   }, [carpoolId, userId, leaveUseCase, load]);
 
   const toEdit = (carpoolId: number) => {
-    const hasMembers = (carpool.members?.length ?? 0) > 1;
+    const hasMembers = (carpool?.members?.length ?? 0) > 1;
 
     const message = hasMembers
       ? "카풀 신청자가 있습니다.\n정말로 수정하시겠습니까?\n\n탑승자에게 수정 알림이 발송됩니다."
@@ -188,7 +192,7 @@ export function useCarpoolDetailViewModel({ carpoolId, userId }: Args) {
     }
 
     let message = "";
-    if (carpool.members && carpool.members.length > 1) {
+    if (carpool?.members && carpool?.members?.length > 1) {
       message =
         "카풀 신청자가 있습니다. 정말로 삭제 하시겠습니까? \n탑승자에게는 삭제 알림이 발송됩니다.";
     } else {
