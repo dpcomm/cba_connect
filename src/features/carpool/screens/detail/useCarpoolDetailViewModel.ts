@@ -5,10 +5,11 @@ import {
   LeaveCarpoolUseCase,
 } from "@application/carpool";
 import { container } from "@shared/di/container";
+import { useAuthStore } from "@shared/stores/useAuthStore";
 import { router } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 
-type Args = { carpoolId: number; userId: number };
+type Args = { carpoolId: number };
 
 export interface ModalState {
   visible: boolean;
@@ -20,20 +21,39 @@ export interface ModalState {
   onCancel?: () => void;
 }
 
-export function useCarpoolDetailViewModel({ carpoolId, userId }: Args) {
+function toNumberId(v: unknown): number | null {
+  const n = Number(v);
+  return Number.isNaN(n) ? null : n;
+}
+
+function memberIdOf(m: any): number | null {
+  // 서버/모델마다 다를 수 있어서 최대한 방어
+  return (
+    toNumberId(m?.userId) ??
+    toNumberId(m?.id) ??
+    toNumberId(m?.user?.id) ??
+    null
+  );
+}
+
+export function useCarpoolDetailViewModel({ carpoolId }: Args) {
   const getDetailUseCase = useMemo(
     () => container.resolve(GetCarpoolDetailUseCase),
     [],
   );
   const joinUseCase = useMemo(() => container.resolve(JoinCarpoolUseCase), []);
-  const leaveUseCase = useMemo(
-    () => container.resolve(LeaveCarpoolUseCase),
-    [],
-  );
+  const leaveUseCase = useMemo(() => container.resolve(LeaveCarpoolUseCase), []);
   const deleteUseCase = useMemo(
     () => container.resolve(DeleteCarpoolUseCase),
     [],
   );
+
+  // ✅ VM 내부에서 userId 뽑기
+  const { user } = useAuthStore();
+  const userId = useMemo(() => {
+    const n = Number(user?.id);
+    return Number.isNaN(n) ? 0 : n;
+  }, [user?.id]);
 
   const [carpool, setCarpool] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -87,16 +107,28 @@ export function useCarpoolDetailViewModel({ carpoolId, userId }: Args) {
     }
   }, [carpoolId, getDetailUseCase]);
 
-  const isDriver = !!carpool && carpool.driverId === userId;
+  // ✅ 운전자 여부
+  const isDriver = useMemo(() => {
+    if (!carpool) return false;
+    const driverId =
+      toNumberId(carpool?.driverId) ??
+      toNumberId(carpool?.driver?.id) ??
+      null;
+    if (!driverId || !userId) return false;
+    return driverId === userId;
+  }, [carpool, userId]);
 
+  // ✅ 멤버 여부 (members에 로그인 유저가 있으면 true)
   const isMember = useMemo(() => {
     if (!carpool) return false;
+
+    // 백에서 isMember 내려주면 그걸 우선 신뢰
     if (typeof carpool.isMember === "boolean") return carpool.isMember;
 
-    if (Array.isArray(carpool?.members))
-      return carpool.members?.some((m: any) => m.id === userId);
+    const members = Array.isArray(carpool?.members) ? carpool.members : [];
+    if (!userId) return false;
 
-    return false;
+    return members.some((m: any) => memberIdOf(m) === userId);
   }, [carpool, userId]);
 
   const join = useCallback(async () => {
@@ -119,10 +151,7 @@ export function useCarpoolDetailViewModel({ carpoolId, userId }: Args) {
             router.push("/carpool");
           });
         } catch (e) {
-          showModal(
-            "오류",
-            e instanceof Error ? e.message : "신청에 실패했습니다.",
-          );
+          showModal("오류", e instanceof Error ? e.message : "신청에 실패했습니다.");
         } finally {
           setIsLoading(false);
         }
@@ -152,10 +181,7 @@ export function useCarpoolDetailViewModel({ carpoolId, userId }: Args) {
             router.push("/carpool");
           });
         } catch (e) {
-          showModal(
-            "오류",
-            e instanceof Error ? e.message : "취소에 실패했습니다.",
-          );
+          showModal("오류", e instanceof Error ? e.message : "취소에 실패했습니다.");
         } finally {
           setIsLoading(false);
         }
@@ -165,7 +191,7 @@ export function useCarpoolDetailViewModel({ carpoolId, userId }: Args) {
     );
   }, [carpoolId, userId, leaveUseCase, load]);
 
-  const toEdit = (carpoolId: number) => {
+  const toEdit = (targetCarpoolId: number) => {
     const hasMembers = (carpool?.members?.length ?? 0) > 1;
 
     const message = hasMembers
@@ -176,13 +202,14 @@ export function useCarpoolDetailViewModel({ carpoolId, userId }: Args) {
       "수정",
       message,
       () => {
-        router.push(`/carpool/edit/${carpoolId}`);
+        router.push(`/carpool/edit/${targetCarpoolId}`);
       },
       "예",
       "아니요",
     );
   };
 
+  // ✅ 삭제
   const deleteCarpool = useCallback(async () => {
     if (!carpoolId) return;
 
@@ -191,13 +218,10 @@ export function useCarpoolDetailViewModel({ carpoolId, userId }: Args) {
       return;
     }
 
-    let message = "";
-    if (carpool?.members && carpool?.members?.length > 1) {
-      message =
-        "카풀 신청자가 있습니다. 정말로 삭제 하시겠습니까? \n탑승자에게는 삭제 알림이 발송됩니다.";
-    } else {
-      message = "정말로 삭제 하시겠습니까?";
-    }
+    const hasOthers = (carpool?.members?.length ?? 0) > 1;
+    const message = hasOthers
+      ? "카풀 신청자가 있습니다. 정말로 삭제 하시겠습니까? \n탑승자에게는 삭제 알림이 발송됩니다."
+      : "정말로 삭제 하시겠습니까?";
 
     showModal(
       "취소",
@@ -210,10 +234,7 @@ export function useCarpoolDetailViewModel({ carpoolId, userId }: Args) {
             router.push("/carpool");
           });
         } catch (e) {
-          showModal(
-            "오류",
-            e instanceof Error ? e.message : "삭제에 실패했습니다.",
-          );
+          showModal("오류", e instanceof Error ? e.message : "삭제에 실패했습니다.");
         } finally {
           setIsLoading(false);
         }
@@ -221,18 +242,22 @@ export function useCarpoolDetailViewModel({ carpoolId, userId }: Args) {
       "예",
       "아니요",
     );
-  }, [carpoolId, userId, deleteUseCase]); // Removed unused dependencies
+  }, [carpoolId, userId, carpool, deleteUseCase]);
 
   return {
     carpool,
     isLoading,
+
+    userId, 
     isDriver,
     isMember,
+
     load,
     join,
     leave,
     toEdit,
     deleteCarpool,
+
     modalState,
     closeModal,
   };

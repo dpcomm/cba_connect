@@ -160,7 +160,6 @@ export function useCarpoolHomeViewModel() {
           p?.destinationDetailed,
           p?.origin,
           p?.originDetailed,
-          // 과거 필드/서버 확장 대비로 남겨둠(있으면 검색됨)
           p?.driverName,
           p?.pickupPlace,
           p?.startPlace,

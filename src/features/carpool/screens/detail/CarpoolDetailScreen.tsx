@@ -45,7 +45,6 @@ export default function CarpoolDetailScreen() {
     closeModal,
   } = useCarpoolDetailViewModel({
     carpoolId: Number(id),
-    userId: user?.id ?? 0,
   });
 
   useEffect(() => {
@@ -53,6 +52,16 @@ export default function CarpoolDetailScreen() {
   }, [id, load]);
 
   if (!carpool) return null;
+
+  const passengerMembers = useMemo(() => {
+    const list = Array.isArray(carpool?.members) ? carpool.members : [];
+    const driverId = carpool?.driver?.id ?? carpool?.driverId;
+
+    return list.filter((m: any) => {
+      const memberId = m?.userId ?? m?.id ?? m?.user?.id;
+      return memberId != null && memberId !== driverId;
+    });
+  }, [carpool]);
 
   const isToRetreat = carpool.destinationDetailed === RETREAT_NAME;
 
@@ -193,6 +202,49 @@ export default function CarpoolDetailScreen() {
               </ThemedText>
             </View>
 
+            {/* ✅ 탑승자 목록: 리스트만 배경 */}
+            {/* ✅ 탑승자 목록: 멤버이고 + 운전자 제외 후 1명 이상일 때만 */}
+            {isMember && passengerMembers.length > 0 && (
+              <View style={styles.passengerBox}>
+                <View style={styles.passengerList}>
+                  {passengerMembers.map((m: any, idx: number) => {
+                    const name = m?.name ?? m?.user?.name ?? '-';
+                    const rawPhone = String(m?.phone ?? m?.user?.phone ?? '').trim();
+                    const digits = rawPhone.replace(/\D/g, '');
+
+                    let masked = '';
+                    if (digits.length === 11) {
+                      masked = `${digits.slice(0, 3)}-xxxx-${digits.slice(7)}`;
+                    } else if (digits.length === 10) {
+                      masked = `${digits.slice(0, 3)}-xxxx-${digits.slice(6)}`;
+                    }
+
+                    return (
+                      <View
+                        key={String(m?.userId ?? m?.id ?? m?.user?.id ?? idx)}
+                        style={styles.passengerRow}
+                      >
+                        <View style={styles.passengerBullet} />
+                        <ThemedText variant="text2" style={styles.passengerNamePhone} numberOfLines={1}>
+                          {name} {masked ? `| ${masked}` : ''}
+                        </ThemedText>
+
+                        {/* ✅ 전화 아이콘: 운전자일 때만 */}
+                        {isDriver && digits && (
+                          <TouchableOpacity
+                            style={styles.passengerCallBtn}
+                            onPress={() => Linking.openURL(`tel:${digits}`)}
+                          >
+                            <Ionicons name="call" size={14} color={Color.text.main} />
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    );
+                  })}
+                </View>
+              </View>
+            )}
+
             {/* 노트 */}
             {!!carpool.note && (
               <View style={styles.infoRow}>
@@ -251,13 +303,13 @@ export default function CarpoolDetailScreen() {
         leftButton={
           modalState.cancelText
             ? {
-                text: modalState.cancelText,
-                onPress: () => {
-                  if (modalState.onCancel) modalState.onCancel();
-                  closeModal();
-                },
-                color: Color.tertiary.main,
-              }
+              text: modalState.cancelText,
+              onPress: () => {
+                if (modalState.onCancel) modalState.onCancel();
+                closeModal();
+              },
+              color: Color.tertiary.main,
+            }
             : undefined
         }
         rightButton={{

@@ -99,4 +99,43 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Color.secondary.pressed,
   },
+
+  /* ---------- 탑승자 목록 ---------- */
+  passengerBox: {
+    marginTop: Layout.spacing.xs,
+    marginLeft: 32 + Layout.spacing.m,
+    paddingVertical: Layout.spacing.s,
+    paddingHorizontal: Layout.spacing.s,
+    borderRadius: 6,
+    backgroundColor: Color.default.background,
+  },
+
+  passengerList: {
+    gap: Layout.spacing.s,
+  },
+
+  passengerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  passengerBullet: {
+    width: 3,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: Color.text.main,
+    marginRight: Layout.spacing.s,
+    marginTop: 4,
+  },
+
+  passengerNamePhone: {
+    color: Color.text.main,
+    flex: 1,
+  },
+
+  passengerCallBtn: {
+    marginLeft: Layout.spacing.s,
+    padding: 2,
+  },
+
 });
