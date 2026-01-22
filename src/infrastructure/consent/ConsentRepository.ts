@@ -1,6 +1,7 @@
 import { Consent } from "@domain/consent/Consent";
 import { IConsentRepository } from "@domain/consent/IConsentRepository";
-import { API_PREFIX, apiClient } from "@shared/api/client";
+import { apiClient } from "@shared/api/client";
+import { API_PREFIX } from "@shared/api/config";
 import { injectable } from "tsyringe";
 
 interface ConsentApiResponse {

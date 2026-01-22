@@ -7,7 +7,8 @@ import {
 } from "@domain/auth/IAuthRepository";
 import { User } from "@domain/user/User";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { API_PREFIX, apiClient } from "@shared/api/client";
+import { apiClient } from "@shared/api/client";
+import { API_PREFIX } from "@shared/api/config";
 import { ApiErrorResponse, ApiResponse } from "@shared/api/types";
 import { isAxiosError } from "axios";
 import * as SecureStore from "expo-secure-store";
