@@ -1,5 +1,6 @@
 import {
   IUserRepository,
+  UpdateEmailData,
   UpdateProfileData,
 } from "@domain/user/IUserRepository";
 import { User } from "@domain/user/User";
@@ -8,7 +9,7 @@ import { API_PREFIX } from "@shared/api/config";
 import { ApiResponse } from "@shared/api/types";
 import { injectable } from "tsyringe";
 
-import { UpdateProfileRequestDto, UserResponseDto } from "./dto";
+import { UpdateEmailRequestDto, UpdateProfileRequestDto, UserResponseDto } from "./dto";
 
 @injectable()
 export class UserRepository implements IUserRepository {
@@ -34,6 +35,17 @@ export class UserRepository implements IUserRepository {
     await apiClient.delete<ApiResponse<void>>(`${API_PREFIX}/users/me`);
   }
 
+  async updateEmail(data: UpdateEmailData): Promise<void> {
+    const requestBody: UpdateEmailRequestDto = {
+      email: data.email,
+      verificationToken: data.verificationToken,
+    };
+    await apiClient.patch<ApiResponse<void>>(
+      `${API_PREFIX}/users/me/email`,
+      requestBody,
+    );
+  }
+
   private mapToUser(dto: UserResponseDto): User {
     return new User(
       dto.id,
@@ -44,6 +56,8 @@ export class UserRepository implements IUserRepository {
       dto.birth,
       dto.gender,
       dto.rank,
+      dto.email,
+      dto.emailVerifiedAt,
       dto.isDeleted,
       dto.createdAt,
       dto.updatedAt,
