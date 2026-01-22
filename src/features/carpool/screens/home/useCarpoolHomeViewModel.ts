@@ -103,7 +103,7 @@ export function useCarpoolHomeViewModel() {
   const [allPosts, setAllPosts] = useState<any[]>([]);
   const [myCarpools, setMyCarpools] = useState<any[]>([]);
 
-  const [activeTab, setActiveTab] = useState<DestinationTab>('HOME');
+  const [activeTab, setActiveTab] = useState<DestinationTab>('RETREAT');
   const [query, setQuery] = useState('');
 
   const preload = useCallback(async (uid: number) => {
@@ -160,7 +160,6 @@ export function useCarpoolHomeViewModel() {
           p?.destinationDetailed,
           p?.origin,
           p?.originDetailed,
-          // 과거 필드/서버 확장 대비로 남겨둠(있으면 검색됨)
           p?.driverName,
           p?.pickupPlace,
           p?.startPlace,
