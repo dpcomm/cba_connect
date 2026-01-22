@@ -20,9 +20,27 @@ export interface AddressSearchModalProps {
   onSelect: (result: AddressResult) => void;
 }
 
-const KAKAO_REST_API_KEY =
-  (Constants.expoConfig?.extra?.KAKAO_REST_API_KEY as string | undefined) ??
-  (Constants.manifest2?.extra?.KAKAO_REST_API_KEY as string | undefined);
+/**
+ * ✅ 프로덕션에서 Constants.expoConfig 가 비는 케이스가 있어서
+ * expoConfig / manifest / manifest2 순서로 extra를 안전하게 찾는다.
+ * + "모듈 상단 상수"로 고정하지 말고, 호출 시점에 매번 읽는다.
+ */
+function getKakaoKey(): string {
+  const extra =
+    (Constants.expoConfig?.extra as any) ??
+    ((Constants as any).manifest?.extra as any) ??
+    ((Constants as any).manifest2?.extra as any) ??
+    {};
+
+  const key = extra?.KAKAO_REST_API_KEY as string | undefined;
+
+  if (!key || !key.trim()) {
+    throw new Error('Missing KAKAO_REST_API_KEY');
+  }
+
+  return key.trim();
+}
+console.log('expoConfig.extra:', Constants.expoConfig?.extra);
 
 function normalizeKakaoDoc(doc: any): AddressResult | null {
   const road = doc?.road_address?.address_name as string | undefined;
@@ -36,10 +54,7 @@ function normalizeKakaoDoc(doc: any): AddressResult | null {
   const lng = Number(doc?.x);
   if (Number.isNaN(lat) || Number.isNaN(lng)) return null;
 
-  console.log(lat, lng);
-
-  const jibunAddress =
-    jibun && jibun !== roadAddress ? jibun : undefined;
+  const jibunAddress = jibun && jibun !== roadAddress ? jibun : undefined;
 
   return {
     roadAddress,
@@ -50,9 +65,7 @@ function normalizeKakaoDoc(doc: any): AddressResult | null {
 }
 
 async function kakaoSearchAddress(query: string, signal?: AbortSignal): Promise<AddressResult[]> {
-  if (!KAKAO_REST_API_KEY) {
-    throw new Error('Missing KAKAO_REST_API_KEY');
-  }
+  const KAKAO_REST_API_KEY = getKakaoKey();
 
   const url = `https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(query)}`;
 
@@ -71,11 +84,7 @@ async function kakaoSearchAddress(query: string, signal?: AbortSignal): Promise<
   const json = await res.json();
   const docs = (json?.documents ?? []) as any[];
 
-  const mapped = docs
-    .map(normalizeKakaoDoc)
-    .filter((v): v is AddressResult => v != null);
-
-  return mapped;
+  return docs.map(normalizeKakaoDoc).filter((v): v is AddressResult => v != null);
 }
 
 export function AddressSearchModal({
@@ -170,7 +179,7 @@ export function AddressSearchModal({
               onChangeText={setQuery}
               placeholder="도로명 / 지번 주소를 입력하세요 (2글자 이상)"
               returnKeyType="search"
-              onSubmitEditing={() => {}}
+              onSubmitEditing={() => { }}
             />
           </View>
         </View>
