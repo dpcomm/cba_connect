@@ -17,8 +17,7 @@ interface LectureResponseDto {
   termName: string;
   codeNumber: string;
   introduction: string;
-  instructorBio?: string;
-  instructorImage?: string;
+  instructorBio: string;
 }
 
 @injectable()
@@ -104,7 +103,6 @@ export class ApiLectureRepository implements ILectureRepository {
       currentCount: dto.currentCount,
       maxCapacity: dto.maxCapacity,
       instructorBio: dto.instructorBio,
-      instructorImage: dto.instructorImage,
     };
   }
 }
