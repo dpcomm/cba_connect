@@ -15,10 +15,12 @@ export const styles = StyleSheet.create({
   scrollContent: {
     padding: Layout.spacing.xl,
     paddingBottom: 100,
+    gap: 20,
   },
-  deleteButtonContainer: {
-    padding: Layout.spacing.xl,
-    paddingBottom: Platform.OS === "ios" ? 0 : Layout.spacing.xl,
+  bottomButtonsInScroll: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 20,
   },
   deleteButton: {
     marginTop: 64,

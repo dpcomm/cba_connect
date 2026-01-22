@@ -8,6 +8,8 @@ export class User {
     public readonly birth: string,
     public readonly gender: string,
     public readonly rank: string,
+    public readonly email: string,
+    public readonly emailVerifiedAt: string | null,
     public readonly isDeleted: boolean,
     public readonly createdAt: string,
     public readonly updatedAt: string

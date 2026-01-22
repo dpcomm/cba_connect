@@ -24,5 +24,7 @@ export function isValidPhone(phone: string): boolean {
  * @returns
  */
 export function isValidPassword(password: string): boolean {
-  return password.length >= 8;
+  // 8자 이상, 영문/숫자 포함
+  const regex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
+  return regex.test(password);
 }

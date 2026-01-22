@@ -1,11 +1,13 @@
 import { Button } from '@shared/components/button/Button';
 import { Header } from '@shared/components/header/Header';
 import { LoadingOverlay } from '@shared/components/loading-overlay/LoadingOverlay';
+import { BaseModal } from '@shared/components/modal/BaseModal';
+import { ThemedText } from '@shared/components/themed-text/ThemedText';
 import { Color } from '@shared/constants/color';
 import { Layout } from '@shared/constants/layout';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React from 'react';
-import { Alert, Keyboard, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, View } from 'react-native';
+import React, { useState } from 'react';
+import { Keyboard, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRegisterStore } from '../../stores/useRegisterStore';
 import { CodeVerificationStep } from './components/CodeVerificationStep';
@@ -14,13 +16,30 @@ import { useEmailVerificationViewModel } from './useEmailVerificationViewModel';
 
 export type EmailVerificationSource = 'register' | 'home' | 'mypage';
 
+interface ModalState {
+  visible: boolean;
+  type: 'success' | 'error';
+  message: string;
+}
+
 export default function EmailVerificationScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ source?: EmailVerificationSource }>();
   const source = params.source || 'register';
 
   const { updateData } = useRegisterStore();
-  const vm = useEmailVerificationViewModel();
+  const vm = useEmailVerificationViewModel(source);
+  
+  const [modalState, setModalState] = useState<ModalState>({
+    visible: false,
+    type: 'success',
+    message: '',
+  });
+
+  const closeModalAndNavigate = () => {
+    setModalState({ ...modalState, visible: false });
+    router.back();
+  };
 
   const handleBack = () => {
     if (vm.step === 'verification') {
@@ -37,30 +56,26 @@ export default function EmailVerificationScreen() {
       const token = await vm.verifyCode();
       if (token) {
         if (source === 'register') {
-           Alert.alert('인증 성공', '이메일 인증이 완료되었습니다.', [
-             {
-               text: '확인',
-               onPress: () => {
-                 updateData({ 
-                   email: vm.email,
-                   verificationToken: token 
-                 });
-                 console.log('Email verified and saved to store:', vm.email);
-                 router.back();
-               }
-             }
-           ]);
-        } else {
-          switch (source) {
-            case 'home':
-              router.replace('/home');
-              break;
-            case 'mypage':
-              router.back();
-              break;
-            default:
-              router.back();
+          updateData({
+            email: vm.email,
+            verificationToken: token
+          });
+          setModalState({
+            visible: true,
+            type: 'success',
+            message: '이메일 인증이 완료되었습니다.',
+          });
+        } else if (source === 'mypage') {
+          const success = await vm.updateEmail(token);
+          if (success) {
+            setModalState({
+              visible: true,
+              type: 'success',
+              message: '이메일이 등록되었습니다.',
+            });
           }
+        } else {
+          router.replace('/home');
         }
       }
     }
@@ -101,6 +116,20 @@ export default function EmailVerificationScreen() {
       </TouchableWithoutFeedback>
     </SafeAreaView>
     <LoadingOverlay visible={vm.isLoading} />
+    
+    <BaseModal
+      visible={modalState.visible}
+      onClose={closeModalAndNavigate}
+      title={modalState.type === 'success' ? '성공' : '오류'}
+      rightButton={{
+        text: '확인',
+        onPress: closeModalAndNavigate,
+      }}
+    >
+      <ThemedText variant="text1" color={Color.text.main}>
+        {modalState.message}
+      </ThemedText>
+    </BaseModal>
     </>
   );
 }
