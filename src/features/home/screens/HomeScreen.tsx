@@ -24,7 +24,7 @@ export default function HomeScreen() {
   };
 
   const handleGuidebookPress = () => {
-    Linking.openURL("https://recba.me");
+    router.push("/guidebook");
   };
 
   const handleVideoPress = () => {

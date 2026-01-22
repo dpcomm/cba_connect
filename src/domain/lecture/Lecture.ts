@@ -15,8 +15,7 @@ export interface Lecture {
   maxCapacity: number;
 
   // 추가 강사 정보
-  instructorBio?: string;
-  instructorImage?: string;
+  instructorBio: string;
 }
 
 export type LectureStatus = "WAITING" | "OPEN" | "CLOSED" | "APPLIED";

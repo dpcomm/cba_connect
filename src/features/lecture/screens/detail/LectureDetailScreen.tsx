@@ -60,22 +60,19 @@ export default function LectureDetailScreen() {
 
         {/* Instructor Section */}
         <View style={styles.infoSection}>
-          <ReadOnlyStepValue label="강사">
-            <ThemedText variant="heading3">
-              {lecture.instructorName}
-            </ThemedText>
-            {lecture.instructorBio && (
-              <ThemedText
-                variant="text4"
-                color={Color.text.sub}
-                style={{ marginTop: 4 }}
-              >
-                {lecture.instructorBio}
-              </ThemedText>
-            )}
-          </ReadOnlyStepValue>
+          <ReadOnlyStepValue label="강사" value={lecture.instructorName} />
 
           <View style={styles.divider} />
+
+          {lecture.instructorBio && (
+            <ThemedText
+              variant="text4"
+              color={Color.text.main}
+              style={styles.instructorBio}
+            >
+              {lecture.instructorBio}
+            </ThemedText>
+          )}
 
           <ReadOnlyStepValue label="장소" value={lecture.location} />
 
@@ -180,6 +177,9 @@ const styles = StyleSheet.create({
   },
   infoSection: {
     paddingBottom: 20,
+  },
+  instructorBio: {
+    marginTop: -Layout.spacing.l,
   },
   divider: {
     height: 1,
