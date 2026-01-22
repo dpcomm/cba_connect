@@ -6,7 +6,7 @@ import type {
 } from "axios";
 import * as SecureStore from "expo-secure-store";
 
-import { API_PREFIX } from "./client";
+import { API_PREFIX } from "./config";
 import { ApiResponse } from "./types";
 
 interface RefreshResponse {
