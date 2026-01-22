@@ -1,31 +1,37 @@
-import React from 'react';
-import { FlatList, Pressable, ScrollView, View } from 'react-native';
+import React from "react";
+import { FlatList, Pressable, ScrollView, View } from "react-native";
 
-import { useRouter } from 'expo-router';
+import { useRouter } from "expo-router";
 
-import { ThemedText } from '@shared/components/themed-text/ThemedText';
-import { Layout } from '@shared/constants/layout';
+import { ThemedText } from "@shared/components/themed-text/ThemedText";
+import { Layout } from "@shared/constants/layout";
 
-import CarpoolDriverIcon from '../../../../../assets/svgs/carpool_driver.svg';
-import CarpoolGuestIcon from '../../../../../assets/svgs/carpool_guest.svg';
+import CarpoolDriverIcon from "../../../../../assets/svgs/carpool_driver.svg";
+import CarpoolGuestIcon from "../../../../../assets/svgs/carpool_guest.svg";
 
-import { Header } from '@shared/components/header/Header';
-import { Color } from '@shared/constants/color';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { getStatusChipMeta } from './getCarpoolStatusChip';
-import { styles } from './styles';
-import { useCarpoolHistoryViewModel } from './useCarpoolHistoryViewModel';
+import { Header } from "@shared/components/header/Header";
+import { Color } from "@shared/constants/color";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { getStatusChipMeta } from "./getCarpoolStatusChip";
+import { styles } from "./styles";
+import { useCarpoolHistoryViewModel } from "./useCarpoolHistoryViewModel";
 
 export default function CarpoolHistoryScreen() {
   const router = useRouter();
   const { items, onPressItem } = useCarpoolHistoryViewModel();
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Color.default.background }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: Color.default.background }}
+    >
       <Header title="카풀 전체 내역" onBack={() => router.back()} />
 
       <ScrollView
-        contentContainerStyle={{ paddingHorizontal: Layout.spacing.l, paddingBottom: 40 }}
+        contentContainerStyle={{
+          paddingHorizontal: Layout.spacing.l,
+          paddingBottom: 40,
+          paddingTop: Layout.spacing.l,
+        }}
         showsVerticalScrollIndicator={false}
       >
         {items.length === 0 ? (
@@ -42,12 +48,17 @@ export default function CarpoolHistoryScreen() {
             keyExtractor={(it) => String(it.id)}
             scrollEnabled={false}
             renderItem={({ item }) => {
-              const RoleIcon = item.isDriver ? CarpoolDriverIcon : CarpoolGuestIcon;
+              const RoleIcon = item.isDriver
+                ? CarpoolDriverIcon
+                : CarpoolGuestIcon;
 
               const chip = getStatusChipMeta(item.status);
 
               return (
-                <Pressable onPress={() => onPressItem(item.id)} style={styles.card}>
+                <Pressable
+                  onPress={() => onPressItem(item.id)}
+                  style={styles.card}
+                >
                   <View style={styles.topRow}>
                     <View style={styles.roleIconWrap}>
                       <RoleIcon width={25} height={25} />
@@ -57,7 +68,12 @@ export default function CarpoolHistoryScreen() {
                       {item.dateText}
                     </ThemedText>
 
-                    <View style={[styles.statusChip, { backgroundColor: chip.backgroundColor }]}>
+                    <View
+                      style={[
+                        styles.statusChip,
+                        { backgroundColor: chip.backgroundColor },
+                      ]}
+                    >
                       <ThemedText
                         variant="text4"
                         style={[styles.statusChip, { color: chip.textColor }]}
@@ -106,7 +122,9 @@ export default function CarpoolHistoryScreen() {
                 </Pressable>
               );
             }}
-            ItemSeparatorComponent={() => <View style={{ height: Layout.spacing.m }} />}
+            ItemSeparatorComponent={() => (
+              <View style={{ height: Layout.spacing.m }} />
+            )}
           />
         )}
       </ScrollView>

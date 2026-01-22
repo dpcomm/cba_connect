@@ -13,6 +13,7 @@ export const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: Layout.spacing.l,
     paddingBottom: 40,
+    paddingTop: Layout.spacing.l,
   },
   menuContainer: {
     gap: 28,

@@ -11,8 +11,8 @@ import { Header } from "@shared/components/header/Header";
 import { BaseModal } from "@shared/components/modal/BaseModal";
 import { SelectBox } from "@shared/components/select-box/SelectBox";
 import {
-    InlineOption,
-    InlineSelectModal,
+  InlineOption,
+  InlineSelectModal,
 } from "@shared/components/select-inline/InlineSelectModal";
 import { Layout } from "@shared/constants/layout";
 import { router } from "expo-router";
@@ -211,6 +211,7 @@ export default function CarpoolEditScreen() {
         contentContainerStyle={{
           paddingHorizontal: Layout.spacing.l,
           paddingBottom: 40,
+          paddingTop: Layout.spacing.l,
         }}
         showsVerticalScrollIndicator={false}
       >

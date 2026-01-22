@@ -95,6 +95,7 @@ export default function CarpoolDetailScreen() {
         contentContainerStyle={{
           paddingHorizontal: Layout.spacing.l,
           paddingBottom: 40,
+          paddingTop: Layout.spacing.l,
         }}
         showsVerticalScrollIndicator={false}
       >

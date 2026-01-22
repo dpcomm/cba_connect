@@ -12,7 +12,7 @@ interface ReadOnlyStepValueProps {
 
 export function ReadOnlyStepValue({ label, value, children }: ReadOnlyStepValueProps) {
   return (
-    <View style={{ marginBottom: Layout.spacing.l, gap: 10 }}>
+    <View style={{ marginBottom: Layout.spacing.m, gap: 10 }}>
       <ThemedText variant="text1" color={Color.text.sub}>
         {label}
       </ThemedText>
