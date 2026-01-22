@@ -28,7 +28,7 @@ export default function HomeScreen() {
   };
 
   const handleVideoPress = () => {
-    Linking.openURL("https://recba.me");
+    Linking.openURL("https://www.youtube.com/@recba_129");
   };
 
   const handleLecturePress = () => {
