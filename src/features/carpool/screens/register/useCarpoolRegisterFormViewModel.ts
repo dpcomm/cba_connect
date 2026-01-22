@@ -271,9 +271,8 @@ export function useCarpoolRegisterFormViewModel() {
       setLoading?.(true);
       const created = await createUseCase.execute(payload);
       await AsyncStorage.setItem(STORAGE_KEYS.carInfo, carInfo.trim());
-      showModal("완료", "카풀 신청이 완료되었습니다.", () => {
-        router.push("/carpool");
-      });
+      alert("카풀 신청이 완료되었습니다.")
+      router.push(`/carpool/${created.id}`)
     } catch (e) {
       showModal(
         "오류",
