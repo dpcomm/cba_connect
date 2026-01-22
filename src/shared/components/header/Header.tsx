@@ -29,7 +29,6 @@ export function Header({ title, onBack, style, rightContent }: HeaderProps) {
       style={[
         {
           height: 46,
-          marginBottom: Layout.spacing.l,
           flexDirection: "row",
           alignItems: "center",
           paddingHorizontal: Layout.spacing.l,

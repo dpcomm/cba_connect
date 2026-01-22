@@ -32,7 +32,7 @@ export default function HomeScreen() {
   };
 
   const handleLecturePress = () => {
-    Linking.openURL("https://recba.me");
+    router.push("/lecture" as any);
   };
 
   const dDay = React.useMemo(() => {

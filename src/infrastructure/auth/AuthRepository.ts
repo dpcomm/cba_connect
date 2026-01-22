@@ -1,9 +1,9 @@
 import { Auth } from "@domain/auth/Auth";
 import { EmailVerificationType } from "@domain/auth/EmailVerificationType";
 import {
-  IAuthRepository,
-  RegisterData,
-  ResetPasswordData,
+    IAuthRepository,
+    RegisterData,
+    ResetPasswordData,
 } from "@domain/auth/IAuthRepository";
 import { User } from "@domain/user/User";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -15,16 +15,16 @@ import * as SecureStore from "expo-secure-store";
 import { injectable } from "tsyringe";
 
 import {
-  AuthResponseDto,
-  CheckIdResponseDto,
-  FindIdRequestDto,
-  FindIdResponseDto,
-  LoginRequestDto,
-  RefreshResponseDto,
-  RegisterRequestDto,
-  ResetPasswordRequestDto,
-  VerifyEmailRequestDto,
-  VerifyEmailResponseDto,
+    AuthResponseDto,
+    CheckIdResponseDto,
+    FindIdRequestDto,
+    FindIdResponseDto,
+    LoginRequestDto,
+    RefreshResponseDto,
+    RegisterRequestDto,
+    ResetPasswordRequestDto,
+    VerifyEmailRequestDto,
+    VerifyEmailResponseDto,
 } from "./dto";
 
 const AUTO_LOGIN_KEY = "auto_login_enabled";
