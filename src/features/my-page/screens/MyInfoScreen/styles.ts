@@ -1,6 +1,6 @@
 import { Color } from "@shared/constants/color";
 import { Layout } from "@shared/constants/layout";
-import { Platform, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   safeArea: {
