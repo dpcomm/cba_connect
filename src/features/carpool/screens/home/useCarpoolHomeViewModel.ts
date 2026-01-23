@@ -152,7 +152,6 @@ export function useCarpoolHomeViewModel() {
         ]);
 
         setAllPosts(toArray(allRes));
-        console.log(allRes);
         setMyCarpools(toArray(myRes));
       } catch (e: any) {
         const msg = e?.message || '카풀 목록 조회에 실패하였습니다.';

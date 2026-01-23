@@ -265,8 +265,6 @@ export function useCarpoolRegisterFormViewModel() {
       destLng: Number(dest.lng!.toFixed(6)),
     };
 
-    console.log(payload);
-
     try {
       setLoading?.(true);
       const created = await createUseCase.execute(payload);
