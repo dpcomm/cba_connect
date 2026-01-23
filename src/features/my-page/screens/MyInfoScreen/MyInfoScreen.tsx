@@ -60,7 +60,7 @@ export default function MyInfoScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         <ReadOnlyStepValue label="아이디" value={user.userId} />
-        
+
         {isEditing ? (
           <PasswordEditSection
             password={editForm.password || ""}
@@ -86,7 +86,6 @@ export default function MyInfoScreen() {
               title="이메일 인증하기"
               size="small"
               onPress={goToEmailVerification}
-              style={{ width: 150 }}
             />
           </View>
         )}
@@ -96,14 +95,22 @@ export default function MyInfoScreen() {
             <ThemedText variant="text1" color={Color.text.sub}>
               성별
             </ThemedText>
-            <View style={{ flexDirection: "row", gap: Layout.spacing.s }}>
+            <View
+              style={{
+                flexDirection: "row",
+                flexWrap: "wrap",
+                gap: Layout.spacing.s,
+              }}
+            >
               <Button
                 title="남자"
                 size="small"
                 onPress={() => handleChange("gender", "male")}
                 style={{
-                  flex: 1,
-                  backgroundColor: editForm.gender === "male" ? Color.primary.main : Color.tertiary.main,
+                  backgroundColor:
+                    editForm.gender === "male"
+                      ? Color.primary.main
+                      : Color.tertiary.main,
                 }}
               />
               <Button
@@ -111,8 +118,10 @@ export default function MyInfoScreen() {
                 size="small"
                 onPress={() => handleChange("gender", "female")}
                 style={{
-                  flex: 1,
-                  backgroundColor: editForm.gender === "female" ? Color.primary.main : Color.tertiary.main,
+                  backgroundColor:
+                    editForm.gender === "female"
+                      ? Color.primary.main
+                      : Color.tertiary.main,
                 }}
               />
               <Button
@@ -120,8 +129,9 @@ export default function MyInfoScreen() {
                 size="small"
                 onPress={() => handleChange("gender", "")}
                 style={{
-                  flex: 1,
-                  backgroundColor: !editForm.gender ? Color.primary.main : Color.tertiary.main,
+                  backgroundColor: !editForm.gender
+                    ? Color.primary.main
+                    : Color.tertiary.main,
                 }}
               />
             </View>
@@ -152,7 +162,11 @@ export default function MyInfoScreen() {
 
         {!isEditing && (
           <View style={{ gap: 10 }}>
-            <Button size="large" title="내 정보 수정하기" onPress={startEditing} />
+            <Button
+              size="large"
+              title="내 정보 수정하기"
+              onPress={startEditing}
+            />
             <TouchableOpacity
               onPress={handleDeleteAccount}
               style={styles.deleteButton}
@@ -248,7 +262,10 @@ function PasswordEditSection({
         onChangeText={onChangePassword}
         secureTextEntry={!showPassword}
         rightIcon={
-          <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ padding: 4 }}>
+          <TouchableOpacity
+            onPress={() => setShowPassword(!showPassword)}
+            style={{ padding: 4 }}
+          >
             <Ionicons
               name={showPassword ? "eye" : "eye-off"}
               size={20}
@@ -259,8 +276,16 @@ function PasswordEditSection({
       />
 
       {showValidation && (
-        <View style={{ marginTop: Layout.spacing.xs, marginBottom: Layout.spacing.m }}>
-          <ValidationMessage message="• 8자리 이상 입력(영문/숫자)" type="info" />
+        <View
+          style={{
+            marginTop: Layout.spacing.xs,
+            marginBottom: Layout.spacing.m,
+          }}
+        >
+          <ValidationMessage
+            message="• 8자리 이상 입력(영문/숫자)"
+            type="info"
+          />
           <ValidationMessage
             message={`• ${isPasswordValid ? "사용가능한 비밀번호입니다." : "사용 불가능한 비밀번호입니다."}`}
             type={isPasswordValid ? "success" : "error"}
@@ -277,7 +302,10 @@ function PasswordEditSection({
             onChangeText={handleConfirmChange}
             secureTextEntry={!showConfirmPassword}
             rightIcon={
-              <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={{ padding: 4 }}>
+              <TouchableOpacity
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                style={{ padding: 4 }}
+              >
                 <Ionicons
                   name={showConfirmPassword ? "eye" : "eye-off"}
                   size={20}
