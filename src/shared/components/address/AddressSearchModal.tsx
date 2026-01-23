@@ -44,8 +44,6 @@ function getKakaoKey(): string {
   return key.trim();
 }
 
-console.log('expoConfig.extra:', Constants.expoConfig?.extra);
-
 function normalizeKakaoDoc(doc: any): AddressResult | null {
   const road = doc?.road_address?.address_name as string | undefined;
   const jibun = doc?.address?.address_name as string | undefined;

@@ -68,11 +68,9 @@ export default function CarpoolEditScreen() {
 
     const show = Keyboard.addListener("keyboardDidShow", (e) => {
       setKbH(e.endCoordinates?.height ?? 0);
-      console.log("KB SHOW height:", e.endCoordinates?.height);
     });
     const hide = Keyboard.addListener("keyboardDidHide", () => {
       setKbH(0);
-      console.log("KB HIDE");
     });
 
     return () => {

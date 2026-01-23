@@ -85,7 +85,7 @@ export default function CarpoolHomeScreen() {
                 style={styles.moreBtn}
               >
                 <ThemedText variant="text4" style={styles.moreBtnText}>
-                  More
+                  더보기
                 </ThemedText>
               </Pressable>
             </View>
@@ -167,7 +167,7 @@ export default function CarpoolHomeScreen() {
             )}
           </View>
         </View>
-
+        <View style={styles.sectionDivider} />
         {/* 수련회장으로 / 집으로 세그먼트 */}
         <View style={styles.segmentWrap}>
           <Pressable
@@ -239,13 +239,6 @@ export default function CarpoolHomeScreen() {
             posts.map((post) => {
               const isClosed = (post.seatsLeft ?? 0) <= 0;
               const driverName = (post as any).driver.name ?? "운전자";
-              const isHome = activeTab === "HOME";
-              const placeLabel = isHome ? "도착지" : "출발지";
-              const detailText = isHome
-                ? (post.destinationDetailed ?? post.destination ?? "")
-                : (post.originDetailed ?? post.origin ?? "");
-
-              const note = post.note ?? "";
 
               return (
                 <Pressable
@@ -279,6 +272,9 @@ export default function CarpoolHomeScreen() {
                       <ThemedText variant="text3" style={styles.postName}>
                         {driverName}
                       </ThemedText>
+                      <ThemedText variant="text4" style={{ color: Color.text.main, marginLeft: Layout.spacing.xs }} >
+                        |{`\t`}👥{`\t`}{post.seatsTotal - post.seatsLeft}/{post.seatsTotal}
+                      </ThemedText>
                     </View>
 
                     {/* seatsLeft 조건: 0이면 마감(라벨), 1+면 신청가능(라벨) */}
@@ -304,44 +300,29 @@ export default function CarpoolHomeScreen() {
 
                   {/* 시간/장소 */}
                   <View style={styles.postInfo}>
-                    <View style={styles.kvRow}>
-                      <ThemedText variant="text2" style={styles.kvLabel}>
-                        시간
+                    <View style={styles.infoRow}>
+                      <View style={styles.iconCol}>
+                        <ThemedText variant="text3">📍</ThemedText>
+                      </View>
+
+                      <ThemedText
+                        variant="text3"
+                        style={styles.infoText}
+                      >
+                        {post.originDetailed} → {post.destinationDetailed}
                       </ThemedText>
-                      <ThemedText variant="text2" style={styles.kvValue}>
+                    </View>
+
+                    {/* 시간 */}
+                    <View style={styles.infoRow}>
+                      <View style={styles.iconCol}>
+                        <ThemedText variant="text3">🕒</ThemedText>
+                      </View>
+
+                      <ThemedText variant="text3" style={styles.infoText}>
                         {post.timeText}
                       </ThemedText>
                     </View>
-
-                    <View style={styles.kvRow}>
-                      <ThemedText variant="text2" style={styles.kvLabel}>
-                        {placeLabel}
-                      </ThemedText>
-                      <ThemedText variant="text2" style={styles.kvValue}>
-                        {detailText}
-                      </ThemedText>
-                    </View>
-
-                    <View style={styles.kvRow}>
-                      <ThemedText variant="text2" style={styles.kvLabel}>
-                        메모
-                      </ThemedText>
-                      <ThemedText variant="text2" style={styles.kvValue}>
-                        {note}
-                      </ThemedText>
-                    </View>
-                  </View>
-
-                  {/* 하단 한줄: 📍 | 👥 | 🚙 */}
-                  <View style={styles.routeRow}>
-                    <ThemedText
-                      variant="text3"
-                      style={styles.routeText}
-                      numberOfLines={1}
-                    >
-                      📍 {detailText} | 👥 {post.seatsTotal-post.seatsLeft}/{post.seatsTotal} |
-                      🚙 {post.carInfo}
-                    </ThemedText>
                   </View>
                 </Pressable>
               );
