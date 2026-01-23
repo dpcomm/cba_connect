@@ -11,7 +11,7 @@ export function useCarpoolRegisterViewModel() {
     setSelected(value);
 
     // 👉 다음 단계로 이동
-    router.push({
+    router.replace({
       pathname: '/carpool/register/form',
       params: { destination: value },
     });

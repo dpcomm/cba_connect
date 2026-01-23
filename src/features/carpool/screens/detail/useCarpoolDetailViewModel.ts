@@ -202,7 +202,7 @@ export function useCarpoolDetailViewModel({ carpoolId }: Args) {
       "수정",
       message,
       () => {
-        router.push(`/carpool/edit/${targetCarpoolId}`);
+        router.replace(`/carpool/edit/${targetCarpoolId}`);
       },
       "예",
       "아니요",
@@ -212,7 +212,7 @@ export function useCarpoolDetailViewModel({ carpoolId }: Args) {
   // ✅ 삭제
   const deleteCarpool = useCallback(async () => {
     if (!carpoolId) return;
-
+ 
     if (!userId || userId <= 0) {
       showModal("오류", "로그인 정보를 찾을 수 없습니다.");
       return;
@@ -231,7 +231,7 @@ export function useCarpoolDetailViewModel({ carpoolId }: Args) {
         try {
           await deleteUseCase.execute(carpoolId);
           showModal("완료", "카풀이 삭제되었습니다.", () => {
-            router.push("/carpool");
+            router.replace("/carpool");
           });
         } catch (e) {
           showModal("오류", e instanceof Error ? e.message : "삭제에 실패했습니다.");

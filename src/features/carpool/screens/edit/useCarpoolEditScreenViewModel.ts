@@ -256,16 +256,6 @@ export function useCarpoolEditScreenViewModel() {
     }
   };
 
-  const confirmSubmit = () => {
-    const hasMembers = membersCount > 1;
-
-    const message = hasMembers
-      ? "카풀 신청자가 있습니다.\n정말로 수정하시겠습니까?\n\n탑승자에게는 수정 알림이 발송됩니다."
-      : "정말로 수정하시겠습니까?";
-
-    showModal("수정", message, submit, "예", "아니요");
-  };
-
   const validate = (): string | null => {
     if (driverId !== user?.id) return "로그인 정보가 일치하지 않습니다.";
     if (!Number.isFinite(carpoolId)) return "잘못된 접근입니다.";
@@ -335,7 +325,6 @@ export function useCarpoolEditScreenViewModel() {
     editableMarker,
 
     submit,
-    confirmSubmit,
     modalState,
     closeModal,
   };

@@ -3,14 +3,35 @@ import { ThemedText } from "@shared/components/themed-text/ThemedText";
 import { Color } from "@shared/constants/color";
 import { Layout } from "@shared/constants/layout";
 import { router } from "expo-router";
-import React from "react";
-import { Pressable, ScrollView, TextInput, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { Keyboard, Platform, Pressable, TextInput, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getDepartureChip } from "./getDepartureChip";
 import { styles } from "./styles";
 import { useCarpoolHomeViewModel } from "./useCarpoolHomeViewModel";
 
 export default function CarpoolHomeScreen() {
+
+  const [kbH, setKbH] = useState(0);
+  const kawRef = useRef<KeyboardAwareScrollView>(null);
+  useEffect(() => {
+    if (Platform.OS !== "android") return;
+
+    const show = Keyboard.addListener("keyboardDidShow", (e) => {
+      setKbH(e.endCoordinates?.height ?? 0);
+    });
+    const hide = Keyboard.addListener("keyboardDidHide", () => {
+      setKbH(0);
+    });
+
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+
+
   const {
     // status
     isLoading,
@@ -40,16 +61,16 @@ export default function CarpoolHomeScreen() {
     >
       <Header title="카풀 서비스" onBack={() => router.back()} />
 
-      <ScrollView
-        contentContainerStyle={{
-          paddingHorizontal: Layout.spacing.l,
-          paddingBottom: 40,
-          paddingTop: Layout.spacing.l,
-        }}
-        showsVerticalScrollIndicator={false}
+      <KeyboardAwareScrollView
+        ref={kawRef}
+        enableOnAndroid
+        extraScrollHeight={80}
+        keyboardOpeningTime={0}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingHorizontal: Layout.spacing.l, paddingTop: Layout.spacing.l, paddingBottom: 40 }}
       >
         {/* ✅ 신청 내역 + More */}
-        <View style={styles.section}>
+        <View>
           <View style={styles.sectionHeaderRow}>
             <ThemedText variant="heading3" style={styles.sectionTitle}>
               📒 신청 내역
@@ -199,6 +220,11 @@ export default function CarpoolHomeScreen() {
           placeholder="목적지, 운전자 이름, 픽업 장소 검색"
           placeholderTextColor={Color.text.disabled}
           style={styles.searchInput}
+          onFocus={() => {
+            setTimeout(() => {
+              kawRef.current?.scrollToPosition(0, 9999, true);
+            }, 50);
+          }}
         />
 
         {/* 모집글 리스트 */}
@@ -322,7 +348,7 @@ export default function CarpoolHomeScreen() {
             })
           )}
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }

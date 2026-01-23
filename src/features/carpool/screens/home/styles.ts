@@ -4,9 +4,6 @@ import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
   /* ---------- 신청내역 ---------- */
-  section: {
-    marginTop: Layout.spacing.m,
-  },
   sectionHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
