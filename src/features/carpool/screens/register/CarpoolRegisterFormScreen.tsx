@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Platform, Pressable, ScrollView, View } from "react-native";
+import { Keyboard, Platform, Pressable, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 import { TextInput } from "@shared/components/text-input/TextInput";
 import { ThemedText } from "@shared/components/themed-text/ThemedText";
@@ -59,6 +60,25 @@ function FieldBlock({
 }
 
 export default function CarpoolRegisterFormScreen() {
+
+  const [kbH, setKbH] = useState(0);
+  const kawRef = useRef<KeyboardAwareScrollView>(null);
+  useEffect(() => {
+    if (Platform.OS !== "android") return;
+
+    const show = Keyboard.addListener("keyboardDidShow", (e) => {
+      setKbH(e.endCoordinates?.height ?? 0);
+    });
+    const hide = Keyboard.addListener("keyboardDidHide", () => {
+      setKbH(0);
+    });
+
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+
   const {
     isHome,
 
@@ -102,12 +122,8 @@ export default function CarpoolRegisterFormScreen() {
 
   const mapRef = useRef<any>(null);
 
-  const [openDropdown, setOpenDropdown] = useState<
-    null | "date" | "hour" | "minute"
-  >(null);
-  const [addressModalOpen, setAddressModalOpen] = useState<
-    null | "origin" | "dest"
-  >(null);
+  const [openDropdown, setOpenDropdown] = useState<null | "date" | "hour" | "minute">(null);
+  const [addressModalOpen, setAddressModalOpen] = useState<null | "origin" | "dest">(null);
 
   const dateOptions: InlineOption[] = useMemo(
     () => DATE_OPTIONS.map((o) => ({ label: o.label, value: o.value })),
@@ -191,6 +207,11 @@ export default function CarpoolRegisterFormScreen() {
           value={mainPickup}
           onChangeText={setMainPickup}
           placeholder="예: 신도림역 1번 출구 앞"
+          onFocus={() => {
+            setTimeout(() => {
+              kawRef.current?.scrollToPosition(0, 9999, true);
+            }, 50);
+          }}
         />
       </View>
     );
@@ -208,14 +229,16 @@ export default function CarpoolRegisterFormScreen() {
         />
       )}
       <Header title="카풀 등록" onBack={() => router.back()} />
-      <ScrollView
-        contentContainerStyle={{
-          paddingHorizontal: Layout.spacing.l,
-          paddingBottom: 40,
-          paddingTop: Layout.spacing.l,
-        }}
-        showsVerticalScrollIndicator={false}
+
+      <KeyboardAwareScrollView
+        ref={kawRef}
+        enableOnAndroid
+        extraScrollHeight={80}
+        keyboardOpeningTime={0}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingHorizontal: Layout.spacing.l, paddingTop: Layout.spacing.l, paddingBottom: 40 }}
       >
+
         <View style={{ gap: 28 }}>
           <FieldBlock label="운전자명">
             <TextInput value={driverName} disabled placeholder="운전자명" />
@@ -375,6 +398,11 @@ export default function CarpoolRegisterFormScreen() {
               textAlignVertical="top"
               inputStyle={{ paddingTop: Layout.spacing.s }}
               containerStyle={styles.memoContainer}
+              onFocus={() => {
+                setTimeout(() => {
+                  kawRef.current?.scrollToPosition(0, 9999, true);
+                }, 50);
+              }}
             />
           </FieldBlock>
 
@@ -385,63 +413,63 @@ export default function CarpoolRegisterFormScreen() {
             </ThemedText>
           </Pressable>
         </View>
+      </KeyboardAwareScrollView>
 
-        {/* 사용 모달 */}
-        <InlineSelectModal
-          visible={openDropdown === "date"}
-          title="날짜 선택"
-          options={dateOptions}
-          selectedValue={date}
-          onClose={() => setOpenDropdown(null)}
-          onSelect={(opt) => setDate(opt.value)}
-        />
+      {/* 사용 모달 */}
+      <InlineSelectModal
+        visible={openDropdown === "date"}
+        title="날짜 선택"
+        options={dateOptions}
+        selectedValue={date}
+        onClose={() => setOpenDropdown(null)}
+        onSelect={(opt) => setDate(opt.value)}
+      />
 
-        <InlineSelectModal
-          visible={openDropdown === "hour"}
-          title="시간 선택"
-          options={hourOptions}
-          selectedValue={hour}
-          onClose={() => setOpenDropdown(null)}
-          onSelect={(opt) => setHour(opt.value)}
-        />
+      <InlineSelectModal
+        visible={openDropdown === "hour"}
+        title="시간 선택"
+        options={hourOptions}
+        selectedValue={hour}
+        onClose={() => setOpenDropdown(null)}
+        onSelect={(opt) => setHour(opt.value)}
+      />
 
-        <InlineSelectModal
-          visible={openDropdown === "minute"}
-          title="분 선택"
-          options={minuteOptions}
-          selectedValue={minute}
-          onClose={() => setOpenDropdown(null)}
-          onSelect={(opt) => setMinute(opt.value)}
-        />
+      <InlineSelectModal
+        visible={openDropdown === "minute"}
+        title="분 선택"
+        options={minuteOptions}
+        selectedValue={minute}
+        onClose={() => setOpenDropdown(null)}
+        onSelect={(opt) => setMinute(opt.value)}
+      />
 
-        <AddressSearchModal
-          visible={addressModalOpen != null}
-          title={
-            addressModalOpen === "origin"
-              ? "출발지 검색(도로명)"
-              : "도착지 검색(도로명)"
+      <AddressSearchModal
+        visible={addressModalOpen != null}
+        title={
+          addressModalOpen === "origin"
+            ? "출발지 검색(도로명)"
+            : "도착지 검색(도로명)"
+        }
+        onClose={() => setAddressModalOpen(null)}
+        onSelect={(r) => {
+          if (addressModalOpen === "origin") {
+            setOrigin({
+              roadAddress: r.roadAddress,
+              lat: r.lat,
+              lng: r.lng,
+              detail: origin.detail,
+            });
+          } else {
+            setDest({
+              roadAddress: r.roadAddress,
+              lat: r.lat,
+              lng: r.lng,
+              detail: dest.detail,
+            });
           }
-          onClose={() => setAddressModalOpen(null)}
-          onSelect={(r) => {
-            if (addressModalOpen === "origin") {
-              setOrigin({
-                roadAddress: r.roadAddress,
-                lat: r.lat,
-                lng: r.lng,
-                detail: origin.detail,
-              });
-            } else {
-              setDest({
-                roadAddress: r.roadAddress,
-                lat: r.lat,
-                lng: r.lng,
-                detail: dest.detail,
-              });
-            }
-            setAddressModalOpen(null);
-          }}
-        />
-      </ScrollView>
+          setAddressModalOpen(null);
+        }}
+      />
       <BaseModal
         visible={modalState.visible}
         onClose={closeModal}

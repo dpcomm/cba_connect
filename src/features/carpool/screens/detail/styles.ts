@@ -28,10 +28,14 @@ export const styles = StyleSheet.create({
     gap: Layout.spacing.m,
   },
 
+  profileInfo: {
+    flex: 1,
+  },
+
   avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 60,
+    height: 60,
+    borderRadius: 999,
     backgroundColor: Color.secondary.hover,
     alignItems: 'center',
     justifyContent: 'center',
@@ -69,7 +73,10 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  infoTextCol: { flex: 1 },
+  infoTextCol: {
+    flex: 1,
+    minWidth: 0,
+  },
 
   bottomBar: {
     position: 'absolute',
@@ -117,15 +124,14 @@ export const styles = StyleSheet.create({
   passengerRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
 
-  passengerBullet: {
-    width: 3,
-    height: 3,
-    borderRadius: 2,
-    backgroundColor: Color.text.main,
-    marginRight: Layout.spacing.s,
-    marginTop: 4,
+  passengerIcon: {
+    width: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: Layout.spacing.xs,
   },
 
   passengerNamePhone: {
