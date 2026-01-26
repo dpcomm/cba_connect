@@ -79,9 +79,9 @@ export default function RootLayout() {
             setShowPermissionModal(true);
             return; // 모달 확인 후 handlePermissionConfirm에서 처리
           }
-          
+
           initializeNotifications().then(({ pushToken }) => {
-            console.log('Push Token:', pushToken);
+            console.log("Push Token:", pushToken);
           });
 
           // 동의 완료됨 -> 홈으로 이동
@@ -143,6 +143,14 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen name="lecture" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="retreat"
+          options={{
+            headerShown: false,
+            presentation: "fullScreenModal",
+            animation: "fade",
+          }}
+        />
       </Stack>
       {showPermissionModal && (
         <PermissionModal

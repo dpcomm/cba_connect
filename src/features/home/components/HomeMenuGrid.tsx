@@ -1,6 +1,7 @@
 import React from "react";
 import { Dimensions, View } from "react-native";
 import CarpoolIcon from "../../../../assets/svgs/carpool.svg";
+import CheckInIcon from "../../../../assets/svgs/check-in.svg";
 import GuidebookIcon from "../../../../assets/svgs/guidebook.svg";
 import LectureIcon from "../../../../assets/svgs/lecture.svg";
 import RetreatIcon from "../../../../assets/svgs/retreat-application.svg";
@@ -18,6 +19,7 @@ const SMALL_CARD_WIDTH =
 const SMALL_CARD_HEIGHT = SMALL_CARD_WIDTH * 0.83;
 
 interface HomeMenuGridProps {
+  isRetreatRegistered?: boolean;
   onRetreatPress?: () => void;
   onCarpoolPress?: () => void;
   onGuidebookPress?: () => void;
@@ -26,6 +28,7 @@ interface HomeMenuGridProps {
 }
 
 export function HomeMenuGrid({
+  isRetreatRegistered = false,
   onRetreatPress,
   onCarpoolPress,
   onGuidebookPress,
@@ -42,12 +45,16 @@ export function HomeMenuGrid({
         }}
       >
         <MenuCard
-          title="수련회 신청"
-          description={"2026 겨울 수련회\n'바라봄'"}
+          title={isRetreatRegistered ? "수련회 등록" : "수련회 신청"}
+          description={
+            isRetreatRegistered
+              ? "현장 체크인은\n여기서!"
+              : "2026 겨울 수련회\n'바라봄'"
+          }
           size="large"
           onPress={onRetreatPress}
           style={{ width: LARGE_CARD_WIDTH, height: LARGE_CARD_HEIGHT }}
-          icon={<RetreatIcon />}
+          icon={isRetreatRegistered ? <CheckInIcon /> : <RetreatIcon />}
         />
         <MenuCard
           title="카풀 서비스"

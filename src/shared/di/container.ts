@@ -24,6 +24,7 @@ import { SubmitConsentUseCase } from "@application/consent/SubmitConsentUseCase"
 import { GetNoticesUseCase } from "@application/notice/GetNoticesUseCase";
 import { GetNoticeUseCase } from "@application/notice/GetNoticeUseCase";
 import { RegisterExpoTokenUseCase } from "@application/notification/RegistExpoTokenUseCase";
+import { GetMyRetreatApplicationUseCase } from "@application/retreat/GetMyRetreatApplicationUseCase";
 import { CheckVersionUseCase } from "@application/status/CheckVersionUseCase";
 import { GetSystemConfigUseCase } from "@application/system/GetSystemConfigUseCase";
 import { GetTermUseCase } from "@application/term/GetTermUseCase";
@@ -35,6 +36,7 @@ import { ConsentRepository } from "@infrastructure/consent/ConsentRepository";
 import { ApiLectureRepository } from "@infrastructure/lecture/ApiLectureRepository";
 import { NoticeRepository } from "@infrastructure/notice/NoticeRepository";
 import { ApiExpoPushTokenRepository } from "@infrastructure/notification/ApiExpoPushTokenRepository";
+import { RetreatRepository } from "@infrastructure/retreat/RetreatRepository";
 import { StatusRepository } from "@infrastructure/status/StatusRepository";
 import { ApiTermRepository } from "@infrastructure/term/ApiTermRepository";
 import { UserRepository } from "@infrastructure/user/UserRepository";
@@ -49,6 +51,7 @@ container.register("StatusRepository", { useClass: StatusRepository });
 container.register("NoticeRepository", { useClass: NoticeRepository });
 container.register("LectureRepository", { useClass: ApiLectureRepository });
 container.register("TermRepository", { useClass: ApiTermRepository });
+container.register("RetreatRepository", { useClass: RetreatRepository });
 container.register("ExpoPushTokenRepository", {
   useClass: ApiExpoPushTokenRepository,
 });
@@ -98,4 +101,7 @@ container.register(UpdateCarpoolStatusUseCase, {
 container.register(GetNoticesUseCase, { useClass: GetNoticesUseCase });
 container.register(GetNoticeUseCase, { useClass: GetNoticeUseCase });
 container.register(GetTermUseCase, { useClass: GetTermUseCase });
+container.register(GetMyRetreatApplicationUseCase, {
+  useClass: GetMyRetreatApplicationUseCase,
+});
 export { container };
