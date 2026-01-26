@@ -79,6 +79,12 @@ export default function CarpoolDetailScreen() {
       ? carpool.seatsTotal - carpool.seatsLeft
       : undefined;
 
+  // ✅ 정원 마감 여부
+  const isFull =
+    carpool.seatsTotal != null &&
+    carpool.seatsLeft != null &&
+    carpool.seatsLeft <= 0;
+
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: Color.default.background }}
@@ -268,6 +274,7 @@ export default function CarpoolDetailScreen() {
       </ScrollView>
 
       {/* 하단 버튼 */}
+      {/* 하단 버튼 */}
       <View style={styles.bottomBar}>
         {isDriver ? (
           <View style={styles.bottomButtonRow}>
@@ -294,6 +301,15 @@ export default function CarpoolDetailScreen() {
             textVariant="text1"
             style={styles.bottomButton}
           />
+        ) : isFull ? (
+          <Button
+            title="마감"
+            onPress={() => { }}
+            disabled
+            size="large"
+            textVariant="text1"
+            style={styles.bottomButton}
+          />
         ) : (
           <Button
             title="신청하기"
@@ -304,6 +320,7 @@ export default function CarpoolDetailScreen() {
           />
         )}
       </View>
+
 
       <BaseModal
         visible={modalState.visible}
