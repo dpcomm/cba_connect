@@ -8,31 +8,37 @@ import { ResetPasswordUseCase } from "@application/auth/ResetPasswordUseCase";
 import { SendEmailVerificationUseCase } from "@application/auth/SendEmailVerificationUseCase";
 import { VerifyEmailCodeUseCase } from "@application/auth/VerifyEmailCodeUseCase";
 import {
-    CreateCarpoolUseCase,
-    DeleteCarpoolUseCase,
-    FindMyCarpoolsUseCase,
-    GetAllCarpoolsUseCase,
-    GetCarpoolByIdUseCase,
-    GetCarpoolDetailUseCase,
-    JoinCarpoolUseCase,
-    LeaveCarpoolUseCase,
-    UpdateCarpoolStatusUseCase,
-    UpdateCarpoolUseCase,
+  CreateCarpoolUseCase,
+  DeleteCarpoolUseCase,
+  FindMyCarpoolsUseCase,
+  GetAllCarpoolsUseCase,
+  GetCarpoolByIdUseCase,
+  GetCarpoolDetailUseCase,
+  JoinCarpoolUseCase,
+  LeaveCarpoolUseCase,
+  UpdateCarpoolStatusUseCase,
+  UpdateCarpoolUseCase,
 } from "@application/carpool";
 import { CheckConsentUseCase } from "@application/consent/CheckConsentUseCase";
 import { SubmitConsentUseCase } from "@application/consent/SubmitConsentUseCase";
 import { GetNoticesUseCase } from "@application/notice/GetNoticesUseCase";
 import { GetNoticeUseCase } from "@application/notice/GetNoticeUseCase";
 import { RegisterExpoTokenUseCase } from "@application/notification/RegistExpoTokenUseCase";
+import { GetMyRetreatApplicationUseCase } from "@application/retreat/GetMyRetreatApplicationUseCase";
 import { CheckVersionUseCase } from "@application/status/CheckVersionUseCase";
+import { GetSystemConfigUseCase } from "@application/system/GetSystemConfigUseCase";
+import { GetTermUseCase } from "@application/term/GetTermUseCase";
 import { GetMeUseCase } from "@application/user/GetMeUseCase";
 import { UpdateProfileUseCase } from "@application/user/UpdateProfileUseCase";
 import { AuthRepository } from "@infrastructure/auth/AuthRepository";
 import { CarpoolRepository } from "@infrastructure/carpool/CarpoolRepository";
 import { ConsentRepository } from "@infrastructure/consent/ConsentRepository";
+import { ApiLectureRepository } from "@infrastructure/lecture/ApiLectureRepository";
 import { NoticeRepository } from "@infrastructure/notice/NoticeRepository";
 import { ApiExpoPushTokenRepository } from "@infrastructure/notification/ApiExpoPushTokenRepository";
+import { RetreatRepository } from "@infrastructure/retreat/RetreatRepository";
 import { StatusRepository } from "@infrastructure/status/StatusRepository";
+import { ApiTermRepository } from "@infrastructure/term/ApiTermRepository";
 import { UserRepository } from "@infrastructure/user/UserRepository";
 import "reflect-metadata";
 import { container } from "tsyringe";
@@ -42,8 +48,10 @@ container.register("UserRepository", { useClass: UserRepository });
 container.register("CarpoolRepository", { useClass: CarpoolRepository });
 container.register("ConsentRepository", { useClass: ConsentRepository });
 container.register("StatusRepository", { useClass: StatusRepository });
-container.register('NoticeRepository', { useClass: NoticeRepository });
-
+container.register("NoticeRepository", { useClass: NoticeRepository });
+container.register("LectureRepository", { useClass: ApiLectureRepository });
+container.register("TermRepository", { useClass: ApiTermRepository });
+container.register("RetreatRepository", { useClass: RetreatRepository });
 container.register("ExpoPushTokenRepository", {
   useClass: ApiExpoPushTokenRepository,
 });
@@ -71,6 +79,9 @@ container.register(UpdateProfileUseCase, { useClass: UpdateProfileUseCase });
 container.register(CheckConsentUseCase, { useClass: CheckConsentUseCase });
 container.register(SubmitConsentUseCase, { useClass: SubmitConsentUseCase });
 container.register(CheckVersionUseCase, { useClass: CheckVersionUseCase });
+container.register(GetSystemConfigUseCase, {
+  useClass: GetSystemConfigUseCase,
+});
 
 container.register(GetAllCarpoolsUseCase, { useClass: GetAllCarpoolsUseCase });
 container.register(CreateCarpoolUseCase, { useClass: CreateCarpoolUseCase });
@@ -89,6 +100,8 @@ container.register(UpdateCarpoolStatusUseCase, {
 
 container.register(GetNoticesUseCase, { useClass: GetNoticesUseCase });
 container.register(GetNoticeUseCase, { useClass: GetNoticeUseCase });
-
+container.register(GetTermUseCase, { useClass: GetTermUseCase });
+container.register(GetMyRetreatApplicationUseCase, {
+  useClass: GetMyRetreatApplicationUseCase,
+});
 export { container };
-

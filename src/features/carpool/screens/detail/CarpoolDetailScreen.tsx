@@ -17,6 +17,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "./styles";
 import { useCarpoolDetailViewModel } from "./useCarpoolDetailViewModel";
 
+import CarpoolDriverIcon from "../../../../../assets/svgs/carpool_driver.svg";
+import CarpoolGuestIcon from "../../../../../assets/svgs/carpool_guest.svg";
+
 let MapView: any = null;
 let Marker: any = null;
 if (Platform.OS !== "web") {
@@ -45,7 +48,6 @@ export default function CarpoolDetailScreen() {
     closeModal,
   } = useCarpoolDetailViewModel({
     carpoolId: Number(id),
-    userId: user?.id ?? 0,
   });
 
   useEffect(() => {
@@ -53,6 +55,8 @@ export default function CarpoolDetailScreen() {
   }, [id, load]);
 
   if (!carpool) return null;
+  const driverId = carpool?.driver?.id ?? carpool?.driverId;
+  const passengerList = Array.isArray(carpool?.members) ? carpool.members : [];
 
   const isToRetreat = carpool.destinationDetailed === RETREAT_NAME;
 
@@ -75,6 +79,12 @@ export default function CarpoolDetailScreen() {
       ? carpool.seatsTotal - carpool.seatsLeft
       : undefined;
 
+  // ✅ 정원 마감 여부
+  const isFull =
+    carpool.seatsTotal != null &&
+    carpool.seatsLeft != null &&
+    carpool.seatsLeft <= 0;
+
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: Color.default.background }}
@@ -95,6 +105,7 @@ export default function CarpoolDetailScreen() {
         contentContainerStyle={{
           paddingHorizontal: Layout.spacing.l,
           paddingBottom: 40,
+          paddingTop: Layout.spacing.l,
         }}
         showsVerticalScrollIndicator={false}
       >
@@ -112,12 +123,15 @@ export default function CarpoolDetailScreen() {
               <View style={styles.avatar}>
                 <ThemedText variant="heading3">👤</ThemedText>
               </View>
-              <View>
+              <View style={styles.profileInfo}>
                 <ThemedText variant="heading3">
                   {carpool.driver.name}
                 </ThemedText>
                 <ThemedText variant="text4" color={Color.text.sub}>
-                  {carpool.driver.phone} | {carpool.carInfo}
+                  {carpool.driver.phone}
+                </ThemedText>
+                <ThemedText variant="text4" color={Color.text.sub}>
+                  {carpool.carInfo}
                 </ThemedText>
               </View>
             </View>
@@ -177,9 +191,11 @@ export default function CarpoolDetailScreen() {
               <View style={styles.iconCircle}>
                 <ThemedText variant="text2">🕒</ThemedText>
               </View>
-              <ThemedText variant="text2">
-                {formatDateTimePretty(carpool.departureTime)} 출발
-              </ThemedText>
+              <View style={styles.infoTextCol}>
+                <ThemedText variant="text2">
+                  {formatDateTimePretty(carpool.departureTime)} 출발
+                </ThemedText>
+              </View>
             </View>
 
             {/* 인원 */}
@@ -192,19 +208,72 @@ export default function CarpoolDetailScreen() {
               </ThemedText>
             </View>
 
+            {/* ✅ 탑승자 목록: 리스트만 배경 */}
+            {/* ✅ 탑승자 목록: 멤버이고 + 운전자 제외 후 1명 이상일 때만 */}
+            {isMember && passengerList.length > 0 && (
+              <View style={styles.passengerBox}>
+                <View style={styles.passengerList}>
+                  {passengerList.map((m: any, idx: number) => {
+                    const memberId = m?.id ?? m?.user?.id ?? 0;
+                    const name = m?.name ?? m?.user?.name ?? '-';
+                    const rawPhone = String(m?.phone ?? m?.user?.phone ?? '').trim();
+                    const digits = rawPhone.replace(/\D/g, '');
+
+                    let masked = '';
+                    if (digits.length === 11) {
+                      masked = `${digits.slice(0, 3)}-xxxx-${digits.slice(7)}`;
+                    } else if (digits.length === 10) {
+                      masked = `${digits.slice(0, 3)}-xxxx-${digits.slice(6)}`;
+                    }
+
+                    return (
+                      <View
+                        key={String(m?.userId ?? m?.id ?? m?.user?.id ?? idx)}
+                        style={styles.passengerRow}
+                      >
+                        <View style={styles.passengerIcon}>
+                          {driverId === memberId ? (
+                            <CarpoolDriverIcon width={16} height={16} />
+                          ) : (
+                            <CarpoolGuestIcon width={16} height={16} />
+                          )}
+                        </View>
+                        <ThemedText variant="text2" style={styles.passengerNamePhone} numberOfLines={1}>
+                          {name} {masked ? `| ${masked}` : ''}
+                        </ThemedText>
+
+                        {/* ✅ 전화 아이콘: 운전자일 때만 */}
+                        {isDriver && digits && (
+                          <TouchableOpacity
+                            style={styles.passengerCallBtn}
+                            onPress={() => Linking.openURL(`tel:${digits}`)}
+                          >
+                            <Ionicons name="call" size={14} color={Color.text.main} />
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    );
+                  })}
+                </View>
+              </View>
+            )}
+
             {/* 노트 */}
             {!!carpool.note && (
               <View style={styles.infoRow}>
                 <View style={styles.iconCircle}>
                   <ThemedText variant="text2">⚡</ThemedText>
                 </View>
-                <ThemedText variant="text2">{carpool.note}</ThemedText>
+                <View style={styles.infoTextCol}>
+                  <ThemedText variant="text2">{carpool.note}</ThemedText>
+                </View>
               </View>
             )}
           </View>
         </View>
       </ScrollView>
 
+      {/* 하단 버튼 */}
       {/* 하단 버튼 */}
       <View style={styles.bottomBar}>
         {isDriver ? (
@@ -232,6 +301,15 @@ export default function CarpoolDetailScreen() {
             textVariant="text1"
             style={styles.bottomButton}
           />
+        ) : isFull ? (
+          <Button
+            title="마감"
+            onPress={() => { }}
+            disabled
+            size="large"
+            textVariant="text1"
+            style={styles.bottomButton}
+          />
         ) : (
           <Button
             title="신청하기"
@@ -243,6 +321,7 @@ export default function CarpoolDetailScreen() {
         )}
       </View>
 
+
       <BaseModal
         visible={modalState.visible}
         onClose={closeModal}
@@ -250,13 +329,13 @@ export default function CarpoolDetailScreen() {
         leftButton={
           modalState.cancelText
             ? {
-                text: modalState.cancelText,
-                onPress: () => {
-                  if (modalState.onCancel) modalState.onCancel();
-                  closeModal();
-                },
-                color: Color.tertiary.main,
-              }
+              text: modalState.cancelText,
+              onPress: () => {
+                if (modalState.onCancel) modalState.onCancel();
+                closeModal();
+              },
+              color: Color.tertiary.main,
+            }
             : undefined
         }
         rightButton={{

@@ -4,6 +4,7 @@ import { TextInput } from "@shared/components/text-input/TextInput";
 import { ThemedText } from "@shared/components/themed-text/ThemedText";
 import { Color } from "@shared/constants/color";
 import { Layout } from "@shared/constants/layout";
+import Constants from "expo-constants";
 import React from "react";
 import { ActivityIndicator, TouchableOpacity, View } from "react-native";
 import RecbaLogo from "../../../../../assets/svgs/recba_logo.svg";
@@ -71,6 +72,20 @@ export default function LoginScreen() {
             ID/PW 찾기
           </ThemedText>
         </TouchableOpacity>
+      </View>
+
+      <View
+        style={{
+          position: "absolute",
+          bottom: 16,
+          left: 0,
+          right: 0,
+          alignItems: "center",
+        }}
+      >
+        <ThemedText variant="text4" color={Color.text.sub}>
+          v{Constants.expoConfig?.version ?? "1.0.0"}
+        </ThemedText>
       </View>
 
       {showPermissionModal && (

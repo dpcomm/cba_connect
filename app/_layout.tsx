@@ -4,6 +4,7 @@ import { AutoLoginUseCase } from "@application/auth/AutoLoginUseCase";
 import { CheckConsentUseCase } from "@application/consent/CheckConsentUseCase";
 import { SubmitConsentUseCase } from "@application/consent/SubmitConsentUseCase";
 import { CheckVersionUseCase } from "@application/status/CheckVersionUseCase";
+import { initializeNotifications } from "@shared/bootstrap/InitializeNotification";
 import { PermissionModal } from "@shared/components/modal/PermissionModal";
 import { container } from "@shared/di/container";
 import { useAuthStore } from "@shared/stores/useAuthStore";
@@ -77,7 +78,7 @@ export default function RootLayout() {
             // 동의 필요 -> 모달 표시
             setShowPermissionModal(true);
             return; // 모달 확인 후 handlePermissionConfirm에서 처리
-          }
+          }      
 
           // 동의 완료됨 -> 홈으로 이동
           router.replace("/home");
@@ -93,6 +94,10 @@ export default function RootLayout() {
     if (fontsLoaded) {
       startAppFlow();
     }
+
+    initializeNotifications().then(({ pushToken }) => {
+      console.log('Push Token:', pushToken);
+    });
   }, [fontsLoaded, router, setUser]);
 
   const handlePermissionConfirm = async () => {
@@ -135,6 +140,15 @@ export default function RootLayout() {
           options={{
             headerShown: false,
             animation: "slide_from_right",
+          }}
+        />
+        <Stack.Screen name="lecture" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="retreat"
+          options={{
+            headerShown: false,
+            presentation: "fullScreenModal",
+            animation: "fade",
           }}
         />
       </Stack>

@@ -1,9 +1,9 @@
 import { Auth } from "@domain/auth/Auth";
 import { EmailVerificationType } from "@domain/auth/EmailVerificationType";
 import {
-  IAuthRepository,
-  RegisterData,
-  ResetPasswordData,
+    IAuthRepository,
+    RegisterData,
+    ResetPasswordData,
 } from "@domain/auth/IAuthRepository";
 import { User } from "@domain/user/User";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -15,16 +15,16 @@ import * as SecureStore from "expo-secure-store";
 import { injectable } from "tsyringe";
 
 import {
-  AuthResponseDto,
-  CheckIdResponseDto,
-  FindIdRequestDto,
-  FindIdResponseDto,
-  LoginRequestDto,
-  RefreshResponseDto,
-  RegisterRequestDto,
-  ResetPasswordRequestDto,
-  VerifyEmailRequestDto,
-  VerifyEmailResponseDto,
+    AuthResponseDto,
+    CheckIdResponseDto,
+    FindIdRequestDto,
+    FindIdResponseDto,
+    LoginRequestDto,
+    RefreshResponseDto,
+    RegisterRequestDto,
+    ResetPasswordRequestDto,
+    VerifyEmailRequestDto,
+    VerifyEmailResponseDto,
 } from "./dto";
 
 const AUTO_LOGIN_KEY = "auto_login_enabled";
@@ -94,6 +94,8 @@ export class AuthRepository implements IAuthRepository {
           responseData.user.birth,
           responseData.user.gender,
           responseData.user.rank,
+          responseData.user.email,
+          responseData.user.emailVerifiedAt,
           responseData.user.isDeleted,
           responseData.user.createdAt,
           responseData.user.updatedAt,
@@ -112,6 +114,8 @@ export class AuthRepository implements IAuthRepository {
           userData.birth,
           userData.gender,
           userData.rank,
+          userData.email,
+          userData.emailVerifiedAt,
           userData.isDeleted,
           userData.createdAt,
           userData.updatedAt,
@@ -193,6 +197,8 @@ export class AuthRepository implements IAuthRepository {
       data.user.birth,
       data.user.gender,
       data.user.rank,
+      data.user.email,
+      data.user.emailVerifiedAt,
       data.user.isDeleted,
       data.user.createdAt,
       data.user.updatedAt,
@@ -300,11 +306,8 @@ export class AuthRepository implements IAuthRepository {
           return new Error("아이디와 이메일 정보가 일치하지 않습니다.");
         return new Error(message || "잘못된 요청입니다.");
       }
-      if (statusCode === 401) {
-        return new Error("인증에 실패했습니다.");
-      }
-      if (statusCode === 404) {
-        return new Error("존재하지 않는 사용자입니다.");
+      if (statusCode === 401 || statusCode === 404) {
+        return new Error("아이디 또는 비밀번호를 다시 확인해 주세요.");
       }
 
       return new Error(message);

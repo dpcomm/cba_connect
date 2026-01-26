@@ -27,14 +27,14 @@ export function TextInputLined({
   return (
     <View style={[{ width: '100%' }, containerStyle]}>
       {label && (
-        <ThemedText variant="text1" color={Color.text.sub} style={{ marginBottom: 10 }}>
+        <ThemedText variant="text1" color={Color.text.sub}>
           {label}
         </ThemedText>
       )}
-      <View style={{ 
+      <View style={{
         flexDirection: 'row',
         alignItems: 'center',
-        borderBottomWidth: 2, 
+        borderBottomWidth: 2,
         borderBottomColor: isFocused ? Color.primary.main : Color.tertiary.main,
         paddingBottom: 4,
       }}>

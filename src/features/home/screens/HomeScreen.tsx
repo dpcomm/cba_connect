@@ -1,7 +1,11 @@
+import { GetMyRetreatApplicationUseCase } from "@application/retreat/GetMyRetreatApplicationUseCase";
+import { GetSystemConfigUseCase } from "@application/system/GetSystemConfigUseCase";
+import { RetreatApplication } from "@domain/retreat/RetreatApplication";
 import { Color } from "@shared/constants/color";
 import { Layout } from "@shared/constants/layout";
-import { useRouter } from "expo-router";
-import React from "react";
+import { container } from "@shared/di/container";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useState } from "react";
 import { Linking } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { HomeHeader } from "../components/HomeHeader";
@@ -10,13 +14,59 @@ import { MainBanner } from "../components/MainBanner";
 
 export default function HomeScreen() {
   const router = useRouter();
+  const [retreatApplication, setRetreatApplication] =
+    useState<RetreatApplication | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      const loadRetreatApplication = async () => {
+        try {
+          const getSystemConfigUseCase = container.resolve(
+            GetSystemConfigUseCase,
+          );
+          const getMyRetreatApplicationUseCase = container.resolve(
+            GetMyRetreatApplicationUseCase,
+          );
+
+          const systemConfig = await getSystemConfigUseCase.execute();
+          console.log(
+            `[HomeScreen] Current Retreat ID: ${systemConfig.currentRetreatId}`,
+          );
+
+          const application = await getMyRetreatApplicationUseCase.execute(
+            systemConfig.currentRetreatId,
+          );
+          console.log(`[HomeScreen] Application result:`, application);
+
+          setRetreatApplication(application);
+        } catch (error) {
+          console.error("Failed to load retreat application:", error);
+          setRetreatApplication(null);
+        }
+      };
+
+      loadRetreatApplication();
+    }, []),
+  );
 
   const handleMenuPress = () => {
     router.push("/my-page");
   };
 
   const handleRetreatPress = () => {
-    Linking.openURL("https://recba.me");
+    if (retreatApplication) {
+      if (retreatApplication.checkedInAt) {
+        if (retreatApplication.eventParticipatedAt) {
+          router.push("/retreat/result" as any);
+        } else {
+          router.push("/retreat/raffle" as any);
+        }
+      } else {
+        router.push("/retreat/check-in" as any);
+      }
+    } else {
+      Linking.openURL("https://recba.me");
+    }
   };
 
   const handleCarpoolPress = () => {
@@ -24,15 +74,15 @@ export default function HomeScreen() {
   };
 
   const handleGuidebookPress = () => {
-    Linking.openURL("https://recba.me");
+    router.push("/guidebook");
   };
 
   const handleVideoPress = () => {
-    Linking.openURL("https://recba.me");
+    Linking.openURL("https://www.youtube.com/@recba_129");
   };
 
   const handleLecturePress = () => {
-    Linking.openURL("https://recba.me");
+    router.push("/lecture" as any);
   };
 
   const dDay = React.useMemo(() => {
@@ -64,6 +114,7 @@ export default function HomeScreen() {
         ]}
       />
       <HomeMenuGrid
+        isRetreatRegistered={retreatApplication !== null}
         onRetreatPress={handleRetreatPress}
         onCarpoolPress={handleCarpoolPress}
         onGuidebookPress={handleGuidebookPress}

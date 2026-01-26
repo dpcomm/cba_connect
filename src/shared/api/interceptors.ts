@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import type {
   AxiosError,
   AxiosInstance,
@@ -8,6 +9,8 @@ import * as SecureStore from "expo-secure-store";
 
 import { API_PREFIX } from "./config";
 import { ApiResponse } from "./types";
+
+const AUTO_LOGIN_KEY = "auto_login_enabled";
 
 interface RefreshResponse {
   access_token: string;
@@ -124,6 +127,7 @@ export function createResponseErrorInterceptor(apiClient: AxiosInstance) {
         processQueue(refreshError, null);
         await SecureStore.deleteItemAsync("access_token");
         await SecureStore.deleteItemAsync("refresh_token");
+        await AsyncStorage.removeItem(AUTO_LOGIN_KEY);
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

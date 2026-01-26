@@ -265,14 +265,12 @@ export function useCarpoolRegisterFormViewModel() {
       destLng: Number(dest.lng!.toFixed(6)),
     };
 
-    console.log(payload);
-
     try {
       setLoading?.(true);
       const created = await createUseCase.execute(payload);
       await AsyncStorage.setItem(STORAGE_KEYS.carInfo, carInfo.trim());
       showModal("완료", "카풀 신청이 완료되었습니다.", () => {
-        router.push("/carpool");
+        router.replace(`/carpool/${created.id}`)
       });
     } catch (e) {
       showModal(
@@ -322,7 +320,9 @@ export function useCarpoolRegisterFormViewModel() {
     editableMarker,
 
     submit,
-
+    modalState,
+    closeModal,
+    
     // 필요하면 노출(디버깅용)
     departureTime,
   };

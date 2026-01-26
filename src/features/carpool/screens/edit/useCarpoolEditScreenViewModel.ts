@@ -239,15 +239,13 @@ export function useCarpoolEditScreenViewModel() {
       payload.originLat = origin.lat;
       payload.originLng = origin.lng;
     }
-    console.log("[submit] carpoolId", carpoolId);
-    console.log("[submit] payload", payload);
 
     try {
       setLoading?.(true);
       await updateUseCase.execute(carpoolId, payload);
       await AsyncStorage.setItem(STORAGE_KEYS.carInfo, carInfo.trim());
       showModal("완료", "수정이 완료되었습니다.", () => {
-        router.push(`/carpool`);
+        router.replace(`/carpool/${carpoolId}`);
       });
     } catch {
       const msg = "수정에 실패하였습니다.";
@@ -256,16 +254,6 @@ export function useCarpoolEditScreenViewModel() {
     } finally {
       setLoading?.(false);
     }
-  };
-
-  const confirmSubmit = () => {
-    const hasMembers = membersCount > 1;
-
-    const message = hasMembers
-      ? "카풀 신청자가 있습니다.\n정말로 수정하시겠습니까?\n\n탑승자에게는 수정 알림이 발송됩니다."
-      : "정말로 수정하시겠습니까?";
-
-    showModal("수정", message, submit, "예", "아니요");
   };
 
   const validate = (): string | null => {
@@ -337,7 +325,6 @@ export function useCarpoolEditScreenViewModel() {
     editableMarker,
 
     submit,
-    confirmSubmit,
     modalState,
     closeModal,
   };

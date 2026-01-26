@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { TextInputLined } from '@shared/components/text-input-lined/TextInputLined';
 import { Color } from '@shared/constants/color';
 import { Layout } from '@shared/constants/layout';
+import { isValidPassword } from '@shared/utils/validators';
 import React, { useRef, useState } from 'react';
 import { TextInput as RNTextInput, TouchableOpacity, View } from 'react-native';
 import { ReadOnlyStepValue } from '../../../components/ReadOnlyStepValue';
@@ -29,7 +30,7 @@ export function PasswordStep({ password, setPassword, onNext, readOnly }: Props)
   };
 
   const handleConfirmSubmit = () => {
-    if (password.length < 8) {
+    if (!isValidPassword(password)) {
       return;
     }
     if (password !== confirmPassword) {
@@ -38,7 +39,7 @@ export function PasswordStep({ password, setPassword, onNext, readOnly }: Props)
     onNext?.();
   };
 
-  const isPasswordValid = password.length >= 8;
+  const isPasswordValid = isValidPassword(password);
   const isConfirmMatch = password === confirmPassword && confirmPassword.length > 0;
 
   return (

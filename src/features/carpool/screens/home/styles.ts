@@ -4,9 +4,6 @@ import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
   /* ---------- 신청내역 ---------- */
-  section: {
-    marginTop: Layout.spacing.m,
-  },
   sectionHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -67,9 +64,13 @@ export const styles = StyleSheet.create({
   },
 
   /* ---------- 집으로 / 수련회장 ---------- */
-  segmentWrap: {
+  sectionDivider: {
+    height: 1,
+    backgroundColor: Color.secondary.hover,
     marginTop: Layout.spacing.l,
-    marginBottom: Layout.spacing.s,
+    marginBottom: Layout.spacing.m,
+  },
+  segmentWrap: {
     height: 36,
     borderRadius: Layout.radius.s,
     backgroundColor: Color.secondary.hover,
@@ -95,7 +96,7 @@ export const styles = StyleSheet.create({
 
   /* ---------- 카풀 찾기 ---------- */
   findHeader: {
-    marginTop: Layout.spacing.m,
+    marginTop: Layout.spacing.s,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -132,7 +133,7 @@ export const styles = StyleSheet.create({
 
   /* ---------- 모집글 리스트 ---------- */
   postList: {
-    marginTop: Layout.spacing.m,
+    marginTop: Layout.spacing.s,
     gap: Layout.spacing.s,
   },
 
@@ -146,31 +147,21 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: Layout.spacing.xs,
   },
-  postTimeText: {
-    color: Color.text.main,
-  },
-  postSeatText: {
-    color: Color.primary.main,
-  },
-  postPlaceText: {
-    color: Color.text.sub,
-    marginBottom: 2,
-  },
-  postRouteText: {
-    color: Color.text.main,
-  },
-
   avatar: {
     width: 28,
     height: 28,
     borderRadius: 14,
     backgroundColor: Color.secondary.hover,
-    marginRight: Layout.spacing.s,
+    marginRight: Layout.spacing.xs,
   },
   postName: {
     color: Color.text.main,
+  },
+
+  carInfo: {
+    color: Color.text.sub,
+    marginLeft: Layout.spacing.m
   },
 
   statusBtnApply: {
@@ -193,28 +184,33 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+
   statusTextClosed: {
     color: Color.text.sub,
   },
+
   postInfo: {
-    marginTop: Layout.spacing.xs,
-    gap: Layout.spacing.xs,
+    marginTop: 6,
   },
   infoRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: Layout.spacing.xs,
+  },
+  iconCol: {
+    width: 20,                  // 아이콘 컬럼 고정
+    alignItems: "center",
+    marginTop: 2,               // 텍스트 첫 줄과 시각 정렬
+  },
+
+  infoText: {
+    flex: 1,                    // 남은 영역 전부 텍스트
+    color: Color.text.main,
+    lineHeight: 20,
   },
   infoValue: {
     color: Color.text.main,
   },
-  routeRow: {
-    marginTop: Layout.spacing.s,
-  },
-  routeText: {
-    color: Color.text.main,
-  },
-
   moreBtn: {
     paddingHorizontal: 14,
     height: 28,
@@ -228,9 +224,11 @@ export const styles = StyleSheet.create({
   moreBtnText: {
     color: Color.text.main,
   },
+
   kvRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
+    marginLeft: Layout.spacing.xs,
   },
 
   kvLabel: {

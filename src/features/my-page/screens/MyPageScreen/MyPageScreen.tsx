@@ -1,4 +1,5 @@
 import { Header } from "@shared/components/header/Header";
+import { LoadingOverlay } from "@shared/components/loading-overlay/LoadingOverlay";
 import { BaseModal } from "@shared/components/modal/BaseModal";
 import { ThemedText } from "@shared/components/themed-text/ThemedText";
 import { Color } from "@shared/constants/color";
@@ -15,6 +16,7 @@ import { useMyPageViewModel } from "./useMyPageViewModel";
 export default function MyPageScreen() {
   const {
     activeModal,
+    isLoading,
     closeModal,
     openCarInfoModal,
     openTechSupport,
@@ -154,6 +156,7 @@ export default function MyPageScreen() {
           구현 중인 기능입니다.
         </ThemedText>
       </BaseModal>
+      <LoadingOverlay visible={isLoading} />
     </SafeAreaView>
   );
 }

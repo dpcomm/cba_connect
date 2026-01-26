@@ -1,3 +1,5 @@
+// useCarpoolHomeViewModel.ts
+
 import { GetAvailableCarpoolsUseCase } from '@application/carpool/GetAvailableCarpoolsUseCase';
 import { GetParticipatingCarpoolsUseCase } from '@application/carpool/GetParticipatingCarpoolsUseCase';
 import { container } from '@shared/di/container';
@@ -16,11 +18,6 @@ function getCarpoolCardStatus(post: any): { status: CarpoolCardStatus; label: st
     status: isClosed ? 'CLOSED' : 'AVAILABLE',
     label: isClosed ? '마감' : '신청가능',
   };
-}
-
-function matchTab(destination?: string | null, tab?: DestinationTab): boolean {
-  const isRetreat = destination === RETREAT_PLACE;
-  return tab === 'RETREAT' ? isRetreat : !isRetreat;
 }
 
 function normalize(v: unknown): string {
@@ -76,11 +73,48 @@ function buildRouteText(p: any): string {
 
   if (total > 0) return `${p?.destination ?? '-'} | ${left} / ${total}`;
 
-  const current = Number(p?.currentCount ?? p?.currentMemberCount ?? p?.passengerCount ?? p?.appliedCount ?? 0) || 0;
+  const current = Number(
+    p?.currentCount ??
+      p?.currentMemberCount ??
+      p?.passengerCount ??
+      p?.appliedCount ??
+      0,
+  ) || 0;
   const max = Number(p?.maxCount ?? p?.capacity ?? p?.maxMemberCount ?? p?.limitCount ?? 0) || 0;
   if (max > 0) return `${p?.destination ?? '-'} | ${current} / ${max}`;
 
   return `${p?.destination ?? '-'}`;
+}
+
+/**
+ * ✅ 핵심: "수련회장으로/집으로" 탭은 destination만 보지 말고
+ *    수련회장이 origin(출발)인지 destination(도착)인지 둘 다 봐야 함.
+ *
+ * 규칙:
+ * - 수련회장이 도착지(destination)이면 => RETREAT (수련회장으로)
+ * - 수련회장이 출발지(origin)이면     => HOME   (집으로)
+ */
+function getDirectionTab(p: any): DestinationTab | null {
+  // 너 말대로: 도로명 비교 안 하고 "수련회장인지 여부"만 비교 (정확히 일치)
+  const origin = (p?.originDetailed ?? p?.origin ?? '').toString().trim();
+  const dest = (p?.destinationDetailed ?? p?.destination ?? '').toString().trim();
+
+  const originIsRetreat = origin === RETREAT_PLACE;
+  const destIsRetreat = dest === RETREAT_PLACE;
+
+  if (destIsRetreat) return 'RETREAT';
+  if (originIsRetreat) return 'HOME';
+
+  return null;
+}
+
+function matchTabByPost(p: any, tab: DestinationTab): boolean {
+  const dir = getDirectionTab(p);
+
+  // 수련회장 관련이 아닌 글은 HOME로 보내는 기본 정책 (원하면 바꿔도 됨)
+  if (!dir) return tab === 'HOME';
+
+  return dir === tab;
 }
 
 export function useCarpoolHomeViewModel() {
@@ -103,29 +137,32 @@ export function useCarpoolHomeViewModel() {
   const [allPosts, setAllPosts] = useState<any[]>([]);
   const [myCarpools, setMyCarpools] = useState<any[]>([]);
 
-  const [activeTab, setActiveTab] = useState<DestinationTab>('HOME');
+  const [activeTab, setActiveTab] = useState<DestinationTab>('RETREAT');
   const [query, setQuery] = useState('');
 
-  const preload = useCallback(async (uid: number) => {
-    try {
-      setLoading(true);
-      setError(null);
+  const preload = useCallback(
+    async (uid: number) => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      const [allRes, myRes] = await Promise.all([
-        getAvailableCarpools.execute(uid),
-        getParticipatingCarpools.execute(uid),
-      ]);
+        const [allRes, myRes] = await Promise.all([
+          getAvailableCarpools.execute(uid),
+          getParticipatingCarpools.execute(uid),
+        ]);
 
-      setAllPosts(toArray(allRes));
-      setMyCarpools(toArray(myRes));
-    } catch (e: any) {
-      const msg = e?.message || '카풀 목록 조회에 실패하였습니다.';
-      setError(msg);
-      alert(msg);
-    } finally {
-      setLoading(false);
-    }
-  }, [getAvailableCarpools, getParticipatingCarpools]);
+        setAllPosts(toArray(allRes));
+        setMyCarpools(toArray(myRes));
+      } catch (e: any) {
+        const msg = e?.message || '카풀 목록 조회에 실패하였습니다.';
+        setError(msg);
+        alert(msg);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [getAvailableCarpools, getParticipatingCarpools],
+  );
 
   // ✅ 홈 화면이 "보일 때마다" 무조건 새로고침
   useFocusEffect(
@@ -145,40 +182,39 @@ export function useCarpoolHomeViewModel() {
       }));
   }, [myCarpools]);
 
-  /** 하단 전체: isArrived=false → 탭(destination) → 검색 */
+  /** 하단 전체: isArrived=false → 탭(수련회장/집) → 검색 */
   const posts = useMemo(() => {
     const base = allPosts
       .filter((p) => p?.isArrived === false)
-      .filter((p) => matchTab(p?.destination, activeTab));
+      .filter((p) => matchTabByPost(p, activeTab));
 
     const q = normalize(query);
     const filtered = !q
       ? base
       : base.filter((p) => {
-        const hay = [
-          p?.destination,
-          p?.destinationDetailed,
-          p?.origin,
-          p?.originDetailed,
-          // 과거 필드/서버 확장 대비로 남겨둠(있으면 검색됨)
-          p?.driverName,
-          p?.pickupPlace,
-          p?.startPlace,
-        ]
-          .map(normalize)
-          .join(' ');
-        return hay.includes(q);
-      });
+          const hay = [
+            p?.destination,
+            p?.destinationDetailed,
+            p?.origin,
+            p?.originDetailed,
+            p?.driverName,
+            p?.pickupPlace,
+            p?.startPlace,
+          ]
+            .map(normalize)
+            .join(' ');
+          return hay.includes(q);
+        });
 
     return filtered.map((p) => {
       const timeText = p?.timeText ?? formatDateTimePretty(p?.departureTime);
+
+      // 표시용 텍스트 (기존 로직 유지)
       let placeText = '';
-      // 장소 표시는 originDetailed 우선, 없으면 origin
-      if (p?.destinationDetailed == RETREAT_PLACE) {
+      if ((p?.destinationDetailed ?? p?.destination) === RETREAT_PLACE) {
         placeText = (p?.originDetailed ?? p?.origin ?? '-');
       } else {
         placeText = (p?.destinationDetailed ?? p?.destination ?? '-');
-
       }
 
       const routeText = p?.routeText ?? buildRouteText(p);

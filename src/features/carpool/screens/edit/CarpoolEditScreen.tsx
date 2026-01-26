@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Platform, Pressable, ScrollView, View } from "react-native";
+import { Keyboard, Platform, Pressable, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 import { TextInput } from "@shared/components/text-input/TextInput";
 import { ThemedText } from "@shared/components/themed-text/ThemedText";
@@ -11,8 +12,8 @@ import { Header } from "@shared/components/header/Header";
 import { BaseModal } from "@shared/components/modal/BaseModal";
 import { SelectBox } from "@shared/components/select-box/SelectBox";
 import {
-    InlineOption,
-    InlineSelectModal,
+  InlineOption,
+  InlineSelectModal,
 } from "@shared/components/select-inline/InlineSelectModal";
 import { Layout } from "@shared/constants/layout";
 import { router } from "expo-router";
@@ -59,6 +60,25 @@ function FieldBlock({
 }
 
 export default function CarpoolEditScreen() {
+  // 키보드 올라올 때 영역 조정
+  const [kbH, setKbH] = useState(100);
+  const kawRef = useRef<KeyboardAwareScrollView>(null);
+  useEffect(() => {
+    if (Platform.OS !== "android") return;
+
+    const show = Keyboard.addListener("keyboardDidShow", (e) => {
+      setKbH(e.endCoordinates?.height ?? 0);
+    });
+    const hide = Keyboard.addListener("keyboardDidHide", () => {
+      setKbH(0);
+    });
+
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+
   const {
     isHome,
 
@@ -94,7 +114,6 @@ export default function CarpoolEditScreen() {
     editableMarker,
 
     submit,
-    confirmSubmit,
     modalState,
     closeModal,
   } = useCarpoolEditScreenViewModel();
@@ -190,6 +209,11 @@ export default function CarpoolEditScreen() {
           value={mainPickup}
           onChangeText={setMainPickup}
           placeholder="예: 신도림역 1번 출구 앞"
+          onFocus={() => {
+            setTimeout(() => {
+              kawRef.current?.scrollToPosition(0, 9999, true);
+            }, 50);
+          }}
         />
       </View>
     );
@@ -207,12 +231,13 @@ export default function CarpoolEditScreen() {
       )}
       <Header title="카풀 수정" onBack={() => router.back()} />
 
-      <ScrollView
-        contentContainerStyle={{
-          paddingHorizontal: Layout.spacing.l,
-          paddingBottom: 40,
-        }}
-        showsVerticalScrollIndicator={false}
+      <KeyboardAwareScrollView
+        ref={kawRef}
+        enableOnAndroid
+        extraScrollHeight={80}
+        keyboardOpeningTime={0}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingHorizontal: Layout.spacing.l, paddingTop: Layout.spacing.l, paddingBottom: 40 }}
       >
         <View style={{ gap: 29 }}>
           <FieldBlock label="운전자명">
@@ -378,7 +403,7 @@ export default function CarpoolEditScreen() {
 
           {/* 버튼 */}
           <Pressable
-            onPress={confirmSubmit}
+            onPress={submit}
             style={styles.submitBtn}
             hitSlop={10}
           >
@@ -387,7 +412,7 @@ export default function CarpoolEditScreen() {
             </ThemedText>
           </Pressable>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       {/* 사용 모달 */}
       <InlineSelectModal
@@ -452,13 +477,13 @@ export default function CarpoolEditScreen() {
         leftButton={
           modalState.cancelText
             ? {
-                text: modalState.cancelText,
-                onPress: () => {
-                  if (modalState.onCancel) modalState.onCancel();
-                  closeModal();
-                },
-                color: Color.tertiary.main,
-              }
+              text: modalState.cancelText,
+              onPress: () => {
+                if (modalState.onCancel) modalState.onCancel();
+                closeModal();
+              },
+              color: Color.tertiary.main,
+            }
             : undefined
         }
         rightButton={{
