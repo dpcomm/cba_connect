@@ -38,7 +38,7 @@ export default function EventResultScreen() {
   }, []);
 
   const handleGoHome = () => {
-    router.replace("/home");
+    router.back();
   };
 
   if (!result) {

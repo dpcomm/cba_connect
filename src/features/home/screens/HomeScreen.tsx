@@ -55,7 +55,15 @@ export default function HomeScreen() {
 
   const handleRetreatPress = () => {
     if (retreatApplication) {
-      router.push("/retreat/check-in" as any);
+      if (retreatApplication.checkedInAt) {
+        if (retreatApplication.eventParticipatedAt) {
+          router.push("/retreat/result" as any);
+        } else {
+          router.push("/retreat/raffle" as any);
+        }
+      } else {
+        router.push("/retreat/check-in" as any);
+      }
     } else {
       Linking.openURL("https://recba.me");
     }

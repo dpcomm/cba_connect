@@ -49,7 +49,7 @@ export default function EventRaffleScreen() {
   }, [router]);
 
   const handleGoHome = () => {
-    router.replace("/home");
+    router.back();
   };
 
   if (error) {
