@@ -25,6 +25,7 @@ import { GetNoticesUseCase } from "@application/notice/GetNoticesUseCase";
 import { GetNoticeUseCase } from "@application/notice/GetNoticeUseCase";
 import { RegisterExpoTokenUseCase } from "@application/notification/RegistExpoTokenUseCase";
 import { CheckVersionUseCase } from "@application/status/CheckVersionUseCase";
+import { GetSystemConfigUseCase } from "@application/system/GetSystemConfigUseCase";
 import { GetTermUseCase } from "@application/term/GetTermUseCase";
 import { GetMeUseCase } from "@application/user/GetMeUseCase";
 import { UpdateProfileUseCase } from "@application/user/UpdateProfileUseCase";
@@ -75,6 +76,9 @@ container.register(UpdateProfileUseCase, { useClass: UpdateProfileUseCase });
 container.register(CheckConsentUseCase, { useClass: CheckConsentUseCase });
 container.register(SubmitConsentUseCase, { useClass: SubmitConsentUseCase });
 container.register(CheckVersionUseCase, { useClass: CheckVersionUseCase });
+container.register(GetSystemConfigUseCase, {
+  useClass: GetSystemConfigUseCase,
+});
 
 container.register(GetAllCarpoolsUseCase, { useClass: GetAllCarpoolsUseCase });
 container.register(CreateCarpoolUseCase, { useClass: CreateCarpoolUseCase });

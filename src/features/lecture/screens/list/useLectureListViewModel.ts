@@ -1,15 +1,13 @@
 import { DropLectureUseCase } from "@application/lecture/DropLectureUseCase";
 import { GetLecturesUseCase } from "@application/lecture/GetLecturesUseCase";
 import { GetMyEnrolledLectureIdUseCase } from "@application/lecture/GetMyEnrolledLectureIdUseCase";
+import { GetSystemConfigUseCase } from "@application/system/GetSystemConfigUseCase";
 import { GetTermUseCase } from "@application/term/GetTermUseCase";
 import { Lecture } from "@domain/lecture/Lecture";
 import { Term } from "@domain/term/Term";
 import { container } from "@shared/di/container";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
-
-// TODO: 실제 Term 관리가 필요하면 동적으로 가져오도록 수정
-const CURRENT_TERM_ID = 4;
 
 export function useLectureListViewModel() {
   const router = useRouter();
@@ -24,6 +22,7 @@ export function useLectureListViewModel() {
   const dropLectureUseCase = container.resolve(DropLectureUseCase);
 
   const load = useCallback(async () => {
+    const getSystemConfigUseCase = container.resolve(GetSystemConfigUseCase);
     const getLecturesUseCase = container.resolve(GetLecturesUseCase);
     const getTermUseCase = container.resolve(GetTermUseCase);
     const getMyEnrolledUseCase = container.resolve(
@@ -32,9 +31,12 @@ export function useLectureListViewModel() {
 
     setIsLoading(true);
     try {
+      const systemConfig = await getSystemConfigUseCase.execute();
+      const currentTermId = systemConfig.currentTermId;
+
       const [fetchedTerm, fetchedLectures, enrolledId] = await Promise.all([
-        getTermUseCase.execute(CURRENT_TERM_ID),
-        getLecturesUseCase.execute(CURRENT_TERM_ID),
+        getTermUseCase.execute(currentTermId),
+        getLecturesUseCase.execute(currentTermId),
         getMyEnrolledUseCase.execute(),
       ]);
       setTerm(fetchedTerm);
