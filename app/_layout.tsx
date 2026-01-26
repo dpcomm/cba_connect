@@ -4,6 +4,7 @@ import { AutoLoginUseCase } from "@application/auth/AutoLoginUseCase";
 import { CheckConsentUseCase } from "@application/consent/CheckConsentUseCase";
 import { SubmitConsentUseCase } from "@application/consent/SubmitConsentUseCase";
 import { CheckVersionUseCase } from "@application/status/CheckVersionUseCase";
+import { initializeNotifications } from "@shared/bootstrap/InitializeNotification";
 import { PermissionModal } from "@shared/components/modal/PermissionModal";
 import { container } from "@shared/di/container";
 import { useAuthStore } from "@shared/stores/useAuthStore";
@@ -78,6 +79,10 @@ export default function RootLayout() {
             setShowPermissionModal(true);
             return; // 모달 확인 후 handlePermissionConfirm에서 처리
           }
+          
+          initializeNotifications().then(({ pushToken }) => {
+            console.log('Push Token:', pushToken);
+          });
 
           // 동의 완료됨 -> 홈으로 이동
           router.replace("/home");
