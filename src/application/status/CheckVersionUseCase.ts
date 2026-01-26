@@ -1,5 +1,6 @@
 import { StatusRepository } from "@infrastructure/status/StatusRepository";
 import Constants from "expo-constants";
+import { Platform } from "react-native";
 import { inject, injectable } from "tsyringe";
 
 export interface VersionCheckResult {
@@ -16,20 +17,26 @@ export class CheckVersionUseCase {
   ) {}
 
   async execute(): Promise<VersionCheckResult> {
-    const appVersion = await this.statusRepository.getApplicationVersion();
+    const systemConfig = await this.statusRepository.getSystemConfig();
+    const appVersion = systemConfig.application;
 
-    // expo-constants에서 현재 앱 버전 가져오기
     const currentVersion = Constants.expoConfig?.version ?? "0.0.0";
     const latestVersion = appVersion.versionName;
 
-    // 단순 문자열 비교 (버전이 다르면 업데이트 필요)
     const isUpdateNeeded = currentVersion !== latestVersion;
+
+    const updateUrl = Platform.select({
+      ios: "https://apps.apple.com/kr/app/cba-connect/id6747623245",
+      android:
+        "https://play.google.com/store/apps/details?id=com.cba.cba_connect_application",
+      default: "",
+    });
 
     return {
       isUpdateNeeded,
       currentVersion,
       latestVersion,
-      updateUrl: appVersion.updateUrl,
+      updateUrl,
     };
   }
 }
