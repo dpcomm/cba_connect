@@ -25,6 +25,7 @@ export default function MyPageScreen() {
     confirmLogout,
     navigateToNotice,
     navigateToHistory,
+    navigateToPaymentStatus,
     router,
   } = useMyPageViewModel();
 
@@ -67,7 +68,10 @@ export default function MyPageScreen() {
               label="수련회 신청 조회"
               onPress={openUnderConstruction}
             />
-            <MenuItem label="회비 납부 조회" onPress={openUnderConstruction} />
+            <MenuItem
+              label="회비 납부 조회"
+              onPress={navigateToPaymentStatus}
+            />
             <MenuItem
               label="수련회 히스토리"
               showBorder={false}

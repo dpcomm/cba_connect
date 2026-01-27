@@ -42,4 +42,18 @@ export class RetreatRepository {
       throw error;
     }
   }
+
+  async getPaymentStatus(retreatId: number): Promise<{ isPaid: boolean }> {
+    try {
+      const response = await apiClient.get<RetreatApplicationApiResponse>(
+        `${API_PREFIX}/application/me/paid/${retreatId}`,
+      );
+      return { isPaid: (response.data.data as any).isPaid };
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        return { isPaid: false };
+      }
+      throw error;
+    }
+  }
 }

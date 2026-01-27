@@ -5,46 +5,27 @@ import { VerifyEmailCodeUseCase } from "@application/auth/VerifyEmailCodeUseCase
 import { EmailVerificationType } from "@domain/auth/EmailVerificationType";
 import { container } from "@shared/di/container";
 import { useState } from "react";
+import { Alert } from "react-native";
 
 export type FindAccountTab = "ID" | "PW";
 export type FindIdStep = "input" | "result";
 export type FindPwStep = "input" | "verification" | "newPassword";
 
-export interface ModalState {
-  visible: boolean;
-  title: string;
-  message: string;
-  onConfirm?: () => void;
-}
-
 export function useFindAccountViewModel(onPasswordResetSuccess?: () => void) {
   const [activeTab, setActiveTab] = useState<FindAccountTab>("ID");
   const [isLoading, setIsLoading] = useState(false);
-
-  // Modal State
-  const [modalState, setModalState] = useState<ModalState>({
-    visible: false,
-    title: "",
-    message: "",
-  });
 
   const showModal = (
     title: string,
     message: string,
     onConfirm?: () => void,
   ) => {
-    setModalState({ visible: true, title, message, onConfirm });
-  };
-
-  const closeModal = () => {
-    setModalState((prev) => ({ ...prev, visible: false }));
-  };
-
-  const handleConfirmModal = () => {
-    if (modalState.onConfirm) {
-      modalState.onConfirm();
-    }
-    closeModal();
+    Alert.alert(title, message, [
+      {
+        text: "확인",
+        onPress: onConfirm,
+      },
+    ]);
   };
 
   // 아이디 찾기
@@ -238,8 +219,5 @@ export function useFindAccountViewModel(onPasswordResetSuccess?: () => void) {
     getButtonTitle,
     isSubmitDisabled,
     isLoading,
-    modalState,
-    closeModal,
-    handleConfirmModal,
   };
 }

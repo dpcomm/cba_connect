@@ -53,6 +53,10 @@ export function useMyPageViewModel() {
     router.push("/carpool/history" as any);
   };
 
+  const navigateToPaymentStatus = () => {
+    router.push("/retreat/fee-status" as any);
+  };
+
   return {
     activeModal,
     isLoading,
@@ -64,6 +68,7 @@ export function useMyPageViewModel() {
     confirmLogout,
     navigateToNotice,
     navigateToHistory,
+    navigateToPaymentStatus,
     router,
   };
 }

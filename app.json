@@ -2,7 +2,7 @@
   "expo": {
     "name": "CBA Connect",
     "slug": "cba-connect-application",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "cba-connect-application",
@@ -15,7 +15,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.cba.cbaConnectApplication",
-      "buildNumber": "11",
+      "buildNumber": "12",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -28,9 +28,10 @@
           "apiKey": ""
         }
       },
-      "versionCode": 11,
+      "versionCode": 12,
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "output": "static",
@@ -90,6 +91,12 @@
       "eas": {
         "projectId": "18c542b9-8307-4e30-a6e5-f584d69b39b2"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/18c542b9-8307-4e30-a6e5-f584d69b39b2"
     }
   }
 }

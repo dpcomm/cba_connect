@@ -2,8 +2,6 @@ import { createMaterialTopTabNavigator } from "@react-navigation/material-top-ta
 import { Button } from "@shared/components/button/Button";
 import { Header } from "@shared/components/header/Header";
 import { LoadingOverlay } from "@shared/components/loading-overlay/LoadingOverlay";
-import { BaseModal } from "@shared/components/modal/BaseModal";
-import { ThemedText } from "@shared/components/themed-text/ThemedText";
 import { Color } from "@shared/constants/color";
 import { Layout } from "@shared/constants/layout";
 import { useRouter } from "expo-router";
@@ -163,21 +161,6 @@ export default function AccountSearchScreen() {
       </TouchableWithoutFeedback>
 
       <LoadingOverlay visible={vm.isLoading} />
-
-      {/* Global Alert Modal for Account Search */}
-      <BaseModal
-        visible={vm.modalState.visible}
-        onClose={vm.closeModal}
-        title={vm.modalState.title}
-        rightButton={{
-          text: "확인",
-          onPress: vm.handleConfirmModal,
-        }}
-      >
-        <ThemedText variant="text1" color={Color.text.main}>
-          {vm.modalState.message}
-        </ThemedText>
-      </BaseModal>
     </SafeAreaView>
   );
 }
