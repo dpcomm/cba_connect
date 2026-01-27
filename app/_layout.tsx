@@ -78,7 +78,7 @@ export default function RootLayout() {
             // 동의 필요 -> 모달 표시
             setShowPermissionModal(true);
             return; // 모달 확인 후 handlePermissionConfirm에서 처리
-          }      
+          }
 
           // 동의 완료됨 -> 홈으로 이동
           router.replace("/home");
@@ -96,7 +96,7 @@ export default function RootLayout() {
     }
 
     initializeNotifications().then(({ pushToken }) => {
-      console.log('Push Token:', pushToken);
+      console.log("Push Token:", pushToken);
     });
   }, [fontsLoaded, router, setUser]);
 
@@ -147,8 +147,6 @@ export default function RootLayout() {
           name="retreat"
           options={{
             headerShown: false,
-            presentation: "fullScreenModal",
-            animation: "fade",
           }}
         />
       </Stack>

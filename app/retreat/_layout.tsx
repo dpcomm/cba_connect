@@ -12,6 +12,7 @@ export default function RetreatLayout() {
       <Stack.Screen name="success" />
       <Stack.Screen name="raffle" />
       <Stack.Screen name="result" />
+      <Stack.Screen name="fee-status" />
     </Stack>
   );
 }
