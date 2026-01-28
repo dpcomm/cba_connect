@@ -35,12 +35,13 @@ export function MenuCard({
             borderRadius: Layout.radius.l,
             paddingHorizontal: 14,
             paddingVertical: 16,
+            justifyContent: "space-between",
             ...Layout.shadow.drop,
           },
           style,
         ]}
       >
-        <View>
+        <View style={{ flex: 1 }}>
           <ThemedText variant="heading2" color={Color.text.main}>
             {title}
           </ThemedText>
@@ -55,7 +56,13 @@ export function MenuCard({
           )}
         </View>
         {icon && (
-          <View style={{ position: "absolute", right: 8, bottom: 8 }}>
+          <View
+            style={{
+              alignSelf: "flex-end",
+              marginBottom: -8,
+              marginRight: -6,
+            }}
+          >
             {icon}
           </View>
         )}
