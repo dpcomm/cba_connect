@@ -1,4 +1,4 @@
-import "reflect-metadata";
+import "reflect-metadata"; // 이거 하단에 줄바꿈 하고 꼭 최상단에 있어야 함.
 
 import { AutoLoginUseCase } from "@application/auth/AutoLoginUseCase";
 import { CheckConsentUseCase } from "@application/consent/CheckConsentUseCase";
@@ -13,6 +13,7 @@ import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 // 스플래시 화면이 자동으로 숨겨지지 않도록 설정
 SplashScreen.preventAutoHideAsync();
@@ -127,7 +128,7 @@ export default function RootLayout() {
   }
 
   return (
-    <>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <Stack initialRouteName="index">
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="auth" options={{ headerShown: false }} />
@@ -147,6 +148,7 @@ export default function RootLayout() {
           name="retreat"
           options={{
             headerShown: false,
+            animation: "slide_from_right",
           }}
         />
       </Stack>
@@ -157,6 +159,6 @@ export default function RootLayout() {
         />
       )}
       <StatusBar style="dark" />
-    </>
+    </GestureHandlerRootView>
   );
 }

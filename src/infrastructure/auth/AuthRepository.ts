@@ -1,9 +1,9 @@
 import { Auth } from "@domain/auth/Auth";
 import { EmailVerificationType } from "@domain/auth/EmailVerificationType";
 import {
-    IAuthRepository,
-    RegisterData,
-    ResetPasswordData,
+  IAuthRepository,
+  RegisterData,
+  ResetPasswordData,
 } from "@domain/auth/IAuthRepository";
 import { User } from "@domain/user/User";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -15,16 +15,16 @@ import * as SecureStore from "expo-secure-store";
 import { injectable } from "tsyringe";
 
 import {
-    AuthResponseDto,
-    CheckIdResponseDto,
-    FindIdRequestDto,
-    FindIdResponseDto,
-    LoginRequestDto,
-    RefreshResponseDto,
-    RegisterRequestDto,
-    ResetPasswordRequestDto,
-    VerifyEmailRequestDto,
-    VerifyEmailResponseDto,
+  AuthResponseDto,
+  CheckIdResponseDto,
+  FindIdRequestDto,
+  FindIdResponseDto,
+  LoginRequestDto,
+  RefreshResponseDto,
+  RegisterRequestDto,
+  ResetPasswordRequestDto,
+  VerifyEmailRequestDto,
+  VerifyEmailResponseDto,
 } from "./dto";
 
 const AUTO_LOGIN_KEY = "auto_login_enabled";
@@ -293,18 +293,21 @@ export class AuthRepository implements IAuthRepository {
       const statusCode = error.response?.status;
 
       if (statusCode === 400) {
-        if (message === "User already exists")
-          return new Error("이미 존재하는 사용자입니다.");
-        if (message === "Email already exists")
-          return new Error("이미 등록된 이메일입니다.");
-        if (message === "Email not registered")
-          return new Error("등록되지 않은 이메일입니다.");
-        if (
-          message === "User email mismatch" ||
-          message === "User ID and email do not match"
-        )
-          return new Error("아이디와 이메일 정보가 일치하지 않습니다.");
-        return new Error(message || "잘못된 요청입니다.");
+        switch (message) {
+          case "User already exists":
+            return new Error("이미 존재하는 사용자입니다.");
+          case "Email already exists":
+            return new Error("이미 등록된 이메일입니다.");
+          case "Email not registered":
+            return new Error("등록되지 않은 이메일입니다.");
+          case "User email mismatch":
+          case "User ID and email do not match":
+            return new Error("아이디와 이메일 정보가 일치하지 않습니다.");
+          case "Email verification code invalid":
+            return new Error("인증번호가 일치하지 않습니다.");
+          default:
+            return new Error(message || "잘못된 요청입니다.");
+        }
       }
       if (statusCode === 401 || statusCode === 404) {
         return new Error("아이디 또는 비밀번호를 다시 확인해 주세요.");
