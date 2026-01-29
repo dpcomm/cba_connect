@@ -5,7 +5,6 @@ import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import LoseSvg from "../../../../assets/svgs/event-lose.svg";
 import WinSvg from "../../../../assets/svgs/event-win.svg";
 
 export default function EventResultScreen() {
@@ -61,8 +60,8 @@ export default function EventResultScreen() {
           </>
         ) : (
           <>
-            <LoseSvg width={300} height={300} />
-            <Text style={styles.resultTitle}>꽝!</Text>
+            <Text style={{ fontSize: 100 }}>🙏🏻</Text>
+            <Text style={styles.resultTitle}>아쉽!</Text>
             <Text style={styles.resultMessage}>
               다음 수련회를 노려보세요!{"\n"}
               참여해주셔서 감사합니다.
