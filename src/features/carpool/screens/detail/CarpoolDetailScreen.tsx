@@ -104,7 +104,7 @@ export default function CarpoolDetailScreen() {
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: Layout.spacing.l,
-          paddingBottom: 40,
+          paddingBottom: 100,
           paddingTop: Layout.spacing.l,
         }}
         showsVerticalScrollIndicator={false}
@@ -215,11 +215,13 @@ export default function CarpoolDetailScreen() {
                 <View style={styles.passengerList}>
                   {passengerList.map((m: any, idx: number) => {
                     const memberId = m?.id ?? m?.user?.id ?? 0;
-                    const name = m?.name ?? m?.user?.name ?? '-';
-                    const rawPhone = String(m?.phone ?? m?.user?.phone ?? '').trim();
-                    const digits = rawPhone.replace(/\D/g, '');
+                    const name = m?.name ?? m?.user?.name ?? "-";
+                    const rawPhone = String(
+                      m?.phone ?? m?.user?.phone ?? "",
+                    ).trim();
+                    const digits = rawPhone.replace(/\D/g, "");
 
-                    let masked = '';
+                    let masked = "";
                     if (digits.length === 11) {
                       masked = `${digits.slice(0, 3)}-xxxx-${digits.slice(7)}`;
                     } else if (digits.length === 10) {
@@ -238,8 +240,12 @@ export default function CarpoolDetailScreen() {
                             <CarpoolGuestIcon width={16} height={16} />
                           )}
                         </View>
-                        <ThemedText variant="text2" style={styles.passengerNamePhone} numberOfLines={1}>
-                          {name} {masked ? `| ${masked}` : ''}
+                        <ThemedText
+                          variant="text2"
+                          style={styles.passengerNamePhone}
+                          numberOfLines={1}
+                        >
+                          {name} {masked ? `| ${masked}` : ""}
                         </ThemedText>
 
                         {/* ✅ 전화 아이콘: 운전자일 때만 */}
@@ -248,7 +254,11 @@ export default function CarpoolDetailScreen() {
                             style={styles.passengerCallBtn}
                             onPress={() => Linking.openURL(`tel:${digits}`)}
                           >
-                            <Ionicons name="call" size={14} color={Color.text.main} />
+                            <Ionicons
+                              name="call"
+                              size={14}
+                              color={Color.text.main}
+                            />
                           </TouchableOpacity>
                         )}
                       </View>
@@ -304,7 +314,7 @@ export default function CarpoolDetailScreen() {
         ) : isFull ? (
           <Button
             title="마감"
-            onPress={() => { }}
+            onPress={() => {}}
             disabled
             size="large"
             textVariant="text1"
@@ -321,7 +331,6 @@ export default function CarpoolDetailScreen() {
         )}
       </View>
 
-
       <BaseModal
         visible={modalState.visible}
         onClose={closeModal}
@@ -329,13 +338,13 @@ export default function CarpoolDetailScreen() {
         leftButton={
           modalState.cancelText
             ? {
-              text: modalState.cancelText,
-              onPress: () => {
-                if (modalState.onCancel) modalState.onCancel();
-                closeModal();
-              },
-              color: Color.tertiary.main,
-            }
+                text: modalState.cancelText,
+                onPress: () => {
+                  if (modalState.onCancel) modalState.onCancel();
+                  closeModal();
+                },
+                color: Color.tertiary.main,
+              }
             : undefined
         }
         rightButton={{

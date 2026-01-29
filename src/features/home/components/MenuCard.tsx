@@ -49,7 +49,7 @@ export function MenuCard({
             <ThemedText
               variant="text2"
               color={Color.text.sub}
-              style={{ marginTop: 4 }}
+              style={{ marginTop: 2 }}
             >
               {description}
             </ThemedText>
@@ -59,8 +59,8 @@ export function MenuCard({
           <View
             style={{
               alignSelf: "flex-end",
-              marginBottom: -8,
-              marginRight: -6,
+              marginBottom: -16,
+              marginRight: -12,
             }}
           >
             {icon}
