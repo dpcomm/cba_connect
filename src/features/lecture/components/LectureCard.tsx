@@ -60,10 +60,10 @@ export function LectureCard({
         <View style={{ marginTop: 8 }}>
           <InfoRow label="강사" value={lecture.instructorName} />
           <InfoRow label="장소" value={lecture.location} />
-          <InfoRow
+          {/* <InfoRow
             label="인원"
             value={`${lecture.currentCount}/${lecture.maxCapacity}명`}
-          />
+          /> */}
           <InfoRow label="일정" value={scheduleStr} />
         </View>
       )}
