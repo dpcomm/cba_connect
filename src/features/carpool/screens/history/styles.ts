@@ -49,22 +49,4 @@ export const styles = StyleSheet.create({
     color: Color.text.sub,
   },
 
-  emptyWrapper: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: Layout.spacing.l,
-  },
-
-  emptyCard: {
-    backgroundColor: Color.secondary.hover,
-    borderRadius: Layout.radius.l,
-    paddingVertical: Layout.spacing.xl,
-    paddingHorizontal: Layout.spacing.l,
-    alignItems: 'center',
-    ...Layout.shadow.default,
-  },
-
-  emptyText: {
-    color: Color.text.main,
-  },
 });
