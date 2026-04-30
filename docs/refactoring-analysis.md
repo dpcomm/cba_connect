@@ -536,4 +536,130 @@ class NotificationService {
 
 ---
 
+---
+
+## 8. 아키텍처 방향 논의 (2026-04-30)
+
+> 현재 구조를 유지할지, 다른 아키텍처로 전환할지에 대한 논의 내용을 정리합니다.
+
+---
+
+### 고려한 아키텍처
+
+#### A. 현재 구조 유지 (DDD / Clean Architecture)
+
+```
+src/
+  domain/          # Entity, Repository 인터페이스
+  application/     # UseCase
+  infrastructure/  # Repository 구현체, DTO
+  features/        # UI (screens, components, hooks)
+  shared/          # 공용 모듈, DI 컨테이너
+```
+
+| 장점 | 단점 |
+|---|---|
+| 레이어 분리가 명확해 복잡한 비즈니스 로직 수용에 강함 | 단순 API 호출에도 파일 4~5개 필요 (과도한 보일러플레이트) |
+| TSyringe DI로 Repository 교체·테스트 용이 | 백엔드 스펙 변경 시 수정 파일이 많음 |
+| 팀에 백엔드 경험자가 있을 때 빠르게 이해 가능 | 초창기 앱에서는 구조 복잡도 대비 이득이 크지 않음 |
+
+---
+
+#### B. FSD (Feature-Sliced Design)
+
+**정통 FSD 구조:**
+```
+src/
+  pages/           # 화면 단위
+  widgets/         # 복합 UI 블록
+  features/        # 사용자 액션 단위 (auth-login, carpool-create 등)
+  entities/        # 비즈니스 엔티티 (model/, api/)
+  shared/          # 공용 모듈
+```
+
+| 장점 | 단점 |
+|---|---|
+| 프론트엔드 커뮤니티에서 인지도 높은 컨벤션 | React Native + Expo Router 환경과 충돌 (`app/` vs `pages/`) |
+| 기능별 코드 응집도 높음 | UseCase 개념이 없어 복잡한 비즈니스 로직 수용이 어려움 |
+| | TSyringe DI 패턴과 구조적으로 맞지 않음 |
+| | 사실상 전면 재작성 수준의 마이그레이션 비용 |
+
+> **결론:** React Native 앱에 정통 FSD를 강제 적용하는 건 이득보다 비용이 크다.
+
+---
+
+#### C. Zustand + React Query
+
+```
+src/
+  features/
+    auth/
+      api.ts        # API 함수 (Repository + DTO 통합)
+      queries.ts    # React Query 훅 (useQuery, useMutation)
+      LoginScreen.tsx
+      useLogin.ts   # ViewModel (대폭 단순화)
+    carpool/
+    ...
+  shared/
+    api/            # axios client
+    stores/         # Zustand (클라이언트 상태만)
+```
+
+**핵심 개념:**
+- **React Query** — 서버 상태 (API 호출, 캐싱, 로딩/에러 자동 처리)
+- **Zustand** — 클라이언트 상태 (로그인 유저 등 UI 전역 상태)
+
+**현재 구조와 비교:**
+
+| 현재 | Zustand + React Query |
+|---|---|
+| `IAuthRepository` (인터페이스) | 제거 |
+| `AuthRepository` (구현체) + `dto.ts` | `features/auth/api.ts` 하나로 통합 |
+| `LoginUseCase` | `useMutation` 훅으로 대체 |
+| `container.ts` DI 등록 | 제거 |
+| ViewModel에서 수동 로딩/에러 state | `isPending`, `isError` 자동 제공 |
+
+| 장점 | 단점 |
+|---|---|
+| 파일 수 절반 이하로 감소 | Repository 인터페이스가 없어 단위 테스트 어려워짐 |
+| 로딩/에러/캐싱 자동 처리 | TSyringe 제거로 DI 이점 상실 |
+| 백엔드 스펙 변경 시 `api.ts` 하나만 수정 | |
+| 초창기 빠른 기능 개발에 유리 | |
+| 데이터 캐싱으로 불필요한 API 재호출 제거 | |
+
+---
+
+### 아키텍처별 적합한 상황
+
+| 구조 | 적합한 상황 |
+|---|---|
+| DDD / Clean Architecture | 복잡한 도메인 규칙, 대규모 팀, 장기 유지보수 |
+| FSD | 웹 프론트엔드, 대형 팀, 페이지 단위 분업 |
+| Zustand + React Query | 초창기 앱, 잦은 스펙 변경, 데이터 패칭 중심 앱 |
+
+---
+
+### 이 앱의 특성
+
+- **초창기 앱** — 백엔드 스펙이 아직 유동적
+- **기능 성격** — 카풀, 공지, 강의, 수련회 등 복잡한 도메인 규칙보다 **데이터 패칭 중심**
+- **복잡도 방향** — 비즈니스 로직보다 UI/데이터 패칭이 복잡해질 가능성이 높음
+
+---
+
+### 추천 방향
+
+**Zustand + React Query 전환을 권장합니다.**
+
+현재 UseCase 대부분이 Repository를 단순 통과하는 수준이라, DDD 구조의 복잡도가 이득을 정당화하지 못합니다. 이 앱의 복잡도는 도메인 규칙보다 데이터 패칭 쪽에 있을 가능성이 높고, React Query는 이 부분에서 현재 구조보다 명확히 우위입니다.
+
+단, **전환 시점은 백엔드 스펙이 어느 정도 안정된 이후**가 적절합니다. 지금 당장 마이그레이션하면 진행 중인 기능 개발이 지연될 수 있습니다.
+
+**현실적인 단계:**
+1. 백엔드와 API 스펙 논의 완료
+2. 핵심 기능 1~2개를 Zustand + React Query로 먼저 전환해보며 팀 적응
+3. 이후 점진적으로 나머지 도메인 전환
+
+---
+
 *이 문서는 논의 과정에서 지속적으로 업데이트됩니다.*
