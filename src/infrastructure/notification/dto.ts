@@ -5,5 +5,5 @@ export interface RegisterRequestDto {
 
 export interface ExpoTokenResponseDto {
     userId: number;
-    expoPushToken: string;
+    token: string;
 }
