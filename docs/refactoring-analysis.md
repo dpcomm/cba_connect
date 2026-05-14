@@ -647,18 +647,20 @@ src/
 
 ---
 
-### 추천 방향
+### 확정된 방향 (2026-05-14)
 
-**Zustand + React Query 전환을 권장합니다.**
+**현재 구조(DDD / Clean Architecture) 유지 + 순수 클린아키텍처로 정제**
 
-현재 UseCase 대부분이 Repository를 단순 통과하는 수준이라, DDD 구조의 복잡도가 이득을 정당화하지 못합니다. 이 앱의 복잡도는 도메인 규칙보다 데이터 패칭 쪽에 있을 가능성이 높고, React Query는 이 부분에서 현재 구조보다 명확히 우위입니다.
+팀 논의 결과:
+- 백엔드도 동일하게 도메인 단위 클린아키텍처로 구성되어 있어 일관성 유지 필요
+- TSyringe DI가 테스트 환경에서 편리하며, FSD로 가면 이 이점을 잃음
+- React Native + Expo Router 환경과 FSD가 구조적으로 맞지 않음
+- 현재 코드에 feature-based 요소가 일부 섞여 있어 혼란을 유발하고 있음
 
-단, **전환 시점은 백엔드 스펙이 어느 정도 안정된 이후**가 적절합니다. 지금 당장 마이그레이션하면 진행 중인 기능 개발이 지연될 수 있습니다.
-
-**현실적인 단계:**
-1. 백엔드와 API 스펙 논의 완료
-2. 핵심 기능 1~2개를 Zustand + React Query로 먼저 전환해보며 팀 적응
-3. 이후 점진적으로 나머지 도메인 전환
+**정제 방향:**
+- feature-based 혼재 요소를 제거하고 **순수 클린아키텍처 패턴**으로 통일
+- `domain` / `application` / `infrastructure` / `features(UI only)` / `shared` 레이어 경계를 엄격히 유지
+- Zustand + React Query 전환 및 FSD 전환은 채택하지 않음
 
 ---
 
