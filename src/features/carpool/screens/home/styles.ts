@@ -58,11 +58,6 @@ export const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
 
-  emptyText: {
-    color: Color.text.sub,
-    textAlign: 'center',
-  },
-
   /* ---------- 집으로 / 수련회장 ---------- */
   sectionDivider: {
     height: 1,

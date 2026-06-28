@@ -1,3 +1,4 @@
+import { EmptyState } from "@shared/components/empty-state/EmptyState";
 import { Header } from "@shared/components/header/Header";
 import { ThemedText } from "@shared/components/themed-text/ThemedText";
 import { Color } from "@shared/constants/color";
@@ -104,11 +105,7 @@ export default function NoticeListScreen() {
         {/* List */}
         <View style={styles.listWrap}>
           {notices.length === 0 ? (
-            <View style={styles.emptyCard}>
-              <ThemedText variant="text2" style={styles.emptyText}>
-                공지사항이 없습니다.
-              </ThemedText>
-            </View>
+            <EmptyState message="공지사항이 없습니다." />
           ) : (
             notices.map((n) => {
               const dateText = formatDateDot(n.createdAt);
