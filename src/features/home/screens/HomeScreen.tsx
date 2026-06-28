@@ -65,7 +65,8 @@ export default function HomeScreen() {
         router.push("/retreat/check-in" as any);
       }
     } else {
-      Linking.openURL("https://recba.me");
+      // 미등록 상태 → 인앱 수련회 신청서 작성 화면으로 이동
+      router.push("/retreat/application" as any);
     }
   };
 

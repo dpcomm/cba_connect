@@ -24,7 +24,12 @@ import { SubmitConsentUseCase } from "@application/consent/SubmitConsentUseCase"
 import { GetNoticesUseCase } from "@application/notice/GetNoticesUseCase";
 import { GetNoticeUseCase } from "@application/notice/GetNoticeUseCase";
 import { RegisterExpoTokenUseCase } from "@application/notification/RegistExpoTokenUseCase";
+import { GetApplicationOptionsUseCase } from "@application/retreat/GetApplicationOptionsUseCase";
+import { GetApplicationSurveyIdUseCase } from "@application/retreat/GetApplicationSurveyIdUseCase";
+import { GetMyApplicationDetailUseCase } from "@application/retreat/GetMyApplicationDetailUseCase";
+import { CancelApplicationUseCase } from "@application/retreat/CancelApplicationUseCase";
 import { GetMyRetreatApplicationUseCase } from "@application/retreat/GetMyRetreatApplicationUseCase";
+import { SubmitRetreatApplicationUseCase } from "@application/retreat/SubmitRetreatApplicationUseCase";
 import { CheckVersionUseCase } from "@application/status/CheckVersionUseCase";
 import { GetSystemConfigUseCase } from "@application/system/GetSystemConfigUseCase";
 import { GetTermUseCase } from "@application/term/GetTermUseCase";
@@ -103,5 +108,21 @@ container.register(GetNoticeUseCase, { useClass: GetNoticeUseCase });
 container.register(GetTermUseCase, { useClass: GetTermUseCase });
 container.register(GetMyRetreatApplicationUseCase, {
   useClass: GetMyRetreatApplicationUseCase,
+});
+
+container.register(GetApplicationOptionsUseCase, {
+  useClass: GetApplicationOptionsUseCase,
+});
+container.register(SubmitRetreatApplicationUseCase, {
+  useClass: SubmitRetreatApplicationUseCase,
+});
+container.register(GetApplicationSurveyIdUseCase, {
+  useClass: GetApplicationSurveyIdUseCase,
+});
+container.register(GetMyApplicationDetailUseCase, {
+  useClass: GetMyApplicationDetailUseCase,
+});
+container.register(CancelApplicationUseCase, {
+  useClass: CancelApplicationUseCase,
 });
 export { container };
