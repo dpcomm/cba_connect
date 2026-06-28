@@ -1,6 +1,6 @@
 // Production/Dev URI
-const PRODUCT_URI = "https://recba.me";
-const LOCAL_URI = "https://dev.recba.me";
+const PRODUCT_URI = "https://api.recba.me";
+const LOCAL_URI = "https://api.dev.recba.me";
 
 // Determine Environment
 export const BASE_URL = __DEV__ ? LOCAL_URI : PRODUCT_URI;
@@ -9,7 +9,6 @@ export const REQUEST_TIMEOUT_MS = 5000;
 
 /**
  * API Path Prefix Configuration
- * Production (Release Build) -> /api/v2
- * Development (Debug Build) -> /api/v2
+ * 서버는 global prefix 없이 라우트를 서빙합니다 (예: /auth/login).
  */
-export const API_PREFIX = "/api/v2";
+export const API_PREFIX = "";
