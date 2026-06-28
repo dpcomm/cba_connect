@@ -1,4 +1,3 @@
-import { Button } from "@shared/components/button/Button";
 import { Header } from "@shared/components/header/Header";
 import { BaseModal } from "@shared/components/modal/BaseModal";
 import { SelectBox } from "@shared/components/select-box/SelectBox";
@@ -50,16 +49,27 @@ export default function RetreatApplicationDetailScreen() {
           </Pressable>
         </View>
       ) : !vm.detail || vm.detail.status === "CANCELED" ? (
-        <View style={styles.centered}>
-          <ThemedText variant="text1" color={Color.text.sub}>
-            {vm.detail?.status === "CANCELED"
-              ? "취소된 신청 내역입니다."
-              : "신청 내역이 없습니다."}
-          </ThemedText>
-          <View style={{ marginTop: 16, width: "60%" }}>
-            <Button title="수련회 신청하기" onPress={vm.goToApply} />
+        <>
+          <View style={styles.centered}>
+            <ThemedText variant="text1" color={Color.text.sub}>
+              {vm.detail?.status === "CANCELED"
+                ? "취소된 신청 내역입니다."
+                : "신청서가 존재하지 않습니다."}
+            </ThemedText>
           </View>
-        </View>
+
+          <SafeAreaView edges={["bottom"]} style={styles.bottomBar}>
+            <Pressable
+              onPress={vm.goToApply}
+              style={[styles.actionBtn, styles.editBtn]}
+              hitSlop={4}
+            >
+              <ThemedText variant="text3" style={styles.editBtnText}>
+                수련회 신청하러 가기
+              </ThemedText>
+            </Pressable>
+          </SafeAreaView>
+        </>
       ) : (
         <>
           <ScrollView contentContainerStyle={formStyles.content}>
