@@ -9,6 +9,6 @@ export const REQUEST_TIMEOUT_MS = 5000;
 
 /**
  * API Path Prefix Configuration
- * 서버는 global prefix 없이 라우트를 서빙합니다 (예: /auth/login).
+ * API hosts are already separated by environment, so no path prefix is needed.
  */
 export const API_PREFIX = "";
