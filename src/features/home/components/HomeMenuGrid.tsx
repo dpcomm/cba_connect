@@ -13,7 +13,7 @@ const HORIZONTAL_PADDING = 20;
 const CARD_GAP = 12;
 
 const LARGE_CARD_WIDTH = (SCREEN_WIDTH - HORIZONTAL_PADDING * 2 - CARD_GAP) / 2;
-const LARGE_CARD_HEIGHT = LARGE_CARD_WIDTH * 0.89;
+const LARGE_CARD_HEIGHT = LARGE_CARD_WIDTH * 0.96;
 const SMALL_CARD_WIDTH =
   (SCREEN_WIDTH - HORIZONTAL_PADDING * 2 - CARD_GAP * 2) / 3;
 const SMALL_CARD_HEIGHT = SMALL_CARD_WIDTH * 0.83;
@@ -45,16 +45,16 @@ export function HomeMenuGrid({
         }}
       >
         <MenuCard
-          title={isRetreatRegistered ? "수련회 등록" : "수련회 신청"}
+          title={isRetreatRegistered ? "신청서 조회" : "수련회 신청"}
           description={
             isRetreatRegistered
-              ? "현장 체크인은\n여기서!"
+              ? "수련회 신청서\n확인 및 수정"
               : "2026 겨울 수련회\n'바라봄'"
           }
           size="large"
           onPress={onRetreatPress}
           style={{ width: LARGE_CARD_WIDTH, height: LARGE_CARD_HEIGHT }}
-          icon={isRetreatRegistered ? <CheckInIcon /> : <RetreatIcon />}
+          icon={<RetreatIcon />}
         />
         <MenuCard
           title="카풀 서비스"

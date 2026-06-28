@@ -29,12 +29,12 @@ export function MenuCard({
       <TouchableOpacity
         onPress={onPress}
         activeOpacity={0.8}
-        style={[
+                style={[
           {
             backgroundColor: Color.secondary.main,
             borderRadius: Layout.radius.l,
             paddingHorizontal: 14,
-            paddingVertical: 16,
+            paddingVertical: 12,
             justifyContent: "space-between",
             ...Layout.shadow.drop,
           },
@@ -59,7 +59,7 @@ export function MenuCard({
           <View
             style={{
               alignSelf: "flex-end",
-              marginBottom: -16,
+              marginBottom: -12,
               marginRight: -12,
             }}
           >

@@ -1,6 +1,8 @@
 import * as Linking from "expo-linking";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { container } from "tsyringe";
+import { GetSystemConfigUseCase } from "@application/system/GetSystemConfigUseCase";
 import { Platform, ScrollView, TouchableOpacity, View } from "react-native";
 
 import { ThemedText } from "@shared/components/themed-text/ThemedText";
@@ -28,12 +30,31 @@ if (Platform.OS !== "web") {
   Marker = maps.Marker;
 }
 
-const RETREAT_NAME = "양평 십자수 기도원";
+const DEFAULT_RETREAT_NAME = "서울성락교회";
 
 export default function CarpoolDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user } = useAuthStore();
+
+  const [retreatName, setRetreatName] = useState(DEFAULT_RETREAT_NAME);
+
+  useEffect(() => {
+    const fetchRetreatName = async () => {
+      try {
+        const getSystemConfigUseCase = container.resolve(GetSystemConfigUseCase);
+        const config = await getSystemConfigUseCase.execute();
+        if (config.currentRetreat?.location) {
+          setRetreatName(config.currentRetreat.location);
+        } else if (config.currentRetreat?.title) {
+          setRetreatName(config.currentRetreat.title);
+        }
+      } catch (err) {
+        console.error("Failed to load retreat name in detail screen:", err);
+      }
+    };
+    fetchRetreatName();
+  }, []);
 
   const {
     carpool,
@@ -58,7 +79,7 @@ export default function CarpoolDetailScreen() {
   const driverId = carpool?.driver?.id ?? carpool?.driverId;
   const passengerList = Array.isArray(carpool?.members) ? carpool.members : [];
 
-  const isToRetreat = carpool.destinationDetailed === RETREAT_NAME;
+  const isToRetreat = carpool.destinationDetailed === retreatName;
 
   // ✅ 지도 기준
   const mapLat = Number(isToRetreat ? carpool.originLat : carpool.destLat);

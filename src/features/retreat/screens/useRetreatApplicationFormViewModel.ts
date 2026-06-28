@@ -15,6 +15,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { container } from "@shared/di/container";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
+import { ApiErrorResponse } from "@shared/api/types";
+import { isAxiosError } from "axios";
 import { Alert } from "react-native";
 
 // 마이페이지 "내 차 정보" 저장 키 (CarInfoModal과 동일). "차종/색상/차번호" 형식 문자열.
@@ -169,7 +171,14 @@ export function useRetreatApplicationFormViewModel() {
       }
     } catch (e) {
       console.error("Failed to load retreat application options:", e);
-      setError("수련회 신청 정보를 불러오지 못했어요.");
+      if (
+        isAxiosError<ApiErrorResponse>(e) &&
+        e.response?.data?.message === "Application period is closed"
+      ) {
+        setError("수련회 신청 기간이 아닙니다.");
+      } else {
+        setError("수련회 신청 정보를 불러오지 못했어요.");
+      }
     } finally {
       setLoading(false);
     }
@@ -335,10 +344,15 @@ export function useRetreatApplicationFormViewModel() {
       router.replace("/retreat/application-success" as any);
     } catch (e) {
       console.error("Failed to submit retreat application:", e);
-      Alert.alert(
-        "신청 실패",
-        "신청서 제출 중 문제가 발생했어요. 잠시 후 다시 시도해주세요.",
-      );
+      let message =
+        "신청서 제출 중 문제가 발생했어요. 잠시 후 다시 시도해주세요.";
+      if (isAxiosError<ApiErrorResponse>(e)) {
+        const serverMessage = e.response?.data?.message;
+        if (serverMessage === "Application period is closed") {
+          message = "수련회 신청 기간이 아닙니다.";
+        }
+      }
+      Alert.alert("신청 실패", message);
     } finally {
       setSubmitting(false);
     }
