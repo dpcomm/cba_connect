@@ -6,7 +6,7 @@ import { Layout } from "@shared/constants/layout";
 import { container } from "@shared/di/container";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
-import { Linking } from "react-native";
+import { Alert, Linking } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { HomeHeader } from "../components/HomeHeader";
 import { HomeMenuGrid } from "../components/HomeMenuGrid";
@@ -16,6 +16,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const [retreatApplication, setRetreatApplication] =
     useState<RetreatApplication | null>(null);
+  const [retreatStartAt, setRetreatStartAt] = useState<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -39,6 +40,9 @@ export default function HomeScreen() {
           console.log(`[HomeScreen] Application result:`, application);
 
           setRetreatApplication(application);
+          if (systemConfig.currentRetreat?.retreatStartAt) {
+            setRetreatStartAt(systemConfig.currentRetreat.retreatStartAt);
+          }
         } catch (error) {
           console.error("Failed to load retreat application:", error);
           setRetreatApplication(null);
@@ -55,17 +59,10 @@ export default function HomeScreen() {
 
   const handleRetreatPress = () => {
     if (retreatApplication) {
-      if (retreatApplication.checkedInAt) {
-        if (retreatApplication.eventParticipatedAt) {
-          router.push("/retreat/result" as any);
-        } else {
-          router.push("/retreat/raffle" as any);
-        }
-      } else {
-        router.push("/retreat/check-in" as any);
-      }
+      router.push("/retreat/application-detail" as any);
     } else {
-      Linking.openURL("https://recba.me");
+      // 미등록 상태 → 인앱 수련회 신청서 작성 화면으로 이동
+      router.push("/retreat/application" as any);
     }
   };
 
@@ -82,18 +79,19 @@ export default function HomeScreen() {
   };
 
   const handleLecturePress = () => {
-    router.push("/lecture" as any);
+    Alert.alert("안내", "선택식 강의 신청 기간이 아닙니다.");
   };
 
   const dDay = React.useMemo(() => {
-    const target = new Date(2026, 0, 30);
+    if (!retreatStartAt) return "-";
+    const target = new Date(retreatStartAt);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     target.setHours(0, 0, 0, 0);
     const diff = target.getTime() - today.getTime();
     const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
     return days <= 0 ? "Day" : days;
-  }, []);
+  }, [retreatStartAt]);
 
   return (
     <SafeAreaView
@@ -109,8 +107,9 @@ export default function HomeScreen() {
       <MainBanner
         images={[
           require("../../../../assets/images/rolling_banner_26_retreat.png"),
-          require("../../../../assets/images/rolling_banner_26_retreat.png"),
-          require("../../../../assets/images/rolling_banner_26_retreat.png"),
+          require("../../../../assets/images/2026_winter_retreat_guidebook.png.jpeg"),
+          require("../../../../assets/images/2026_winter_retreat_map.png"),
+          require("../../../../assets/images/2026_winter_retreat_event.jpeg"),
         ]}
       />
       <HomeMenuGrid

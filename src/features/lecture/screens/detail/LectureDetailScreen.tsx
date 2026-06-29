@@ -86,20 +86,19 @@ export default function LectureDetailScreen() {
             label="참여인원"
             value={
               <ThemedText variant="heading3">
-                <ThemedText
+                {/* <ThemedText
                   variant="heading3"
                   color={isFull ? Color.accents.pink : Color.primary.main}
                 >
                   {lecture.currentCount}명
                 </ThemedText>
-                {" / "}
+                {" / "} */}
                 {lecture.maxCapacity}명
               </ThemedText>
             }
           />
 
           <View style={styles.divider} />
-
         </View>
       </ScrollView>
 

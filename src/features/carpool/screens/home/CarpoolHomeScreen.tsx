@@ -1,3 +1,4 @@
+import { EmptyState } from "@shared/components/empty-state/EmptyState";
 import { Header } from "@shared/components/header/Header";
 import { ThemedText } from "@shared/components/themed-text/ThemedText";
 import { Color } from "@shared/constants/color";
@@ -93,11 +94,7 @@ export default function CarpoolHomeScreen() {
 
           <View style={styles.applicationList}>
             {carpools?.length === 0 ? (
-              <View style={styles.applicationCard}>
-                <ThemedText variant="text2" style={styles.emptyText}>
-                  카풀 신청한 내역이 없습니다.
-                </ThemedText>
-              </View>
+              <EmptyState message="카풀 신청한 내역이 없습니다." />
             ) : (
               carpools?.map((item) => {
                 const summary = String(item.summary ?? "");
@@ -230,11 +227,7 @@ export default function CarpoolHomeScreen() {
         {/* 모집글 리스트 */}
         <View style={styles.postList}>
           {posts.length === 0 ? (
-            <View style={styles.postCard}>
-              <ThemedText variant="text3" style={styles.emptyText}>
-                등록된 카풀이 없습니다.
-              </ThemedText>
-            </View>
+            <EmptyState message="등록된 카풀이 없습니다." />
           ) : (
             posts.map((post) => {
               const isClosed = (post.seatsLeft ?? 0) <= 0;
@@ -267,7 +260,7 @@ export default function CarpoolHomeScreen() {
                           { alignItems: "center", justifyContent: "center" },
                         ]}
                       >
-                        <ThemedText variant="text2">👤</ThemedText>
+                        <ThemedText variant="text2" style={{ lineHeight: 28 }}>👤</ThemedText>
                       </View>
                       <ThemedText variant="text3" style={styles.postName}>
                         {driverName}

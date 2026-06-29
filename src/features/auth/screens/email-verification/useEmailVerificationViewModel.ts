@@ -6,6 +6,7 @@ import { EmailVerificationType } from "@domain/auth/EmailVerificationType";
 import { container } from "@shared/di/container";
 import { useAuthStore } from "@shared/stores/useAuthStore";
 import { useState } from "react";
+import { Alert } from "react-native";
 
 type Step = "email" | "verification";
 type Source = "register" | "home" | "mypage";
@@ -53,7 +54,7 @@ export function useEmailVerificationViewModel(source: Source = "register") {
       setStep("verification");
     } catch (error: any) {
       console.error("Failed to send verification code:", error);
-      alert(error.message || "인증번호 발송에 실패했습니다.");
+      Alert.alert("오류", error.message || "인증번호 발송에 실패했습니다.");
     } finally {
       setIsLoading(false);
     }
@@ -66,10 +67,10 @@ export function useEmailVerificationViewModel(source: Source = "register") {
         email,
         getEmailVerificationType(),
       );
-      alert("인증번호가 재발송되었습니다.");
+      Alert.alert("성공", "인증번호가 재발송되었습니다.");
     } catch (error: any) {
       console.error("Failed to resend verification code:", error);
-      alert(error.message || "인증번호 재발송에 실패했습니다.");
+      Alert.alert("오류", error.message || "인증번호 재발송에 실패했습니다.");
     } finally {
       setIsLoading(false);
     }
@@ -91,7 +92,7 @@ export function useEmailVerificationViewModel(source: Source = "register") {
       return token;
     } catch (error: any) {
       console.error("Failed to verify code:", error);
-      alert(error.message || "인증번호 확인에 실패했습니다.");
+      Alert.alert("오류", error.message || "인증번호 확인에 실패했습니다.");
       return null;
     } finally {
       setIsLoading(false);
@@ -114,7 +115,7 @@ export function useEmailVerificationViewModel(source: Source = "register") {
       return true;
     } catch (error: any) {
       console.error("Failed to update email:", error);
-      alert(error.message || "이메일 변경에 실패했습니다.");
+      Alert.alert("오류", error.message || "이메일 변경에 실패했습니다.");
       return false;
     } finally {
       setIsLoading(false);

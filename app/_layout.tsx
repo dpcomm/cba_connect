@@ -1,4 +1,4 @@
-import "reflect-metadata";
+import "reflect-metadata"; // 이거 하단에 줄바꿈 하고 꼭 최상단에 있어야 함.
 
 import { AutoLoginUseCase } from "@application/auth/AutoLoginUseCase";
 import { CheckConsentUseCase } from "@application/consent/CheckConsentUseCase";
@@ -13,9 +13,13 @@ import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { CustomSplashScreen } from "../src/features/splash/SplashScreen";
 
 // 스플래시 화면이 자동으로 숨겨지지 않도록 설정
-SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync().catch(() => {
+  /* reloading */
+});
 
 // 모듈 레벨에서 앱 시작 체크 여부 관리 (컴포넌트 리마운트에도 유지)
 let hasAppStartChecked = false;
@@ -25,6 +29,8 @@ export default function RootLayout() {
   const { setUser } = useAuthStore();
   const [isReady, setIsReady] = useState(hasAppStartChecked);
   const [showPermissionModal, setShowPermissionModal] = useState(false);
+  const [isSplashAnimationFinished, setIsSplashAnimationFinished] =
+    useState(false);
 
   const [fontsLoaded] = useFonts({
     "Pretendard-Black": require("../assets/fonts/Pretendard-Black.otf"),
@@ -117,39 +123,48 @@ export default function RootLayout() {
   };
 
   useEffect(() => {
-    if (fontsLoaded && isReady) {
-      SplashScreen.hideAsync();
+    if (fontsLoaded && isReady && isSplashAnimationFinished) {
+      // Native splash hide is now handled inside CustomSplashScreen or kept here as safety?
+      // CustomSplashScreen handles it on mount.
     }
-  }, [fontsLoaded, isReady]);
+  }, [fontsLoaded, isReady, isSplashAnimationFinished]);
 
-  if (!fontsLoaded || !isReady) {
-    return null;
-  }
+  // Removed early return to allow CustomSplashScreen to render immediately
 
   return (
-    <>
-      <Stack initialRouteName="index">
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="auth" options={{ headerShown: false }} />
-        <Stack.Screen name="update" options={{ headerShown: false }} />
-        <Stack.Screen name="home" options={{ headerShown: false }} />
-        <Stack.Screen name="carpool" options={{ headerShown: false }} />
-        <Stack.Screen name="notice" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="my-page"
-          options={{
-            headerShown: false,
-            animation: "slide_from_right",
-          }}
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      {fontsLoaded && isReady && (
+        <Stack initialRouteName="index">
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="auth" options={{ headerShown: false }} />
+          <Stack.Screen name="update" options={{ headerShown: false }} />
+          <Stack.Screen name="home" options={{ headerShown: false }} />
+          <Stack.Screen name="carpool" options={{ headerShown: false }} />
+          <Stack.Screen name="notice" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="my-page"
+            options={{
+              headerShown: false,
+              animation: "slide_from_right",
+            }}
+          />
+          <Stack.Screen name="lecture" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="retreat"
+            options={{
+              headerShown: false,
+              animation: "slide_from_right",
+            }}
+          />
+        </Stack>
+      )}
+
+      {!isSplashAnimationFinished && (
+        <CustomSplashScreen
+          isAppReady={!!fontsLoaded && isReady}
+          onFinish={() => setIsSplashAnimationFinished(true)}
         />
-        <Stack.Screen name="lecture" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="retreat"
-          options={{
-            headerShown: false,
-          }}
-        />
-      </Stack>
+      )}
       {showPermissionModal && (
         <PermissionModal
           visible={showPermissionModal}
@@ -157,6 +172,6 @@ export default function RootLayout() {
         />
       )}
       <StatusBar style="dark" />
-    </>
+    </GestureHandlerRootView>
   );
 }

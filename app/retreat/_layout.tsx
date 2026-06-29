@@ -13,6 +13,9 @@ export default function RetreatLayout() {
       <Stack.Screen name="raffle" />
       <Stack.Screen name="result" />
       <Stack.Screen name="fee-status" />
+      <Stack.Screen name="application" />
+      <Stack.Screen name="application-success" />
+      <Stack.Screen name="application-detail" />
     </Stack>
   );
 }

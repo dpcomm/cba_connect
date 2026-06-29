@@ -1,5 +1,6 @@
 import { GetCarpoolDetailUseCase } from "@application/carpool/GetCarpoolDetailUseCase";
 import { UpdateCarpoolUseCase } from "@application/carpool/UpdateCarpoolUseCase";
+import { GetSystemConfigUseCase } from "@application/system/GetSystemConfigUseCase";
 import { UpdateCarpoolData } from "@domain/carpool/ICarpoolRepository";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuthStore } from "@shared/stores/useAuthStore";
@@ -7,7 +8,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { container } from "tsyringe";
 
-const RETREAT_NAME = "양평 십자수 기도원";
+const DEFAULT_RETREAT_NAME = "서울성락교회";
 
 type DateOption = { label: string; value: string };
 
@@ -79,6 +80,25 @@ export function useCarpoolEditScreenViewModel() {
 
   const STORAGE_KEYS = { carInfo: "carpool.carInfo" };
 
+  const [retreatName, setRetreatName] = useState(DEFAULT_RETREAT_NAME);
+
+  useEffect(() => {
+    const fetchRetreatName = async () => {
+      try {
+        const getSystemConfigUseCase = container.resolve(GetSystemConfigUseCase);
+        const config = await getSystemConfigUseCase.execute();
+        if (config.currentRetreat?.location) {
+          setRetreatName(config.currentRetreat.location);
+        } else if (config.currentRetreat?.title) {
+          setRetreatName(config.currentRetreat.title);
+        }
+      } catch (err) {
+        console.error("Failed to load retreat name for edit viewmodel:", err);
+      }
+    };
+    fetchRetreatName();
+  }, []);
+
   const [driverId, setDriverId] = useState<number>();
   const [driverName, setDriverName] = useState("");
   const [phone, setPhone] = useState("");
@@ -148,8 +168,8 @@ export function useCarpoolEditScreenViewModel() {
         setCapacity(detail.seatsTotal ?? 1);
         setMemo(detail.note ?? "");
 
-        const originIsRetreat = detail.originDetailed === RETREAT_NAME;
-        const destIsRetreat = detail.destinationDetailed === RETREAT_NAME;
+        const originIsRetreat = detail.originDetailed === retreatName;
+        const destIsRetreat = detail.destinationDetailed === retreatName;
 
         setOriginDisabled(originIsRetreat);
         setDestDisabled(destIsRetreat);

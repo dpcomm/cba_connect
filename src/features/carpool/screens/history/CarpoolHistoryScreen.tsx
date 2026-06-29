@@ -3,6 +3,7 @@ import { FlatList, Pressable, ScrollView, View } from "react-native";
 
 import { useRouter } from "expo-router";
 
+import { EmptyState } from "@shared/components/empty-state/EmptyState";
 import { ThemedText } from "@shared/components/themed-text/ThemedText";
 import { Layout } from "@shared/constants/layout";
 
@@ -35,13 +36,7 @@ export default function CarpoolHistoryScreen() {
         showsVerticalScrollIndicator={false}
       >
         {items.length === 0 ? (
-          <View style={{ gap: 28 }}>
-            <View style={styles.emptyCard}>
-              <ThemedText variant="text2" style={styles.emptyText}>
-                카풀 이용한 이력이 없습니다.
-              </ThemedText>
-            </View>
-          </View>
+          <EmptyState message="카풀 이용한 이력이 없습니다." />
         ) : (
           <FlatList
             data={items}

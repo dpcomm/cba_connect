@@ -1,6 +1,8 @@
 import { CreateCarpoolUseCase } from "@application/carpool";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuthStore } from "@shared/stores/useAuthStore";
+import { GetSystemConfigUseCase } from "@application/system/GetSystemConfigUseCase";
+import { searchAddresses } from "@shared/services/address";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { container } from "tsyringe";
@@ -8,10 +10,10 @@ import { ModalState } from "../detail/useCarpoolDetailViewModel";
 
 type Destination = "HOME" | "RETREAT";
 
-const RETREAT_NAME = "양평 십자수 기도원";
-const RETREAT_ROAD_ADDRESS = "경기 양평군 서종면 중미산로 938";
-const RETREAT_LAT = 37.5939493541455;
-const RETREAT_LNG = 127.438637548918;
+const DEFAULT_RETREAT_NAME = "서울성락교회";
+const DEFAULT_RETREAT_ROAD_ADDRESS = "서울 영등포구 도림로 307";
+const DEFAULT_RETREAT_LAT = 37.509748;
+const DEFAULT_RETREAT_LNG = 126.908051;
 
 type DateOption = { label: string; value: string };
 
@@ -62,11 +64,11 @@ type Place = {
   lng?: number;
 };
 
-const RETREAT_PLACE: Place = {
-  roadAddress: RETREAT_ROAD_ADDRESS, // ✅ 저장/표시/좌표용 실제 주소
-  detail: RETREAT_NAME, // ✅ 화면에서 이름이 필요하면 사용
-  lat: RETREAT_LAT,
-  lng: RETREAT_LNG,
+const DEFAULT_RETREAT_PLACE: Place = {
+  roadAddress: DEFAULT_RETREAT_ROAD_ADDRESS,
+  detail: DEFAULT_RETREAT_NAME,
+  lat: DEFAULT_RETREAT_LAT,
+  lng: DEFAULT_RETREAT_LNG,
 };
 
 const EMPTY_PLACE: Place = { roadAddress: "" };
@@ -163,18 +165,52 @@ export function useCarpoolRegisterFormViewModel() {
   const [origin, setOrigin] = useState<Place>(EMPTY_PLACE);
   const [dest, setDest] = useState<Place>(EMPTY_PLACE);
 
+  const [retreatPlace, setRetreatPlace] = useState<Place>(DEFAULT_RETREAT_PLACE);
+
+  useEffect(() => {
+    const fetchRetreatPlace = async () => {
+      try {
+        const getSystemConfigUseCase = container.resolve(GetSystemConfigUseCase);
+        const config = await getSystemConfigUseCase.execute();
+        if (config.currentRetreat?.address) {
+          const address = config.currentRetreat.address;
+          const name = config.currentRetreat.location || config.currentRetreat.title;
+          const results = await searchAddresses(address).catch(() => []);
+          if (results && results.length > 0) {
+            setRetreatPlace({
+              roadAddress: address,
+              detail: name,
+              lat: results[0].lat,
+              lng: results[0].lng,
+            });
+          } else {
+            setRetreatPlace({
+              roadAddress: address,
+              detail: name,
+              lat: DEFAULT_RETREAT_LAT,
+              lng: DEFAULT_RETREAT_LNG,
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load dynamic retreat place for carpool:", err);
+      }
+    };
+    fetchRetreatPlace();
+  }, []);
+
   // ✅ destination에 따라 “수련원 고정 위치”를 origin 또는 dest에 주입
   useEffect(() => {
     if (isHome) {
       // HOME: 출발지 고정(수련원) / 도착지 입력
-      setOrigin(RETREAT_PLACE);
+      setOrigin(retreatPlace);
       setDest((prev) => (prev.roadAddress ? prev : EMPTY_PLACE));
     } else {
       // RETREAT: 도착지 고정(수련원) / 출발지 입력
-      setDest(RETREAT_PLACE);
+      setDest(retreatPlace);
       setOrigin((prev) => (prev.roadAddress ? prev : EMPTY_PLACE));
     }
-  }, [isHome]);
+  }, [isHome, retreatPlace]);
 
   const originDisabled = isHome; // HOME: 출발지 고정
   const destDisabled = !isHome; // RETREAT: 도착지 고정
@@ -238,11 +274,11 @@ export function useCarpoolRegisterFormViewModel() {
     const departureTimeISO = buildDepartureTimeISO(date, hour, minute);
 
     const originDetailed = isHome
-      ? (origin.detail ?? RETREAT_NAME)
+      ? (origin.detail ?? retreatPlace.detail ?? DEFAULT_RETREAT_NAME)
       : mainPickup.trim();
     const destinationDetailed = isHome
       ? mainPickup.trim()
-      : (dest.detail ?? RETREAT_NAME);
+      : (dest.detail ?? retreatPlace.detail ?? DEFAULT_RETREAT_NAME);
 
     const payload = {
       driverId: user.id,

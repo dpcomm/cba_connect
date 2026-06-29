@@ -70,21 +70,6 @@ export const styles = StyleSheet.create({
     color: Color.text.sub,
   },
 
-  emptyCard: {
-    backgroundColor: Color.secondary.main,
-    borderRadius: Layout.radius.l,
-    borderWidth: 1,
-    borderColor: Color.secondary.hover,
-    paddingHorizontal: Layout.spacing.s,
-    paddingVertical: Layout.spacing.s,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emptyText: {
-    color: Color.text.sub,
-    textAlign: 'center',
-  },
-
   /* ---------- Modal content (BaseModal children) ---------- */
   noticeModalWrapper: {
     marginTop: -Layout.spacing.m, // BaseModal 헤더 바로 아래

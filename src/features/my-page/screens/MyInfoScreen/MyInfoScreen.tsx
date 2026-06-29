@@ -4,7 +4,6 @@ import { ValidationMessage } from "@features/auth/components/ValidationMessage";
 import { AffiliationStep } from "@features/auth/screens/register/steps/AffiliationStep";
 import { Button } from "@shared/components/button/Button";
 import { Header } from "@shared/components/header/Header";
-import { BaseModal } from "@shared/components/modal/BaseModal";
 import { TextInputLined } from "@shared/components/text-input-lined/TextInputLined";
 import { ThemedText } from "@shared/components/themed-text/ThemedText";
 import { Color } from "@shared/constants/color";
@@ -21,9 +20,6 @@ export default function MyInfoScreen() {
     user,
     handleBack,
     handleDeleteAccount,
-    confirmDeleteAccount,
-    modalState,
-    closeModal,
     getGenderText,
     isEditing,
     editForm,
@@ -193,39 +189,6 @@ export default function MyInfoScreen() {
           </View>
         )}
       </ScrollView>
-
-      <BaseModal
-        visible={modalState?.type === "CONFIRM_DELETE"}
-        onClose={closeModal}
-        title="계정 삭제"
-        leftButton={{
-          text: "취소",
-          onPress: closeModal,
-          color: Color.tertiary.main,
-        }}
-        rightButton={{
-          text: "삭제",
-          onPress: confirmDeleteAccount,
-          color: Color.accents.pink,
-        }}
-      >
-        <ThemedText variant="text1" color={Color.text.main}>
-          정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
-        </ThemedText>
-      </BaseModal>
-      <BaseModal
-        visible={modalState?.type === "ERROR" || modalState?.type === "SUCCESS"}
-        onClose={closeModal}
-        title={modalState?.type === "SUCCESS" ? "성공" : "오류"}
-        rightButton={{
-          text: "확인",
-          onPress: closeModal,
-        }}
-      >
-        <ThemedText variant="text1" color={Color.text.main}>
-          {modalState?.message}
-        </ThemedText>
-      </BaseModal>
     </SafeAreaView>
   );
 }

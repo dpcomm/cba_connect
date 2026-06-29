@@ -2,13 +2,14 @@
 
 import { GetAvailableCarpoolsUseCase } from '@application/carpool/GetAvailableCarpoolsUseCase';
 import { GetParticipatingCarpoolsUseCase } from '@application/carpool/GetParticipatingCarpoolsUseCase';
+import { GetSystemConfigUseCase } from '@application/system/GetSystemConfigUseCase';
 import { container } from '@shared/di/container';
 import { useAuthStore } from '@shared/stores/useAuthStore';
 import { formatDateTimePretty } from '@shared/utils/dateFormat';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 
-const RETREAT_PLACE = '양평 십자수 기도원';
+const DEFAULT_RETREAT_PLACE = '서울성락교회';
 export type DestinationTab = 'HOME' | 'RETREAT';
 export type CarpoolCardStatus = 'AVAILABLE' | 'CLOSED';
 
@@ -94,13 +95,12 @@ function buildRouteText(p: any): string {
  * - 수련회장이 도착지(destination)이면 => RETREAT (수련회장으로)
  * - 수련회장이 출발지(origin)이면     => HOME   (집으로)
  */
-function getDirectionTab(p: any): DestinationTab | null {
-  // 너 말대로: 도로명 비교 안 하고 "수련회장인지 여부"만 비교 (정확히 일치)
+function getDirectionTab(p: any, retreatName: string): DestinationTab | null {
   const origin = (p?.originDetailed ?? p?.origin ?? '').toString().trim();
   const dest = (p?.destinationDetailed ?? p?.destination ?? '').toString().trim();
 
-  const originIsRetreat = origin === RETREAT_PLACE;
-  const destIsRetreat = dest === RETREAT_PLACE;
+  const originIsRetreat = origin === retreatName;
+  const destIsRetreat = dest === retreatName;
 
   if (destIsRetreat) return 'RETREAT';
   if (originIsRetreat) return 'HOME';
@@ -108,10 +108,9 @@ function getDirectionTab(p: any): DestinationTab | null {
   return null;
 }
 
-function matchTabByPost(p: any, tab: DestinationTab): boolean {
-  const dir = getDirectionTab(p);
+function matchTabByPost(p: any, tab: DestinationTab, retreatName: string): boolean {
+  const dir = getDirectionTab(p, retreatName);
 
-  // 수련회장 관련이 아닌 글은 HOME로 보내는 기본 정책 (원하면 바꿔도 됨)
   if (!dir) return tab === 'HOME';
 
   return dir === tab;
@@ -139,6 +138,7 @@ export function useCarpoolHomeViewModel() {
 
   const [activeTab, setActiveTab] = useState<DestinationTab>('RETREAT');
   const [query, setQuery] = useState('');
+  const [retreatName, setRetreatName] = useState(DEFAULT_RETREAT_PLACE);
 
   const preload = useCallback(
     async (uid: number) => {
@@ -164,11 +164,26 @@ export function useCarpoolHomeViewModel() {
     [getAvailableCarpools, getParticipatingCarpools],
   );
 
-  // ✅ 홈 화면이 "보일 때마다" 무조건 새로고침
+  // ✅ 홈 화면이 "보일 때마다" 무조건 새로고침 및 시스템 설정 로드
   useFocusEffect(
     useCallback(() => {
-      if (!hasUserId) return;
-      preload(userId);
+      const loadData = async () => {
+        try {
+          const getSystemConfigUseCase = container.resolve(GetSystemConfigUseCase);
+          const config = await getSystemConfigUseCase.execute();
+          if (config.currentRetreat?.location) {
+            setRetreatName(config.currentRetreat.location);
+          } else if (config.currentRetreat?.title) {
+            setRetreatName(config.currentRetreat.title);
+          }
+        } catch (err) {
+          console.error("Failed to load retreat config in carpool home VM:", err);
+        }
+        if (hasUserId) {
+          preload(userId);
+        }
+      };
+      loadData();
     }, [hasUserId, userId, preload]),
   );
 
@@ -186,17 +201,17 @@ export function useCarpoolHomeViewModel() {
   const posts = useMemo(() => {
     const base = allPosts
       .filter((p) => p?.isArrived === false)
-      .filter((p) => matchTabByPost(p, activeTab));
+      .filter((p) => matchTabByPost(p, activeTab, retreatName));
 
-    const q = normalize(query);
+    const q = query.trim().toLowerCase();
     const filtered = !q
       ? base
       : base.filter((p) => {
           const hay = [
-            p?.destination,
-            p?.destinationDetailed,
             p?.origin,
             p?.originDetailed,
+            p?.destination,
+            p?.destinationDetailed,
             p?.driverName,
             p?.pickupPlace,
             p?.startPlace,
@@ -211,7 +226,7 @@ export function useCarpoolHomeViewModel() {
 
       // 표시용 텍스트 (기존 로직 유지)
       let placeText = '';
-      if ((p?.destinationDetailed ?? p?.destination) === RETREAT_PLACE) {
+      if ((p?.destinationDetailed ?? p?.destination) === retreatName) {
         placeText = (p?.originDetailed ?? p?.origin ?? '-');
       } else {
         placeText = (p?.destinationDetailed ?? p?.destination ?? '-');
@@ -227,7 +242,7 @@ export function useCarpoolHomeViewModel() {
         routeText,
       };
     });
-  }, [allPosts, activeTab, query]);
+  }, [allPosts, activeTab, query, retreatName]);
 
   const goDetail = (id: number) => router.push(`/carpool/${id}`);
   const goRegister = () => router.push('/carpool/register');

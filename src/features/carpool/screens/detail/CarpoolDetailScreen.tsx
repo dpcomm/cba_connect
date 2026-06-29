@@ -1,6 +1,8 @@
 import * as Linking from "expo-linking";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { container } from "tsyringe";
+import { GetSystemConfigUseCase } from "@application/system/GetSystemConfigUseCase";
 import { Platform, ScrollView, TouchableOpacity, View } from "react-native";
 
 import { ThemedText } from "@shared/components/themed-text/ThemedText";
@@ -28,12 +30,31 @@ if (Platform.OS !== "web") {
   Marker = maps.Marker;
 }
 
-const RETREAT_NAME = "양평 십자수 기도원";
+const DEFAULT_RETREAT_NAME = "서울성락교회";
 
 export default function CarpoolDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user } = useAuthStore();
+
+  const [retreatName, setRetreatName] = useState(DEFAULT_RETREAT_NAME);
+
+  useEffect(() => {
+    const fetchRetreatName = async () => {
+      try {
+        const getSystemConfigUseCase = container.resolve(GetSystemConfigUseCase);
+        const config = await getSystemConfigUseCase.execute();
+        if (config.currentRetreat?.location) {
+          setRetreatName(config.currentRetreat.location);
+        } else if (config.currentRetreat?.title) {
+          setRetreatName(config.currentRetreat.title);
+        }
+      } catch (err) {
+        console.error("Failed to load retreat name in detail screen:", err);
+      }
+    };
+    fetchRetreatName();
+  }, []);
 
   const {
     carpool,
@@ -58,7 +79,7 @@ export default function CarpoolDetailScreen() {
   const driverId = carpool?.driver?.id ?? carpool?.driverId;
   const passengerList = Array.isArray(carpool?.members) ? carpool.members : [];
 
-  const isToRetreat = carpool.destinationDetailed === RETREAT_NAME;
+  const isToRetreat = carpool.destinationDetailed === retreatName;
 
   // ✅ 지도 기준
   const mapLat = Number(isToRetreat ? carpool.originLat : carpool.destLat);
@@ -104,7 +125,7 @@ export default function CarpoolDetailScreen() {
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: Layout.spacing.l,
-          paddingBottom: 40,
+          paddingBottom: 100,
           paddingTop: Layout.spacing.l,
         }}
         showsVerticalScrollIndicator={false}
@@ -215,11 +236,13 @@ export default function CarpoolDetailScreen() {
                 <View style={styles.passengerList}>
                   {passengerList.map((m: any, idx: number) => {
                     const memberId = m?.id ?? m?.user?.id ?? 0;
-                    const name = m?.name ?? m?.user?.name ?? '-';
-                    const rawPhone = String(m?.phone ?? m?.user?.phone ?? '').trim();
-                    const digits = rawPhone.replace(/\D/g, '');
+                    const name = m?.name ?? m?.user?.name ?? "-";
+                    const rawPhone = String(
+                      m?.phone ?? m?.user?.phone ?? "",
+                    ).trim();
+                    const digits = rawPhone.replace(/\D/g, "");
 
-                    let masked = '';
+                    let masked = "";
                     if (digits.length === 11) {
                       masked = `${digits.slice(0, 3)}-xxxx-${digits.slice(7)}`;
                     } else if (digits.length === 10) {
@@ -238,8 +261,12 @@ export default function CarpoolDetailScreen() {
                             <CarpoolGuestIcon width={16} height={16} />
                           )}
                         </View>
-                        <ThemedText variant="text2" style={styles.passengerNamePhone} numberOfLines={1}>
-                          {name} {masked ? `| ${masked}` : ''}
+                        <ThemedText
+                          variant="text2"
+                          style={styles.passengerNamePhone}
+                          numberOfLines={1}
+                        >
+                          {name} {masked ? `| ${masked}` : ""}
                         </ThemedText>
 
                         {/* ✅ 전화 아이콘: 운전자일 때만 */}
@@ -248,7 +275,11 @@ export default function CarpoolDetailScreen() {
                             style={styles.passengerCallBtn}
                             onPress={() => Linking.openURL(`tel:${digits}`)}
                           >
-                            <Ionicons name="call" size={14} color={Color.text.main} />
+                            <Ionicons
+                              name="call"
+                              size={14}
+                              color={Color.text.main}
+                            />
                           </TouchableOpacity>
                         )}
                       </View>
@@ -304,7 +335,7 @@ export default function CarpoolDetailScreen() {
         ) : isFull ? (
           <Button
             title="마감"
-            onPress={() => { }}
+            onPress={() => {}}
             disabled
             size="large"
             textVariant="text1"
@@ -321,7 +352,6 @@ export default function CarpoolDetailScreen() {
         )}
       </View>
 
-
       <BaseModal
         visible={modalState.visible}
         onClose={closeModal}
@@ -329,13 +359,13 @@ export default function CarpoolDetailScreen() {
         leftButton={
           modalState.cancelText
             ? {
-              text: modalState.cancelText,
-              onPress: () => {
-                if (modalState.onCancel) modalState.onCancel();
-                closeModal();
-              },
-              color: Color.tertiary.main,
-            }
+                text: modalState.cancelText,
+                onPress: () => {
+                  if (modalState.onCancel) modalState.onCancel();
+                  closeModal();
+                },
+                color: Color.tertiary.main,
+              }
             : undefined
         }
         rightButton={{

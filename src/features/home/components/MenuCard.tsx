@@ -29,18 +29,19 @@ export function MenuCard({
       <TouchableOpacity
         onPress={onPress}
         activeOpacity={0.8}
-        style={[
+                style={[
           {
             backgroundColor: Color.secondary.main,
             borderRadius: Layout.radius.l,
             paddingHorizontal: 14,
-            paddingVertical: 16,
+            paddingVertical: 12,
+            justifyContent: "space-between",
             ...Layout.shadow.drop,
           },
           style,
         ]}
       >
-        <View>
+        <View style={{ flex: 1 }}>
           <ThemedText variant="heading2" color={Color.text.main}>
             {title}
           </ThemedText>
@@ -48,14 +49,20 @@ export function MenuCard({
             <ThemedText
               variant="text2"
               color={Color.text.sub}
-              style={{ marginTop: 4 }}
+              style={{ marginTop: 2 }}
             >
               {description}
             </ThemedText>
           )}
         </View>
         {icon && (
-          <View style={{ position: "absolute", right: 8, bottom: 8 }}>
+          <View
+            style={{
+              alignSelf: "flex-end",
+              marginBottom: -12,
+              marginRight: -12,
+            }}
+          >
             {icon}
           </View>
         )}

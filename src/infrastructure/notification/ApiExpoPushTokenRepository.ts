@@ -9,7 +9,7 @@ import { ExpoTokenResponseDto, RegisterRequestDto } from "./dto";
 
 @injectable()
 export class ApiExpoPushTokenRepository implements ExpoPushTokenRepository {
-  async register(userId: number): Promise<ExpoPushToken> {
+  async register(_userId: number): Promise<ExpoPushToken> {
     try {
       const token = await getExpoPushToken();
 
@@ -17,13 +17,13 @@ export class ApiExpoPushTokenRepository implements ExpoPushTokenRepository {
         throw new Error("Expo push token not available");
       }
 
+      // 서버는 인증 토큰(JWT)에서 userId를 추출하므로 body에는 token만 전송한다.
       const requestBody: RegisterRequestDto = {
-        userId: userId,
         token: token,
       };
 
       const response = await apiClient.post<ApiResponse<ExpoTokenResponseDto>>(
-        `${API_PREFIX}/expoPushToken/regist`,
+        `${API_PREFIX}/push-token/regist`,
         requestBody,
       );
       const responseData = response.data.data;
@@ -48,7 +48,7 @@ export class ApiExpoPushTokenRepository implements ExpoPushTokenRepository {
       };
 
       await apiClient.post<ApiResponse<null>>(
-        `${API_PREFIX}/expoPushToken/delete`,
+        `${API_PREFIX}/push-token/delete`,
         requestBody,
       );
     } catch (error: any) {
@@ -57,6 +57,6 @@ export class ApiExpoPushTokenRepository implements ExpoPushTokenRepository {
   }
 
   private mapToExpoToken(data: ExpoTokenResponseDto): ExpoPushToken {
-    return new ExpoPushToken(data.userId, data.expoPushToken);
+    return new ExpoPushToken(data.userId, data.token);
   }
 }

@@ -57,6 +57,10 @@ export function useMyPageViewModel() {
     router.push("/retreat/fee-status" as any);
   };
 
+  const navigateToApplicationDetail = () => {
+    router.push("/retreat/application-detail" as any);
+  };
+
   return {
     activeModal,
     isLoading,
@@ -69,6 +73,7 @@ export function useMyPageViewModel() {
     navigateToNotice,
     navigateToHistory,
     navigateToPaymentStatus,
+    navigateToApplicationDetail,
     router,
   };
 }
