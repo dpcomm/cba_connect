@@ -106,10 +106,7 @@ export default function HomeScreen() {
       <HomeHeader dDay={dDay} onMenuPress={handleMenuPress} />
       <MainBanner
         images={[
-          require("../../../../assets/images/rolling_banner_26_retreat.png"),
-          require("../../../../assets/images/2026_winter_retreat_guidebook.png.jpeg"),
-          require("../../../../assets/images/2026_winter_retreat_map.png"),
-          require("../../../../assets/images/2026_winter_retreat_event.jpeg"),
+          require("../../../../assets/images/2026_summer_retreat_poster.png"),
         ]}
       />
       <HomeMenuGrid
