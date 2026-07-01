@@ -34,6 +34,7 @@ import { CheckVersionUseCase } from "@application/status/CheckVersionUseCase";
 import { GetSystemConfigUseCase } from "@application/system/GetSystemConfigUseCase";
 import { GetTermUseCase } from "@application/term/GetTermUseCase";
 import { GetMeUseCase } from "@application/user/GetMeUseCase";
+import { GetUserGroupOptionsUseCase } from "@application/user/GetUserGroupOptionsUseCase";
 import { UpdateProfileUseCase } from "@application/user/UpdateProfileUseCase";
 import { AuthRepository } from "@infrastructure/auth/AuthRepository";
 import { CarpoolRepository } from "@infrastructure/carpool/CarpoolRepository";
@@ -67,6 +68,9 @@ container.register(LogoutUseCase, { useClass: LogoutUseCase });
 container.register(RefreshUseCase, { useClass: RefreshUseCase });
 container.register(AutoLoginUseCase, { useClass: AutoLoginUseCase });
 container.register(GetMeUseCase, { useClass: GetMeUseCase });
+container.register(GetUserGroupOptionsUseCase, {
+  useClass: GetUserGroupOptionsUseCase,
+});
 container.register(RegisterExpoTokenUseCase, {
   useClass: RegisterExpoTokenUseCase,
 });

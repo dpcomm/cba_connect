@@ -1,9 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { ReadOnlyStepValue } from "@features/auth/components/ReadOnlyStepValue";
 import { ValidationMessage } from "@features/auth/components/ValidationMessage";
-import { AffiliationStep } from "@features/auth/screens/register/steps/AffiliationStep";
 import { Button } from "@shared/components/button/Button";
 import { Header } from "@shared/components/header/Header";
+import { SelectBox } from "@shared/components/select-box/SelectBox";
+import {
+  InlineOption,
+  InlineSelectModal,
+} from "@shared/components/select-inline/InlineSelectModal";
 import { TextInputLined } from "@shared/components/text-input-lined/TextInputLined";
 import { ThemedText } from "@shared/components/themed-text/ThemedText";
 import { Color } from "@shared/constants/color";
@@ -27,11 +31,29 @@ export default function MyInfoScreen() {
     cancelEditing,
     handleChange,
     handleGroupChange,
+    groupOptions,
+    groupOptionsLoading,
     saveProfile,
     goToEmailVerification,
   } = useMyInfoViewModel();
 
   const [confirmPassword, setConfirmPassword] = React.useState("");
+  const [groupModalVisible, setGroupModalVisible] = useState(false);
+
+  const groupSelectOptions = React.useMemo<InlineOption[]>(
+    () =>
+      groupOptions.map((group) => ({
+        label: group.label,
+        value: group.value,
+      })),
+    [groupOptions],
+  );
+
+  const selectedGroupLabel =
+    groupSelectOptions.find((option) => option.value === editForm.group)
+      ?.label ??
+    editForm.group ??
+    "";
 
   const handleSave = () => {
     saveProfile(confirmPassword);
@@ -148,10 +170,21 @@ export default function MyInfoScreen() {
         )}
 
         {isEditing ? (
-          <AffiliationStep
-            affiliation={editForm.group || ""}
-            setAffiliation={handleGroupChange}
-          />
+          <View style={{ gap: 10 }}>
+            <ThemedText variant="text1" color={Color.text.sub}>
+              중그룹
+            </ThemedText>
+            <SelectBox
+              value={selectedGroupLabel}
+              placeholder={
+                groupOptionsLoading
+                  ? "중그룹 옵션을 불러오는 중입니다"
+                  : "중그룹을 선택해주세요"
+              }
+              disabled={groupOptionsLoading || groupSelectOptions.length === 0}
+              onPress={() => setGroupModalVisible(true)}
+            />
+          </View>
         ) : (
           <ReadOnlyStepValue label="중그룹" value={user.group} />
         )}
@@ -189,6 +222,15 @@ export default function MyInfoScreen() {
           </View>
         )}
       </ScrollView>
+
+      <InlineSelectModal
+        visible={groupModalVisible}
+        title="중그룹 선택"
+        options={groupSelectOptions}
+        selectedValue={editForm.group ?? undefined}
+        onClose={() => setGroupModalVisible(false)}
+        onSelect={(option) => handleGroupChange(option.value)}
+      />
     </SafeAreaView>
   );
 }

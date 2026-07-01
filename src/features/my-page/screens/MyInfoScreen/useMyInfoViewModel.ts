@@ -1,11 +1,15 @@
 import { DeleteAccountUseCase } from "@application/user/DeleteAccountUseCase";
+import { GetUserGroupOptionsUseCase } from "@application/user/GetUserGroupOptionsUseCase";
 import { UpdateProfileUseCase } from "@application/user/UpdateProfileUseCase";
-import { UpdateProfileData } from "@domain/user/IUserRepository";
+import {
+  UpdateProfileData,
+  UserGroupOption,
+} from "@domain/user/IUserRepository";
 import { container } from "@shared/di/container";
 import { useAuthStore } from "@shared/stores/useAuthStore";
 import { isValidPassword } from "@shared/utils/validators";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Alert } from "react-native";
 
 export function useMyInfoViewModel() {
@@ -13,10 +17,30 @@ export function useMyInfoViewModel() {
   const { user, logout: clearAuthState, setUser } = useAuthStore();
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<UpdateProfileData>({});
+  const [groupOptions, setGroupOptions] = useState<UserGroupOption[]>([]);
+  const [groupOptionsLoading, setGroupOptionsLoading] = useState(false);
 
   const handleBack = () => {
     router.back();
   };
+
+  const loadGroupOptions = useCallback(async () => {
+    setGroupOptionsLoading(true);
+    try {
+      const getUserGroupOptionsUseCase = container.resolve(
+        GetUserGroupOptionsUseCase,
+      );
+      const options = await getUserGroupOptionsUseCase.execute();
+      setGroupOptions(options);
+    } catch (error) {
+      console.error("Failed to load group options:", error);
+      if (user?.group) {
+        setGroupOptions([{ label: user.group, value: user.group }]);
+      }
+    } finally {
+      setGroupOptionsLoading(false);
+    }
+  }, [user?.group]);
 
   const startEditing = () => {
     if (!user) return;
@@ -28,6 +52,7 @@ export function useMyInfoViewModel() {
       gender: user.gender,
     });
     setIsEditing(true);
+    void loadGroupOptions();
   };
 
   const cancelEditing = () => {
@@ -135,6 +160,8 @@ export function useMyInfoViewModel() {
     cancelEditing,
     handleChange,
     handleGroupChange,
+    groupOptions,
+    groupOptionsLoading,
     saveProfile,
     goToEmailVerification,
   };

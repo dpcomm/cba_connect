@@ -1,6 +1,8 @@
 import { GetMyRetreatApplicationUseCase } from "@application/retreat/GetMyRetreatApplicationUseCase";
 import { GetSystemConfigUseCase } from "@application/system/GetSystemConfigUseCase";
 import { RetreatApplication } from "@domain/retreat/RetreatApplication";
+import { BaseModal } from "@shared/components/modal/BaseModal";
+import { ThemedText } from "@shared/components/themed-text/ThemedText";
 import { Color } from "@shared/constants/color";
 import { Layout } from "@shared/constants/layout";
 import { container } from "@shared/di/container";
@@ -17,6 +19,13 @@ export default function HomeScreen() {
   const [retreatApplication, setRetreatApplication] =
     useState<RetreatApplication | null>(null);
   const [retreatStartAt, setRetreatStartAt] = useState<string | null>(null);
+  const [activeModal, setActiveModal] = useState<"UNDER_CONSTRUCTION" | null>(
+    null,
+  );
+
+  const closeModal = () => {
+    setActiveModal(null);
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -71,7 +80,7 @@ export default function HomeScreen() {
   };
 
   const handleGuidebookPress = () => {
-    router.push("/guidebook");
+    setActiveModal("UNDER_CONSTRUCTION");
   };
 
   const handleVideoPress = () => {
@@ -117,6 +126,20 @@ export default function HomeScreen() {
         onVideoPress={handleVideoPress}
         onLecturePress={handleLecturePress}
       />
+
+      <BaseModal
+        visible={activeModal === "UNDER_CONSTRUCTION"}
+        onClose={closeModal}
+        title="알림"
+        rightButton={{
+          text: "확인",
+          onPress: closeModal,
+        }}
+      >
+        <ThemedText variant="text1" color={Color.text.main}>
+          구현 중인 기능입니다.
+        </ThemedText>
+      </BaseModal>
     </SafeAreaView>
   );
 }

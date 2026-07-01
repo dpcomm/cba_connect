@@ -27,3 +27,12 @@ export interface UpdateEmailRequestDto {
   email: string;
   verificationToken: string;
 }
+
+export interface UserGroupOptionDto {
+  value: string;
+  label: string;
+}
+
+export interface UserGroupOptionsResponseDto {
+  groups: UserGroupOptionDto[];
+}

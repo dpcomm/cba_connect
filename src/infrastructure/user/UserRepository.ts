@@ -2,6 +2,7 @@ import {
   IUserRepository,
   UpdateEmailData,
   UpdateProfileData,
+  UserGroupOption,
 } from "@domain/user/IUserRepository";
 import { User } from "@domain/user/User";
 import { apiClient } from "@shared/api/client";
@@ -9,7 +10,12 @@ import { API_PREFIX } from "@shared/api/config";
 import { ApiResponse } from "@shared/api/types";
 import { injectable } from "tsyringe";
 
-import { UpdateEmailRequestDto, UpdateProfileRequestDto, UserResponseDto } from "./dto";
+import {
+  UpdateEmailRequestDto,
+  UpdateProfileRequestDto,
+  UserGroupOptionsResponseDto,
+  UserResponseDto,
+} from "./dto";
 
 @injectable()
 export class UserRepository implements IUserRepository {
@@ -44,6 +50,13 @@ export class UserRepository implements IUserRepository {
       `${API_PREFIX}/users/me/email`,
       requestBody,
     );
+  }
+
+  async getGroupOptions(): Promise<UserGroupOption[]> {
+    const response = await apiClient.get<ApiResponse<UserGroupOptionsResponseDto>>(
+      `${API_PREFIX}/users/options/groups`,
+    );
+    return response.data.data.groups;
   }
 
   private mapToUser(dto: UserResponseDto): User {

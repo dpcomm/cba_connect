@@ -1,7 +1,10 @@
 import { CheckIdDuplicateUseCase } from '@application/auth/CheckIdDuplicateUseCase';
 import { RegisterUseCase } from '@application/auth/RegisterUseCase';
+import { GetUserGroupOptionsUseCase } from '@application/user/GetUserGroupOptionsUseCase';
+import { UserGroupOption } from '@domain/user/IUserRepository';
 import { container } from '@shared/di/container';
 import { useFunnel } from '@shared/hooks/useFunnel';
+import { useCallback, useState } from 'react';
 import { RegisterData, useRegisterStore } from '../../stores/useRegisterStore';
 
 export const REGISTER_STEPS = [
@@ -40,6 +43,24 @@ export function useRegisterViewModel() {
   };
 
   const { data: registerData, updateData, reset } = useRegisterStore();
+  const [groupOptions, setGroupOptions] = useState<UserGroupOption[]>([]);
+  const [groupOptionsLoading, setGroupOptionsLoading] = useState(false);
+
+  const loadGroupOptions = useCallback(async () => {
+    if (groupOptionsLoading) return;
+    setGroupOptionsLoading(true);
+    try {
+      const getUserGroupOptionsUseCase = container.resolve(
+        GetUserGroupOptionsUseCase,
+      );
+      const options = await getUserGroupOptionsUseCase.execute();
+      setGroupOptions(options);
+    } catch (error) {
+      console.error('Failed to load user group options:', error);
+    } finally {
+      setGroupOptionsLoading(false);
+    }
+  }, [groupOptionsLoading]);
 
   const register = async () => {
     try {
@@ -82,6 +103,9 @@ export function useRegisterViewModel() {
     ...funnel,
     stepIndex: funnel.stepIndex,
     registerData,
+    groupOptions,
+    groupOptionsLoading,
+    loadGroupOptions,
     updateData,
     register,
     reset,

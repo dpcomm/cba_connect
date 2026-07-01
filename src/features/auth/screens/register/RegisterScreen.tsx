@@ -22,7 +22,21 @@ import { styles } from './styles';
 import { REGISTER_STEPS, RegisterStep, useRegisterViewModel } from './useRegisterViewModel';
 
 export default function RegisterScreen() {
-  const { currentStep, next, prev, hasPrev, registerData, updateData, stepIndex, register, reset, checkIdDuplicate } = useRegisterViewModel();
+  const {
+    currentStep,
+    next,
+    prev,
+    hasPrev,
+    registerData,
+    groupOptions,
+    groupOptionsLoading,
+    loadGroupOptions,
+    updateData,
+    stepIndex,
+    register,
+    reset,
+    checkIdDuplicate,
+  } = useRegisterViewModel();
   const router = useRouter();
 
   // 이메일 인증 완료 감지
@@ -38,6 +52,12 @@ export default function RegisterScreen() {
       reset();
     };
   }, [reset]);
+
+  useEffect(() => {
+    if (currentStep === 'Affiliation' && groupOptions.length === 0) {
+      void loadGroupOptions();
+    }
+  }, [currentStep, groupOptions.length, loadGroupOptions]);
 
   const handleNextAction = () => {
     if (currentStep === 'Name' && !registerData.name.trim()) {
@@ -94,7 +114,15 @@ export default function RegisterScreen() {
       case 'Phone':
         return <PhoneStep phoneNumber={registerData.phoneNumber} setPhoneNumber={(v) => updateData({ phoneNumber: v })} onNext={handleNextAction} />;
       case 'Affiliation':
-        return <AffiliationStep affiliation={registerData.affiliation} setAffiliation={(v) => updateData({ affiliation: v })} onNext={handleNextAction} />;
+        return (
+          <AffiliationStep
+            affiliation={registerData.affiliation}
+            setAffiliation={(v) => updateData({ affiliation: v })}
+            onNext={handleNextAction}
+            options={groupOptions}
+            loading={groupOptionsLoading}
+          />
+        );
       case 'Id':
         return <IdStep userId={registerData.userId} setUserId={(v) => updateData({ userId: v })} onNext={handleNextAction} onCheckDuplicate={checkIdDuplicate} />;
       case 'Password':
@@ -119,7 +147,14 @@ export default function RegisterScreen() {
       case 'Phone':
         return <PhoneStep key={step} phoneNumber={registerData.phoneNumber} readOnly />;
       case 'Affiliation':
-        return <AffiliationStep key={step} affiliation={registerData.affiliation} readOnly />;
+        return (
+          <AffiliationStep
+            key={step}
+            affiliation={registerData.affiliation}
+            options={groupOptions}
+            readOnly
+          />
+        );
       case 'Id':
         return <IdStep key={step} userId={registerData.userId} readOnly />;
       case 'Password':
