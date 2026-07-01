@@ -162,6 +162,8 @@ export function useRetreatApplicationFormViewModel() {
         try {
           const getDetail = container.resolve(GetMyApplicationDetailUseCase);
           const detail = await getDetail.execute(config.currentRetreatId);
+
+          console.log("------------------------------- detail", detail)
           if (detail && detail.status === "CANCELED") {
             setShowLoadExistingModal(true);
           }
@@ -320,6 +322,7 @@ export function useRetreatApplicationFormViewModel() {
         vehicleNumber: departureTransport?.isVehicleRequired
           ? trimmedVehicle
           : undefined,
+        remark: "-",
       });
     }
     if (returnTransportId != null) {
@@ -328,6 +331,7 @@ export function useRetreatApplicationFormViewModel() {
         vehicleNumber: returnTransport?.isVehicleRequired
           ? trimmedVehicle
           : undefined,
+        remark: "-",
       });
     }
 
