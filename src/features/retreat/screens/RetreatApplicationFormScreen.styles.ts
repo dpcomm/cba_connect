@@ -4,6 +4,7 @@ import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Color.default.background },
+  keyboardAvoidingView: { flex: 1 },
 
   content: {
     paddingHorizontal: Layout.spacing.l,

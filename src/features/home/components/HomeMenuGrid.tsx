@@ -1,7 +1,6 @@
 import React from "react";
 import { Dimensions, View } from "react-native";
 import CarpoolIcon from "../../../../assets/svgs/carpool.svg";
-import CheckInIcon from "../../../../assets/svgs/check-in.svg";
 import GuidebookIcon from "../../../../assets/svgs/guidebook.svg";
 import LectureIcon from "../../../../assets/svgs/lecture.svg";
 import RetreatIcon from "../../../../assets/svgs/retreat-application.svg";
@@ -49,7 +48,7 @@ export function HomeMenuGrid({
           description={
             isRetreatRegistered
               ? "수련회 신청서\n확인 및 수정"
-              : "2026 겨울 수련회\n'바라봄'"
+              : "수련회 신청서\n바로 작성하기"
           }
           size="large"
           onPress={onRetreatPress}

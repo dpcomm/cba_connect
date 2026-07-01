@@ -8,9 +8,11 @@ import {
 import { TextInput } from "@shared/components/text-input/TextInput";
 import { ThemedText } from "@shared/components/themed-text/ThemedText";
 import { Color } from "@shared/constants/color";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   View,
@@ -32,6 +34,7 @@ type DropdownKey =
 export default function RetreatApplicationFormScreen() {
   const vm = useRetreatApplicationFormViewModel();
   const [dropdown, setDropdown] = useState<DropdownKey>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const groupOptions = useMemo<InlineOption[]>(
     () =>
@@ -98,9 +101,15 @@ export default function RetreatApplicationFormScreen() {
     <SafeAreaView style={styles.container}>
       <Header title={headerTitle} onBack={vm.handleBack} />
 
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoidingView}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
       <ScrollView
+        ref={scrollViewRef}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
       >
       {/* 수련회 제목 */}
       <View style={styles.retreatSection}>
@@ -239,6 +248,11 @@ export default function RetreatApplicationFormScreen() {
                 value={vm.vehicleNumber}
                 onChangeText={vm.setVehicleNumber}
                 placeholder="입력해주세요"
+                onFocus={() => {
+                  setTimeout(() => {
+                    scrollViewRef.current?.scrollToEnd({ animated: true });
+                  }, 250);
+                }}
               />
             </View>
           )}
@@ -261,6 +275,7 @@ export default function RetreatApplicationFormScreen() {
           )}
         </Pressable>
       </SafeAreaView>
+      </KeyboardAvoidingView>
 
       <InlineSelectModal
         visible={dropdown === "group"}
