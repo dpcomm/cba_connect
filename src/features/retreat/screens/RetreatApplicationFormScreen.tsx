@@ -28,6 +28,7 @@ type DropdownKey =
   | "returnTransport"
   | null;
 
+
 export default function RetreatApplicationFormScreen() {
   const vm = useRetreatApplicationFormViewModel();
   const [dropdown, setDropdown] = useState<DropdownKey>(null);
@@ -56,11 +57,7 @@ export default function RetreatApplicationFormScreen() {
     [vm.options],
   );
 
-  const headerTitle = vm.isEditMode
-    ? "수련회 신청 수정"
-    : vm.retreatTitle
-      ? `${vm.retreatTitle} 수련회 신청`
-      : "수련회 신청";
+  const headerTitle = vm.isEditMode ? "수련회 신청 수정" : "수련회 신청";
 
   if (vm.loading) {
     return (
@@ -105,6 +102,16 @@ export default function RetreatApplicationFormScreen() {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
+      {/* 수련회 제목 */}
+      <View style={styles.retreatSection}>
+        <ThemedText
+            variant="text3"
+            color={Color.primary.main}
+            style={styles.retreatTitle}
+          >
+          {vm.retreatTitle}
+        </ThemedText>
+      </View>
         {/* 소속 중그룹 */}
         <View style={styles.section}>
           <ThemedText

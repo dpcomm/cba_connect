@@ -16,6 +16,19 @@ export const styles = StyleSheet.create({
 
   section: { gap: Layout.spacing.s },
 
+    retreatSection: {
+      width: "100%",
+      alignItems: "center",
+    },
+
+    retreatTitle: {
+      fontSize: 20,
+      lineHeight: 28,
+      textAlign: "center",
+      fontFamily: "Pretendard-Bold",
+      color: Color.primary.main,
+    },
+
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
