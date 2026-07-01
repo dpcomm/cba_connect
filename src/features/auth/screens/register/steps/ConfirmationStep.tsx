@@ -40,11 +40,11 @@ export function ConfirmationStep({ data, onConfirm }: Props) {
         value={"•".repeat(data.password.length)}
       />
       <ReadOnlyStepValue label="이름" value={data.name} />
+      <ReadOnlyStepValue label="이메일" value={data.email} />
       {/* {data.birthdate && <ReadOnlyStepValue label="생년월일" value={data.birthdate} />} */}
 
       <ReadOnlyStepValue label="성별" value={getGenderText(data.gender)} />
       <ReadOnlyStepValue label="전화번호" value={data.phoneNumber} />
-      <ReadOnlyStepValue label="이메일" value={data.email} />
       <ReadOnlyStepValue label="중그룹" value={data.affiliation} />
 
       <View style={{ marginTop: Layout.spacing.xl }}>

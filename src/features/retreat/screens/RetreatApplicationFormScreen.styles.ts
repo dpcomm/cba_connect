@@ -4,6 +4,7 @@ import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Color.default.background },
+  keyboardAvoidingView: { flex: 1 },
 
   content: {
     paddingHorizontal: Layout.spacing.l,
@@ -15,6 +16,19 @@ export const styles = StyleSheet.create({
   centered: { flex: 1, alignItems: "center", justifyContent: "center" },
 
   section: { gap: Layout.spacing.s },
+
+    retreatSection: {
+      width: "100%",
+      alignItems: "center",
+    },
+
+    retreatTitle: {
+      fontSize: 20,
+      lineHeight: 28,
+      textAlign: "center",
+      fontFamily: "Pretendard-Bold",
+      color: Color.primary.main,
+    },
 
   sectionHeader: {
     flexDirection: "row",

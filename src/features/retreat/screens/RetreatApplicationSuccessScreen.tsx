@@ -7,7 +7,7 @@ import { Color } from "@shared/constants/color";
 import { container } from "@shared/di/container";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Pressable, View } from "react-native";
+import { BackHandler, Pressable, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "./RetreatApplicationSuccessScreen.styles";
 
@@ -27,6 +27,15 @@ export default function RetreatApplicationSuccessScreen() {
         console.error("Failed to load retreat title:", e);
       }
     })();
+  }, []);
+
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => true,
+    );
+
+    return () => subscription.remove();
   }, []);
 
   const headerTitle = retreatTitle

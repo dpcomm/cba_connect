@@ -8,9 +8,11 @@ import {
 import { TextInput } from "@shared/components/text-input/TextInput";
 import { ThemedText } from "@shared/components/themed-text/ThemedText";
 import { Color } from "@shared/constants/color";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   View,
@@ -28,9 +30,11 @@ type DropdownKey =
   | "returnTransport"
   | null;
 
+
 export default function RetreatApplicationFormScreen() {
   const vm = useRetreatApplicationFormViewModel();
   const [dropdown, setDropdown] = useState<DropdownKey>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const groupOptions = useMemo<InlineOption[]>(
     () =>
@@ -56,11 +60,7 @@ export default function RetreatApplicationFormScreen() {
     [vm.options],
   );
 
-  const headerTitle = vm.isEditMode
-    ? "수련회 신청 수정"
-    : vm.retreatTitle
-      ? `${vm.retreatTitle} 수련회 신청`
-      : "수련회 신청";
+  const headerTitle = vm.isEditMode ? "수련회 신청 수정" : "수련회 신청";
 
   if (vm.loading) {
     return (
@@ -101,10 +101,26 @@ export default function RetreatApplicationFormScreen() {
     <SafeAreaView style={styles.container}>
       <Header title={headerTitle} onBack={vm.handleBack} />
 
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoidingView}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
       <ScrollView
+        ref={scrollViewRef}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
       >
+      {/* 수련회 제목 */}
+      <View style={styles.retreatSection}>
+        <ThemedText
+            variant="text3"
+            color={Color.primary.main}
+            style={styles.retreatTitle}
+          >
+          {vm.retreatTitle}
+        </ThemedText>
+      </View>
         {/* 소속 중그룹 */}
         <View style={styles.section}>
           <ThemedText
@@ -232,6 +248,11 @@ export default function RetreatApplicationFormScreen() {
                 value={vm.vehicleNumber}
                 onChangeText={vm.setVehicleNumber}
                 placeholder="입력해주세요"
+                onFocus={() => {
+                  setTimeout(() => {
+                    scrollViewRef.current?.scrollToEnd({ animated: true });
+                  }, 250);
+                }}
               />
             </View>
           )}
@@ -254,6 +275,7 @@ export default function RetreatApplicationFormScreen() {
           )}
         </Pressable>
       </SafeAreaView>
+      </KeyboardAvoidingView>
 
       <InlineSelectModal
         visible={dropdown === "group"}
