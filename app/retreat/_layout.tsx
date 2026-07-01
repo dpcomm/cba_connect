@@ -14,7 +14,10 @@ export default function RetreatLayout() {
       <Stack.Screen name="result" />
       <Stack.Screen name="fee-status" />
       <Stack.Screen name="application" />
-      <Stack.Screen name="application-success" />
+      <Stack.Screen
+        name="application-success"
+        options={{ gestureEnabled: false }}
+      />
       <Stack.Screen name="application-detail" />
     </Stack>
   );

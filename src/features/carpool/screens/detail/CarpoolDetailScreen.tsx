@@ -6,7 +6,6 @@ import { GetSystemConfigUseCase } from "@application/system/GetSystemConfigUseCa
 import { Platform, ScrollView, TouchableOpacity, View } from "react-native";
 
 import { ThemedText } from "@shared/components/themed-text/ThemedText";
-import { useAuthStore } from "@shared/stores/useAuthStore";
 
 import { Ionicons } from "@expo/vector-icons";
 import { Button } from "@shared/components/button/Button";
@@ -35,7 +34,6 @@ const DEFAULT_RETREAT_NAME = "서울성락교회";
 export default function CarpoolDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { user } = useAuthStore();
 
   const [retreatName, setRetreatName] = useState(DEFAULT_RETREAT_NAME);
 
@@ -75,17 +73,12 @@ export default function CarpoolDetailScreen() {
     if (id) load();
   }, [id, load]);
 
-  if (!carpool) return null;
-  const driverId = carpool?.driver?.id ?? carpool?.driverId;
-  const passengerList = Array.isArray(carpool?.members) ? carpool.members : [];
-
-  const isToRetreat = carpool.destinationDetailed === retreatName;
-
-  // ✅ 지도 기준
-  const mapLat = Number(isToRetreat ? carpool.originLat : carpool.destLat);
-  const mapLng = Number(isToRetreat ? carpool.originLng : carpool.destLng);
-
   const mapRegion = useMemo(() => {
+    if (!carpool) return null;
+    const isToRetreat = carpool.destinationDetailed === retreatName;
+    const mapLat = Number(isToRetreat ? carpool.originLat : carpool.destLat);
+    const mapLng = Number(isToRetreat ? carpool.originLng : carpool.destLng);
+
     if (!Number.isFinite(mapLat) || !Number.isFinite(mapLng)) return null;
     return {
       latitude: mapLat,
@@ -93,7 +86,13 @@ export default function CarpoolDetailScreen() {
       latitudeDelta: 0.01,
       longitudeDelta: 0.01,
     };
-  }, [mapLat, mapLng]);
+  }, [carpool, retreatName]);
+
+  if (!carpool) return null;
+  const driverId = carpool?.driver?.id ?? carpool?.driverId;
+  const passengerList = Array.isArray(carpool?.members) ? carpool.members : [];
+
+  const isToRetreat = carpool.destinationDetailed === retreatName;
 
   const currentMembers =
     carpool.seatsTotal && carpool.seatsLeft != null

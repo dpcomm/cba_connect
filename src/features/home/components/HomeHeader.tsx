@@ -28,12 +28,12 @@ export function HomeHeader({ dDay = 0, onMenuPress }: HomeHeaderProps) {
           {dDayText}
         </ThemedText>
         <ThemedText variant="text2" color={Color.text.main}>
-          주는 나의 목자시니
+          모든 사람으로 더불어 화평함과 거룩함을 좇으라
         </ThemedText>
         <ThemedText variant="text2" color={Color.text.main}>
-          내가 부족함이 없으리로다.{" "}
+          이것이 없이는 아무도 주를 보지 못하리라.{" "}
           <ThemedText variant="text5" color={Color.text.main}>
-            (시 23:1)
+            (히 12:14)
           </ThemedText>
         </ThemedText>
       </View>
